@@ -1,0 +1,50 @@
+polymarket:
+  api_url: "https://api.polymarket.com"
+  refresh_interval: 10    # seconds
+  max_markets_per_request: 100
+  enabled: true
+
+news:
+  provider: newsapi
+  api_key_env: NEWSAPI_KEY
+  refresh_interval: 300   # 5 minutes
+  max_articles_per_query: 50
+  languages: ["en"]
+  sort_by: "publishedAt"
+  enabled: true
+
+twitter:
+  enabled: true
+  api_key_env: TWITTER_API_KEY
+  refresh_interval: 60    # 1 minute
+  max_tweets_per_query: 100
+  min_followers: 100      # Filter low-quality accounts
+
+reddit:
+  enabled: true
+  subreddits:
+    - politics
+    - worldnews
+    - cryptocurrency
+    - sports
+  refresh_interval: 300   # 5 minutes
+  max_posts_per_subreddit: 50
+  min_score: 5            # Minimum upvotes
+
+whale_tracking:
+  enabled: true
+  min_trade_size: 10000   # $10K minimum to track
+  refresh_interval: 30    # 30 seconds
+  wallet_threshold: 100000  # $100K minimum wallet value
+
+cache:
+  news_ttl: 300           # 5 minutes
+  social_ttl: 60          # 1 minute
+  whale_ttl: 30           # 30 seconds
+  market_ttl: 10          # 10 seconds (minimal caching)
+
+vector_db:
+  provider: chromadb      # or pinecone
+  collection_name: "market_embeddings"
+  embedding_model: "all-MiniLM-L6-v2"
+

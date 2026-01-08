@@ -1,0 +1,54 @@
+xgboost:
+  n_estimators: 300
+  max_depth: 6
+  learning_rate: 0.05
+  subsample: 0.8
+  colsample_bytree: 0.8
+  min_child_weight: 3
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+  random_state: 42
+
+lightgbm:
+  n_estimators: 300
+  max_depth: 6
+  learning_rate: 0.05
+  num_leaves: 31
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.1
+  reg_lambda: 1.0
+  random_state: 42
+
+neural:
+  hidden_layers: [128, 64, 32]
+  dropout: 0.3
+  learning_rate: 0.001
+  batch_size: 32
+  epochs: 100
+  early_stopping_patience: 10
+
+nlp:
+  model_name: "distilbert-base-uncased"
+  max_length: 512
+  batch_size: 16
+  learning_rate: 2e-5
+  epochs: 5
+
+ensemble:
+  weights:
+    xgboost: 0.35
+    lightgbm: 0.25
+    neural: 0.20
+    nlp: 0.20
+  dynamic_weighting: true
+  lookback_days: 30
+  min_weight: 0.05
+  max_weight: 0.50
+
+training:
+  time_series_splits: 5
+  early_stopping_rounds: 20
+  sample_weight_decay: 0.95  # Decay for recency weighting
+  min_samples_per_split: 1000
+

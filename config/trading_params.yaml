@@ -1,0 +1,33 @@
+signals:
+  min_edge: 0.05          # 5% minimum edge
+  min_confidence: 0.60    # 60% model confidence
+  min_liquidity: 1000     # $1000 minimum volume
+  max_signals_per_day: 10
+  cooldown_minutes: 60    # Cooldown between signals for same market
+
+position_sizing:
+  kelly_fraction: 0.25    # Quarter Kelly
+  max_position_pct: 0.05  # 5% max per trade
+  max_total_exposure: 0.50  # 50% max total
+  min_position_size: 10   # $10 minimum
+  correlation_threshold: 0.7  # Reduce size for correlated markets
+
+risk:
+  max_daily_loss: 0.05    # 5% daily loss limit
+  max_drawdown: 0.15      # 15% max drawdown
+  stop_loss_pct: 0.50     # Stop if position down 50%
+  max_positions: 20       # Maximum concurrent positions
+  position_timeout_days: 30  # Close positions after N days
+
+execution:
+  order_type: "LIMIT"
+  max_slippage: 0.02      # 2% max slippage
+  retry_attempts: 3
+  retry_delay: 5          # seconds
+  fill_timeout: 30        # seconds
+
+fees:
+  winner_fee: 0.02        # 2% fee on winning trades
+  maker_fee: 0.0
+  taker_fee: 0.0
+
