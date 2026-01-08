@@ -53,7 +53,7 @@ polymarket-ai-trader/
 
 ```bash
 # Clone repository
-git clone https://github.com/iabadvisors/ai-ml-trading-bot.git
+git clone https://github.com/iambrands/ai-ml-trading-bot.git
 cd ai-ml-trading-bot
 
 # Create virtual environment

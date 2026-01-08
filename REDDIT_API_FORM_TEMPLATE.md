@@ -87,9 +87,7 @@ These requirements are outside Devvit's scope, which is focused on Reddit-native
 
 **Answer**:
 ```
-GitHub Repository: https://github.com/iabadvisors/ai-ml-trading-bot
-
-(Or provide your actual repository URL if different)
+https://github.com/iambrands/ai-ml-trading-bot
 ```
 
 ---
