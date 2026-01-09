@@ -1,0 +1,1736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymarket AI Trading Bot - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: #f8f9fa;
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #667eea;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Polymarket AI Trading Bot</h1>
+            <p>Real-time market analysis, predictions, and trading signals</p>
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-indicator"></div>
+                    <span>API Connected</span>
+                </div>
+                <div class="status-item">
+                    <strong>Version:</strong> <span id="api-version">-</span>
+                </div>
+                <div class="status-item">
+                    <strong>Status:</strong> <span id="api-status">Checking...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('markets')">📊 Markets</button>
+            <button class="tab" onclick="showTab('predictions')">🔮 Predictions</button>
+            <button class="tab" onclick="showTab('signals')">📡 Signals</button>
+            <button class="tab" onclick="showTab('trades')">💼 Trades</button>
+            <button class="tab" onclick="showTab('portfolio')">💰 Portfolio</button>
+            <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
+            <button class="tab" onclick="showTab('help')">❓ Help & FAQ</button>
+        </div>
+        
+        <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+            <strong>✅ Auto-Refresh Active:</strong> All pages automatically refresh every 30 seconds to show the latest data. Predictions are generated every 5 minutes by the background service. No manual refresh needed - just wait and new data will appear!
+        </div>
+
+        <div class="content">
+            <!-- Markets Tab -->
+            <div id="markets" class="tab-content active">
+                <h2>Markets</h2>
+                <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                    <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show the latest data. Markets are fetched live from Polymarket API.
+                </div>
+                <div class="controls">
+                    <label style="display: flex; align-items: center; gap: 10px; color: #666;">
+                        <span>Show:</span>
+                        <input type="number" id="markets-limit" value="50" min="10" max="100" step="10" placeholder="50" 
+                               title="Controls how many markets appear on the page. Range: 10-100. Default: 50. Higher = more data but slower loading."
+                               style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <span>markets <span style="color: #999; font-size: 0.9em;" title="Range: 10-100 markets. Default: 50. Hover over the input for details.">(10-100)</span></span>
+                    </label>
+                    <select id="markets-outcome">
+                        <option value="">All Outcomes</option>
+                        <option value="YES">YES</option>
+                        <option value="NO">NO</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="loadMarkets(true)">🔄 Refresh Now</button>
+                    <span id="markets-last-updated" style="color: #666; margin-left: 15px; font-size: 0.9em;"></span>
+                </div>
+                <div id="markets-content"></div>
+            </div>
+
+            <!-- Predictions Tab -->
+            <div id="predictions" class="tab-content">
+                <h2>Model Predictions</h2>
+                <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                    <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show new predictions. Predictions are generated every 5 minutes by the background service.
+                </div>
+                <div class="controls">
+                    <input type="text" id="predictions-market-id" placeholder="Market ID (optional)" style="flex: 1;">
+                    <label style="display: flex; align-items: center; gap: 10px; color: #666;">
+                        <span>Show:</span>
+                        <input type="number" id="predictions-limit" value="50" min="10" max="1000" step="10" placeholder="50" 
+                               title="Controls how many predictions appear on the page. Range: 10-1000. Default: 50. Higher = more data but slower loading."
+                               style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <span><span style="color: #999; font-size: 0.9em;" title="Range: 10-1000 predictions. Default: 50. Hover over the input for details.">(10-1000)</span></span>
+                    </label>
+                    <button class="btn btn-secondary" onclick="loadPredictions(true)">🔄 Refresh Now</button>
+                    <span id="predictions-last-updated" style="color: #666; margin-left: 15px; font-size: 0.9em;"></span>
+                </div>
+                <div id="predictions-content"></div>
+            </div>
+
+            <!-- Signals Tab -->
+            <div id="signals" class="tab-content">
+                <h2>Trading Signals</h2>
+                <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                    <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show new signals. Signals are created automatically when predictions meet the edge threshold.
+                </div>
+                <div class="controls">
+                    <input type="text" id="signals-market-id" placeholder="Market ID (optional)" style="flex: 1;">
+                    <select id="signals-executed">
+                        <option value="">All</option>
+                        <option value="true">Executed</option>
+                        <option value="false">Not Executed</option>
+                    </select>
+                    <label style="display: flex; align-items: center; gap: 10px; color: #666;">
+                        <span>Show:</span>
+                        <input type="number" id="signals-limit" value="50" min="10" max="1000" step="10" placeholder="50" 
+                               title="Controls how many signals appear on the page. Range: 10-1000. Default: 50. Higher = more data but slower loading."
+                               style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <span><span style="color: #999; font-size: 0.9em;" title="Range: 10-1000 signals. Default: 50. Hover over the input for details.">(10-1000)</span></span>
+                    </label>
+                    <button class="btn btn-secondary" onclick="loadSignals(true)">🔄 Refresh Now</button>
+                    <span id="signals-last-updated" style="color: #666; margin-left: 15px; font-size: 0.9em;"></span>
+                </div>
+                <div id="signals-content"></div>
+            </div>
+
+            <!-- Trades Tab -->
+            <div id="trades" class="tab-content">
+                <h2>Trades</h2>
+                <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                    <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show new trades. Trades are created automatically from signals (if auto-trading is enabled).
+                </div>
+                <div class="controls">
+                    <input type="text" id="trades-market-id" placeholder="Market ID (optional)" style="flex: 1;">
+                    <select id="trades-status">
+                        <option value="">All Status</option>
+                        <option value="OPEN">Open</option>
+                        <option value="CLOSED">Closed</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                    <label style="display: flex; align-items: center; gap: 10px; color: #666;">
+                        <span>Show:</span>
+                        <input type="number" id="trades-limit" value="50" min="10" max="1000" step="10" placeholder="50" 
+                               title="Controls how many trades appear on the page. Range: 10-1000. Default: 50. Higher = more data but slower loading."
+                               style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <span><span style="color: #999; font-size: 0.9em;" title="Range: 10-1000 trades. Default: 50. Hover over the input for details.">(10-1000)</span></span>
+                    </label>
+                    <button class="btn btn-secondary" onclick="loadTrades(true)">🔄 Refresh Now</button>
+                    <span id="trades-last-updated" style="color: #666; margin-left: 15px; font-size: 0.9em;"></span>
+                </div>
+                <div id="trades-content"></div>
+            </div>
+
+            <!-- Portfolio Tab -->
+            <div id="portfolio" class="tab-content">
+                <h2>Portfolio</h2>
+                <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                    <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show portfolio updates. Portfolio is updated automatically when trades are executed.
+                </div>
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="loadPortfolio(true)">🔄 Refresh Now</button>
+                    <span id="portfolio-last-updated" style="color: #666; margin-left: 15px; font-size: 0.9em;"></span>
+                </div>
+                <div id="portfolio-content"></div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <h2>⚙️ Settings & Preferences</h2>
+                
+                <!-- Wallet Connection -->
+                <div style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">🔗 Wallet Connection</h3>
+                    <div id="wallet-info" style="margin-bottom: 20px;">
+                        <p id="wallet-status-text" style="color: #666;">Not connected</p>
+                    </div>
+                    <button class="btn" onclick="connectWallet()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">Connect Wallet</button>
+                </div>
+
+                <!-- Trading Mode Toggle -->
+                <div style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 4px solid #667eea;">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">🚀 Trading Mode</h3>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                            <input type="checkbox" id="live-mode" onchange="toggleLiveMode()" style="width: 24px; height: 24px; cursor: pointer;">
+                            <div>
+                                <strong style="color: #333;">Live Mode (Real Trading)</strong>
+                                <p style="color: #666; font-size: 0.9em; margin-top: 5px;">When enabled, connects to real MetaMask and processes real deposits/trades. When disabled, uses simulated funds for testing.</p>
+                            </div>
+                        </label>
+                    </div>
+                    <div id="mode-status" style="padding: 15px; border-radius: 8px; background: #fff3cd; color: #856404;">
+                        <strong>⚠️ Test Mode Active:</strong> Deposits and trades are simulated. Perfect for testing with $100!
+                    </div>
+                </div>
+
+                <!-- Account Funding -->
+                <div style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">💰 Account Funding</h3>
+                    <div id="funding-mode-info" style="margin-bottom: 20px; padding: 15px; background: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 8px;">
+                        <p style="margin: 0; color: #0c5460;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 10px; color: #666; font-weight: 600;">Deposit Amount (USD)</label>
+                        <input type="number" id="deposit-amount" placeholder="100" min="10" step="10" style="width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em;">
+                    </div>
+                    <button class="btn" onclick="depositFunds()" id="deposit-btn" style="background: #28a745;">Deposit Funds (Simulated)</button>
+                    <p id="deposit-status" style="margin-top: 15px; color: #666;"></p>
+                </div>
+
+                <!-- Trading Preferences -->
+                <div style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">📊 Trading Preferences</h3>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 10px; color: #666; font-weight: 600;">Trading Mode</label>
+                        <select id="trading-mode" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em;">
+                            <option value="auto">Auto-Trade (Recommended)</option>
+                            <option value="manual">Manual Review</option>
+                        </select>
+                        <p style="margin-top: 5px; color: #999; font-size: 0.9em;">Auto-trade executes signals automatically. Manual requires approval for each trade.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 10px; color: #666; font-weight: 600;">Risk Level</label>
+                        <select id="risk-level" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em;">
+                            <option value="conservative">Conservative</option>
+                            <option value="moderate" selected>Moderate (Recommended)</option>
+                            <option value="aggressive">Aggressive</option>
+                        </select>
+                        <p style="margin-top: 5px; color: #999; font-size: 0.9em;">Conservative = smaller positions, only STRONG signals. Aggressive = larger positions, all signals.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 10px; color: #666; font-weight: 600;">Max Position Size (USD)</label>
+                        <input type="number" id="max-position" placeholder="200" min="10" step="10" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em;">
+                        <p style="margin-top: 5px; color: #999; font-size: 0.9em;">Maximum amount to bet on a single trade. Recommended: 1-2% of total capital.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 10px; color: #666; font-weight: 600;">Min Edge Threshold (%)</label>
+                        <input type="number" id="min-edge" placeholder="10" min="5" max="30" step="1" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em;">
+                        <p style="margin-top: 5px; color: #999; font-size: 0.9em;">Minimum edge required to create a signal. Higher = fewer but better opportunities.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <label style="display: block; margin-bottom: 10px; color: #666; font-weight: 600;">Min Confidence (%)</label>
+                        <input type="number" id="min-confidence" placeholder="60" min="40" max="90" step="5" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 1em;">
+                        <p style="margin-top: 5px; color: #999; font-size: 0.9em;">Minimum confidence level required. Higher = more certain predictions only.</p>
+                    </div>
+
+                    <button class="btn" onclick="savePreferences()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); width: 100%;">Save Preferences</button>
+                    <p id="preferences-status" style="margin-top: 15px; color: #666;"></p>
+                </div>
+
+                <!-- Account Info -->
+                <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 20px;">ℹ️ Account Information</h3>
+                    <div style="color: #666;">
+                        <p><strong>Data Source:</strong> <span id="data-source">Real-time from Polymarket API</span></p>
+                        <p style="margin-top: 10px;"><strong>Current Mode:</strong> <span id="current-mode-display">Test Mode (Simulated)</span></p>
+                        <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                            <p style="margin-bottom: 10px;"><strong>✅ Real Data:</strong></p>
+                            <ul style="margin-left: 20px; color: #666;">
+                                <li>Markets from Polymarket API</li>
+                                <li>AI predictions from trained models</li>
+                                <li>Trading signals based on real edge calculations</li>
+                            </ul>
+                            <p style="margin-top: 15px; margin-bottom: 10px;"><strong id="simulation-label">⚠️ Simulated (Test Mode):</strong></p>
+                            <ul style="margin-left: 20px; color: #666;">
+                                <li id="simulation-item-1">Fund deposits (simulated for testing)</li>
+                                <li id="simulation-item-2">Trade execution (simulated for testing)</li>
+                            </ul>
+                            <p style="margin-top: 15px; color: #667eea;"><strong>💡 Tip:</strong> Use Test Mode to simulate $100 deposits and see how the system works. Enable Live Mode when ready for real trading!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help & FAQ Tab -->
+            <div id="help" class="tab-content">
+                <h2>❓ Help & FAQ</h2>
+                <p style="color: #666; margin-bottom: 30px;">Complete guide to understanding and using the Polymarket AI Trading Bot</p>
+                
+                <!-- Quick Navigation -->
+                <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📑 Quick Navigation</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <a href="#getting-started" style="padding: 10px 20px; background: #f8f9fa; border-radius: 8px; text-decoration: none; color: #667eea; font-weight: 600;">Getting Started</a>
+                        <a href="#page-guide" style="padding: 10px 20px; background: #f8f9fa; border-radius: 8px; text-decoration: none; color: #667eea; font-weight: 600;">Page Guide</a>
+                        <a href="#key-concepts" style="padding: 10px 20px; background: #f8f9fa; border-radius: 8px; text-decoration: none; color: #667eea; font-weight: 600;">Key Concepts</a>
+                        <a href="#faq" style="padding: 10px 20px; background: #f8f9fa; border-radius: 8px; text-decoration: none; color: #667eea; font-weight: 600;">FAQ</a>
+                        <a href="#troubleshooting" style="padding: 10px 20px; background: #f8f9fa; border-radius: 8px; text-decoration: none; color: #667eea; font-weight: 600;">Troubleshooting</a>
+                    </div>
+                </div>
+
+                <!-- Getting Started -->
+                <div id="getting-started" style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.8em;">🚀 Getting Started</h3>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.3em;">Step 1: Connect Your Wallet</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;">On the landing page or Settings tab, click "Connect Wallet" and approve the connection in MetaMask.</p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li>Your wallet address will be displayed</li>
+                            <li>No funds are transferred during connection</li>
+                            <li>You can disconnect anytime</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.3em;">Step 2: Choose Your Mode</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;">Go to Settings tab and choose:</p>
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
+                            <strong>Test Mode (Recommended for First Time):</strong>
+                            <ul style="margin-top: 10px; margin-left: 20px;">
+                                <li>Simulate deposits (test with $100)</li>
+                                <li>See how predictions and signals work</li>
+                                <li>No real money at risk</li>
+                            </ul>
+                        </div>
+                        <div style="background: #d4edda; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <strong>Live Mode (When Ready):</strong>
+                            <ul style="margin-top: 10px; margin-left: 20px;">
+                                <li>Real MetaMask deposits</li>
+                                <li>Real Polymarket trades</li>
+                                <li>Real funds, real trading</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.3em;">Step 3: Fund Your Account</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;">In Settings tab, enter deposit amount and click "Deposit Funds":</p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li><strong>Test Mode:</strong> Simulated deposit (instant, no real transfer)</li>
+                            <li><strong>Live Mode:</strong> Real MetaMask transaction (confirm in wallet)</li>
+                            <li>Start with $100 to test the system</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.3em;">Step 4: Set Your Preferences</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;">Configure your trading settings in Settings tab:</p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li><strong>Trading Mode:</strong> Auto-trade (recommended) or Manual review</li>
+                            <li><strong>Risk Level:</strong> Conservative, Moderate, or Aggressive</li>
+                            <li><strong>Max Position Size:</strong> Maximum $ per trade (recommend 1-2% of capital)</li>
+                            <li><strong>Min Edge:</strong> Minimum opportunity % (default: 10%)</li>
+                            <li><strong>Min Confidence:</strong> Minimum certainty % (default: 60%)</li>
+                        </ul>
+                        <p style="color: #666; line-height: 1.8; margin-top: 10px;">Click "Save Preferences" when done.</p>
+                    </div>
+
+                    <div>
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.3em;">Step 5: Monitor Your Dashboard</h4>
+                        <p style="color: #666; line-height: 1.8;">The system runs automatically. Check these tabs regularly:</p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li><strong>Predictions:</strong> See AI model predictions</li>
+                            <li><strong>Signals:</strong> View trading opportunities</li>
+                            <li><strong>Trades:</strong> Monitor your positions</li>
+                            <li><strong>Portfolio:</strong> Track performance</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Page Guide -->
+                <div id="page-guide" style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.8em;">📊 Page-by-Page Guide</h3>
+                    
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: #333; margin-bottom: 15px; font-size: 1.3em;">📊 Markets Tab</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> All available prediction markets from Polymarket</p>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                            <li>Data loads automatically when you open the tab</li>
+                            <li>Data refreshes every 30 seconds automatically</li>
+                            <li>Browse markets to find interesting questions</li>
+                            <li>Use "Refresh Now" button for manual refresh if needed</li>
+                        </ul>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #e7f3ff; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-100 markets</span> (Default: 50) - Controls how many markets appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #666; line-height: 1.8;"><strong>Key fields:</strong> Question, YES/NO prices, Outcome (Active/Resolved/Closed), Resolution Date</p>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: #333; margin-bottom: 15px; font-size: 1.3em;">🔮 Predictions Tab</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> AI model predictions for markets</p>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                            <li>Data loads automatically when you open the tab</li>
+                            <li>Data refreshes every 30 seconds automatically</li>
+                            <li>Look for predictions with <strong>high edge</strong> (>10%) = opportunity</li>
+                            <li>Look for predictions with <strong>high confidence</strong> (>60%) = model is sure</li>
+                        </ul>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #e7f3ff; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 predictions</span> (Default: 50) - Controls how many predictions appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Understanding the data:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                            <li><strong>Model Probability:</strong> What the AI thinks (0-100%)</li>
+                            <li><strong>Market Price:</strong> Current market price</li>
+                            <li><strong>Edge:</strong> Difference (positive = opportunity)</li>
+                            <li><strong>Confidence:</strong> How sure the model is</li>
+                        </ul>
+                        <p style="color: #666; line-height: 1.8;"><strong>What happens next:</strong> Predictions with edge >5% automatically generate signals</p>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: #333; margin-bottom: 15px; font-size: 1.3em;">📡 Signals Tab</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> Trading signals generated from predictions</p>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                            <li>Data loads automatically when you open the tab</li>
+                            <li>Data refreshes every 30 seconds automatically</li>
+                            <li>Focus on <strong>STRONG signals</strong> (best opportunities)</li>
+                            <li>Signals are automatically created from predictions</li>
+                        </ul>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #e7f3ff; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 signals</span> (Default: 50) - Controls how many signals appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Signal Strength:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                            <li><strong>STRONG:</strong> >15% edge (best opportunities)</li>
+                            <li><strong>MEDIUM:</strong> 10-15% edge (good opportunities)</li>
+                            <li><strong>WEAK:</strong> 5-10% edge (small opportunities)</li>
+                        </ul>
+                        <p style="color: #666; line-height: 1.8;"><strong>What happens next:</strong> Signals automatically become trades if auto-trading is enabled</p>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: #333; margin-bottom: 15px; font-size: 1.3em;">💼 Trades Tab</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> All executed trades</p>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                            <li>Data loads automatically when you open the tab</li>
+                            <li>Data refreshes every 30 seconds automatically</li>
+                            <li>Monitor <strong>OPEN trades</strong> for active positions</li>
+                            <li>Review <strong>P&L</strong> on closed trades</li>
+                        </ul>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #e7f3ff; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 trades</span> (Default: 50) - Controls how many trades appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Understanding the data:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                            <li><strong>Side:</strong> YES or NO position</li>
+                            <li><strong>Entry Price:</strong> Price when trade opened</li>
+                            <li><strong>Size:</strong> Position size in USD</li>
+                            <li><strong>Status:</strong> OPEN, CLOSED, or CANCELLED</li>
+                            <li><strong>P&L:</strong> Profit/Loss (shown when closed)</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="color: #333; margin-bottom: 15px; font-size: 1.3em;">💰 Portfolio Tab</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> Overall portfolio performance</p>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                            <li>Data loads automatically when you open the tab</li>
+                            <li>Data refreshes every 30 seconds automatically</li>
+                            <li>Monitor your portfolio performance in real-time</li>
+                        </ul>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #e7f3ff; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Shows latest snapshot</span> - Portfolio displays the most recent snapshot automatically.</p>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Key Metrics:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                            <li><strong>Total Value:</strong> Entire portfolio (cash + positions + P&L)</li>
+                            <li><strong>Cash:</strong> Money available for new trades</li>
+                            <li><strong>Positions Value:</strong> Current value of open positions</li>
+                            <li><strong>Total Exposure:</strong> Amount at risk</li>
+                            <li><strong>Daily P&L:</strong> Profit/Loss today</li>
+                            <li><strong>Unrealized P&L:</strong> Profit/Loss on open positions</li>
+                            <li><strong>Realized P&L:</strong> Profit/Loss on closed trades</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 style="color: #333; margin-bottom: 15px; font-size: 1.3em;">⚙️ Settings Tab</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> Account configuration and preferences</p>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Sections:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li><strong>Wallet Connection:</strong> Connect/disconnect MetaMask</li>
+                            <li><strong>Trading Mode:</strong> Toggle between Test Mode and Live Mode</li>
+                            <li><strong>Account Funding:</strong> Deposit funds (simulated or real)</li>
+                            <li><strong>Trading Preferences:</strong> Configure risk, position sizes, thresholds</li>
+                            <li><strong>Account Information:</strong> View data source and mode status</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Key Concepts -->
+                <div id="key-concepts" style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.8em;">🎯 Key Concepts</h3>
+                    
+                    <div style="margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-left: 4px solid #667eea; border-radius: 8px;">
+                        <h4 style="color: #333; margin-bottom: 15px; font-size: 1.2em;">📊 Display Limits by Tab</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 15px;">Each tab has a limit control that determines how many items appear on the page. This helps balance performance with visibility.</p>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+                            <thead>
+                                <tr style="background: #667eea; color: white;">
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Tab</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Range</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Default</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #ddd;">Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>Markets</strong></td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">10-100</td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">50</td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">Limited by live API</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #ddd; background: #f8f9fa;">
+                                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>Predictions</strong></td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">10-1000</td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">50</td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">Database limit</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #ddd;">
+                                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>Signals</strong></td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">10-1000</td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">50</td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">Database limit</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #ddd; background: #f8f9fa;">
+                                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>Trades</strong></td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">10-1000</td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">50</td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">Database limit</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px; border: 1px solid #ddd;"><strong>Portfolio</strong></td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">Latest only</td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">N/A</td>
+                                    <td style="padding: 12px; border: 1px solid #ddd;">Shows most recent snapshot</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="color: #666; line-height: 1.8; margin-top: 15px; font-size: 0.9em;"><strong>💡 Tip:</strong> Hover over the limit input on any tab to see a tooltip explaining the range. Higher limits show more data but may load slower.</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.3em;">What is "Edge"?</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;">Edge is the difference between what the AI thinks and what the market thinks:</p>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                            <p style="margin: 0;"><strong>Example:</strong></p>
+                            <ul style="margin-top: 10px; margin-left: 20px;">
+                                <li>Market says: 40% chance</li>
+                                <li>AI Model says: 70% chance</li>
+                                <li><strong>Edge: +30%</strong> (big opportunity!)</li>
+                            </ul>
+                        </div>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li><strong>Positive edge:</strong> AI thinks market is undervalued (opportunity)</li>
+                            <li><strong>Negative edge:</strong> AI thinks market is overvalued</li>
+                            <li><strong>Higher edge = Better opportunity</strong></li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.3em;">What is "Confidence"?</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;">Confidence is how sure the AI model is in its prediction:</p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li><strong>High confidence</strong> (>60%): Model is very sure</li>
+                            <li><strong>Low confidence</strong> (<40%): Model is uncertain</li>
+                            <li><strong>Use with edge:</strong> High edge + high confidence = best trades</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.3em;">Signal Strength</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;">Signals are categorized by edge size:</p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li><strong>STRONG:</strong> >15% edge (best opportunities, consider trading)</li>
+                            <li><strong>MEDIUM:</strong> 10-15% edge (good opportunities, review carefully)</li>
+                            <li><strong>WEAK:</strong> 5-10% edge (small edge, may not be worth it)</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.3em;">Test Mode vs Live Mode</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Test Mode (Default):</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-bottom: 15px;">
+                            <li>✅ Real market data and predictions</li>
+                            <li>⚠️ Simulated deposits (test with $100)</li>
+                            <li>⚠️ Simulated trade execution</li>
+                            <li>Perfect for learning and testing</li>
+                        </ul>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Live Mode:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li>✅ Real market data and predictions</li>
+                            <li>✅ Real MetaMask deposits</li>
+                            <li>✅ Real Polymarket trades</li>
+                            <li>Real funds, real trading</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- FAQ -->
+                <div id="faq" style="background: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.8em;">❓ Frequently Asked Questions</h3>
+                    
+                    <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Q: Is the data real or simulated?</h4>
+                        <p style="color: #666; line-height: 1.8;"><strong>A:</strong> All market data, predictions, and signals are <strong>100% real</strong> from Polymarket API and trained AI models. Only deposits and trades are simulated in Test Mode. In Live Mode, everything is real.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Q: How do I test with $100?</h4>
+                        <p style="color: #666; line-height: 1.8;"><strong>A:</strong> Go to Settings tab, make sure Test Mode is active (Live Mode OFF), enter $100 in deposit field, click "Deposit Funds (Simulated)". The system will simulate the deposit and you can test all features without risking real money.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Q: When should I switch to Live Mode?</h4>
+                        <p style="color: #666; line-height: 1.8;"><strong>A:</strong> Switch to Live Mode when you're comfortable with how the system works and ready to trade with real funds. Make sure you understand the risks and have tested thoroughly in Test Mode first.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Q: How often does the system analyze markets?</h4>
+                        <p style="color: #666; line-height: 1.8;"><strong>A:</strong> The system runs automatically in the background, typically analyzing markets every hour or daily (configurable). You don't need to do anything - it works 24/7.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Q: What's the difference between predictions and signals?</h4>
+                        <p style="color: #666; line-height: 1.8;"><strong>A:</strong> <strong>Predictions</strong> are AI model probability estimates for each market. <strong>Signals</strong> are trading recommendations created from predictions that have significant edge (>5%). Signals tell you when and what to trade.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Q: How do trades get created?</h4>
+                        <p style="color: #666; line-height: 1.8;"><strong>A:</strong> If auto-trading is enabled, trades are automatically created from signals. If manual review is enabled, you review signals in the Signals tab and execute them manually.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Q: What if I don't see any data?</h4>
+                        <p style="color: #666; line-height: 1.8;"><strong>A:</strong> Data loads automatically when you open each tab. If you don't see data:</p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-top: 10px;">
+                            <li>Make sure you've connected your wallet and funded your account</li>
+                            <li>Wait a few minutes for the system to analyze markets</li>
+                            <li>Data refreshes automatically every 30 seconds</li>
+                            <li>Use "Refresh Now" button if you want to manually refresh</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Q: Can I change my preferences later?</h4>
+                        <p style="color: #666; line-height: 1.8;"><strong>A:</strong> Yes! Go to Settings tab anytime, adjust your preferences, and click "Save Preferences". Changes take effect immediately for new signals and trades.</p>
+                    </div>
+
+                    <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Q: Is my money safe?</h4>
+                        <p style="color: #666; line-height: 1.8;"><strong>A:</strong> In Test Mode, no real money is involved. In Live Mode, your funds are held in your MetaMask wallet or the trading account. Always start with small amounts and never invest more than you can afford to lose. Trading involves risk.</p>
+                    </div>
+
+                    <div>
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Q: How do I know if the system is working?</h4>
+                        <p style="color: #666; line-height: 1.8;"><strong>A:</strong> Check these indicators:</p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px; margin-top: 10px;">
+                            <li>Predictions tab shows predictions with edges</li>
+                            <li>Signals tab shows signals (if edge > threshold)</li>
+                            <li>Trades tab shows trades (if auto-trading enabled)</li>
+                            <li>Portfolio tab shows portfolio value</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Troubleshooting -->
+                <div id="troubleshooting" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #667eea; margin-bottom: 20px; font-size: 1.8em;">🔧 Troubleshooting</h3>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Problem: Can't connect wallet</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li>Make sure MetaMask is installed in your browser</li>
+                            <li>Refresh the page and try again</li>
+                            <li>Check that MetaMask is unlocked</li>
+                            <li>Try a different browser if issues persist</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Problem: No data showing in tabs</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li>Data loads automatically - just wait a moment when opening a tab</li>
+                            <li>Wait a few minutes for system to analyze markets</li>
+                            <li>Make sure you've funded your account (even simulated)</li>
+                            <li>Data refreshes automatically every 30 seconds</li>
+                            <li>Use "Refresh Now" button for manual refresh</li>
+                            <li>Check that the API server is running</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Problem: No signals being generated</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li>Check your Min Edge Threshold in Settings (lower it if too high)</li>
+                            <li>Check your Min Confidence in Settings (lower it if too high)</li>
+                            <li>Wait for more markets to be analyzed</li>
+                            <li>Check Predictions tab to see if predictions have edge</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Problem: Deposit not working</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li>In Test Mode: Should work instantly (simulated)</li>
+                            <li>In Live Mode: Check MetaMask popup and confirm transaction</li>
+                            <li>Make sure wallet is connected</li>
+                            <li>Check that you have sufficient funds in wallet (Live Mode)</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 style="color: #333; margin-bottom: 10px; font-size: 1.2em;">Problem: Trades not executing</h4>
+                        <p style="color: #666; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
+                        <ul style="color: #666; line-height: 1.8; margin-left: 20px;">
+                            <li>Check that auto-trading is enabled in Settings</li>
+                            <li>Make sure you have sufficient funds in account</li>
+                            <li>Check that signals are being generated</li>
+                            <li>In Live Mode: Check MetaMask for transaction confirmations</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contact/Support -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 12px; color: white; margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px; font-size: 1.8em;">💬 Need More Help?</h3>
+                    <p style="margin-bottom: 20px; opacity: 0.95;">If you can't find the answer you're looking for, check the documentation or contact support.</p>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <a href="/static/index.html" style="padding: 12px 24px; background: white; color: #667eea; border-radius: 8px; text-decoration: none; font-weight: 600;">Back to Dashboard</a>
+                        <a href="#getting-started" style="padding: 12px 24px; background: rgba(255,255,255,0.2); color: white; border-radius: 8px; text-decoration: none; font-weight: 600;">Start Over</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8001';
+
+        // Check API health on load
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                document.getElementById('api-status').textContent = data.status;
+                document.getElementById('api-version').textContent = data.version;
+            } catch (error) {
+                document.getElementById('api-status').textContent = 'Disconnected';
+                document.getElementById('api-status').style.color = '#dc3545';
+            }
+        }
+
+        // Tab switching with auto-load
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // Auto-load data when tab is switched
+            switch(tabName) {
+                case 'markets':
+                    loadMarkets();
+                    break;
+                case 'predictions':
+                    loadPredictions();
+                    break;
+                case 'signals':
+                    loadSignals();
+                    break;
+                case 'trades':
+                    loadTrades();
+                    break;
+                case 'portfolio':
+                    loadPortfolio();
+                    break;
+            }
+        }
+
+        // Loading state
+        function showLoading(containerId) {
+            document.getElementById(containerId).innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading data...</p>
+                </div>
+            `;
+        }
+
+        // Error state
+        function showError(containerId, message) {
+            document.getElementById(containerId).innerHTML = `
+                <div class="error">
+                    <strong>Error:</strong> ${message}
+                </div>
+            `;
+        }
+        
+        // Update last updated timestamp (in Central Time)
+        function updateLastUpdated(tabName) {
+            const now = new Date();
+            // Format in Central Time
+            const options = {
+                timeZone: 'America/Chicago',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            const timeString = now.toLocaleTimeString('en-US', options) + ' CT';
+            const element = document.getElementById(`${tabName}-last-updated`);
+            if (element) {
+                element.textContent = `Last updated: ${timeString}`;
+            }
+        }
+
+        // Load Markets - Auto-loads live data from API
+        async function loadMarkets(refresh = false) {
+            const container = document.getElementById('markets-content');
+            if (!refresh) showLoading('markets-content');
+
+            try {
+                const limit = document.getElementById('markets-limit').value || 50;
+                const outcome = document.getElementById('markets-outcome').value;
+                
+                // Try live data first, fallback to DB
+                let markets = [];
+                try {
+                    const liveResponse = await fetch(`${API_BASE}/live/markets?limit=${limit}`);
+                    if (liveResponse.ok) {
+                        markets = await liveResponse.json();
+                    }
+                } catch (e) {
+                    // Fallback to DB if live fails
+                }
+                
+                // If no live data, try DB
+                if (markets.length === 0) {
+                    let url = `${API_BASE}/markets?limit=${limit}`;
+                    if (outcome) url += `&outcome=${outcome}`;
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        markets = await response.json();
+                    }
+                }
+                
+                if (markets.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>No markets found. The system will automatically fetch markets when available.</p></div>';
+                    return;
+                }
+                
+                displayMarkets(markets, container, markets.length > 0);
+                updateLastUpdated('markets');
+            } catch (error) {
+                showError('markets-content', error.message);
+            }
+        }
+
+        // Display markets (shared function)
+        function displayMarkets(markets, container, isLive = false) {
+
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Markets</h3>
+                        <div class="value">${markets.length}</div>
+                    </div>
+                    ${isLive ? '<div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);"><h3>Data Source</h3><div class="value" style="font-size: 1.2em;">Live API</div></div>' : ''}
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Category</th>
+                                <th>YES Price</th>
+                                <th>NO Price</th>
+                                <th>Outcome</th>
+                                <th>Resolution Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            markets.forEach(market => {
+                const outcomeBadge = market.outcome 
+                    ? `<span class="badge ${market.outcome === 'YES' ? 'badge-success' : 'badge-danger'}">${market.outcome}</span>`
+                    : '<span class="badge badge-info">Active</span>';
+                
+                const yesPrice = market.yes_price !== undefined ? (market.yes_price * 100).toFixed(2) + '%' : '-';
+                const noPrice = market.no_price !== undefined ? (market.no_price * 100).toFixed(2) + '%' : '-';
+                
+                html += `
+                    <tr>
+                        <td><strong>${market.question || 'N/A'}</strong></td>
+                        <td>${market.category || '-'}</td>
+                        <td><strong>${yesPrice}</strong></td>
+                        <td><strong>${noPrice}</strong></td>
+                        <td>${outcomeBadge}</td>
+                        <td>${market.resolution_date ? new Date(market.resolution_date).toLocaleDateString() : '-'}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        // Load Predictions - Auto-loads from database
+        async function loadPredictions(refresh = false) {
+            const container = document.getElementById('predictions-content');
+            if (!refresh) showLoading('predictions-content');
+
+            try {
+                const limit = document.getElementById('predictions-limit').value || 50;
+                const marketId = document.getElementById('predictions-market-id').value;
+                let url = `${API_BASE}/predictions?limit=${limit}`;
+                if (marketId) url += `&market_id=${marketId}`;
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const predictions = await response.json();
+                
+                if (predictions.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>No predictions found yet. The system automatically generates predictions - check back soon!</p></div>';
+                    return;
+                }
+
+                displayPredictions(predictions, container);
+                updateLastUpdated('predictions');
+            } catch (error) {
+                showError('predictions-content', error.message);
+            }
+        }
+
+
+        // Display predictions (shared function)
+        function displayPredictions(predictions, container, isDemo = false) {
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Predictions</h3>
+                        <div class="value">${predictions.length}</div>
+                    </div>
+                    ${isDemo ? '<div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);"><h3>Data Source</h3><div class="value" style="font-size: 1.2em;">Demo</div></div>' : ''}
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Model Prob</th>
+                                <th>Market Price</th>
+                                <th>Edge</th>
+                                <th>Confidence</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            predictions.forEach(p => {
+                const edgeClass = p.edge > 0 ? 'badge-success' : 'badge-danger';
+                const question = p.question || (p.market_id ? `${p.market_id.substring(0, 30)}...` : 'N/A');
+                html += `
+                    <tr>
+                        <td><strong>${question}</strong></td>
+                        <td><strong>${(p.model_probability * 100).toFixed(2)}%</strong></td>
+                        <td>${(p.market_price * 100).toFixed(2)}%</td>
+                        <td><span class="badge ${edgeClass}">${(p.edge * 100).toFixed(2)}%</span></td>
+                        <td>${(p.confidence * 100).toFixed(2)}%</td>
+                        <td>${new Date(p.prediction_time).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        // Load Signals - Auto-loads from database
+        async function loadSignals(refresh = false) {
+            const container = document.getElementById('signals-content');
+            if (!refresh) showLoading('signals-content');
+
+            try {
+                const limit = document.getElementById('signals-limit').value || 50;
+                const marketId = document.getElementById('signals-market-id').value;
+                const executed = document.getElementById('signals-executed').value;
+                let url = `${API_BASE}/signals?limit=${limit}`;
+                if (marketId) url += `&market_id=${marketId}`;
+                if (executed) url += `&executed=${executed}`;
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const signals = await response.json();
+                
+                if (signals.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>No signals found yet. Signals are automatically created from predictions - check back soon!</p></div>';
+                    return;
+                }
+
+                displaySignals(signals, container);
+                updateLastUpdated('signals');
+            } catch (error) {
+                showError('signals-content', error.message);
+            }
+        }
+
+
+        // Display signals (shared function)
+        function displaySignals(signals, container, isDemo = false) {
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Signals</h3>
+                        <div class="value">${signals.length}</div>
+                    </div>
+                    ${isDemo ? '<div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);"><h3>Data Source</h3><div class="value" style="font-size: 1.2em;">Demo</div></div>' : ''}
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Side</th>
+                                <th>Strength</th>
+                                <th>Edge</th>
+                                <th>Size</th>
+                                <th>Executed</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            signals.forEach(s => {
+                const sideBadge = s.side === 'YES' ? 'badge-success' : 'badge-danger';
+                const strengthBadge = s.signal_strength === 'STRONG' ? 'badge-success' : 
+                                     s.signal_strength === 'MEDIUM' ? 'badge-warning' : 'badge-info';
+                const question = s.question || (s.market_id ? `${s.market_id.substring(0, 40)}...` : 'N/A');
+                html += `
+                    <tr>
+                        <td><strong>${question}</strong></td>
+                        <td><span class="badge ${sideBadge}">${s.side}</span></td>
+                        <td><span class="badge ${strengthBadge}">${s.signal_strength}</span></td>
+                        <td>${s.edge != null && !isNaN(s.edge) ? (s.edge * 100).toFixed(2) + '%' : '-'}</td>
+                        <td>${s.suggested_size ? `$${s.suggested_size.toFixed(2)}` : '-'}</td>
+                        <td>${s.executed ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-warning">No</span>'}</td>
+                        <td>${new Date(s.created_at).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        // Load Trades - Auto-loads from database
+        async function loadTrades(refresh = false) {
+            const container = document.getElementById('trades-content');
+            if (!refresh) showLoading('trades-content');
+
+            try {
+                const limit = document.getElementById('trades-limit').value || 50;
+                const marketId = document.getElementById('trades-market-id').value;
+                const status = document.getElementById('trades-status').value;
+                let url = `${API_BASE}/trades?limit=${limit}`;
+                if (marketId) url += `&market_id=${marketId}`;
+                if (status) url += `&status=${status}`;
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const trades = await response.json();
+                
+                if (trades.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><p>No trades found yet. Trades are automatically created from signals - check back soon!</p></div>';
+                    return;
+                }
+
+                displayTrades(trades, container);
+                updateLastUpdated('trades');
+            } catch (error) {
+                showError('trades-content', error.message);
+            }
+        }
+
+
+        // Display trades (shared function)
+        function displayTrades(trades, container, isDemo = false) {
+            let html = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Trades</h3>
+                        <div class="value">${trades.length}</div>
+                    </div>
+                    ${isDemo ? '<div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);"><h3>Data Source</h3><div class="value" style="font-size: 1.2em;">Demo</div></div>' : ''}
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Side</th>
+                                <th>Entry Price</th>
+                                <th>Exit Price</th>
+                                <th>Size</th>
+                                <th>P&L</th>
+                                <th>Status</th>
+                                <th>Entry Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            trades.forEach(t => {
+                const pnlBadge = t.pnl && t.pnl > 0 ? 'badge-success' : t.pnl && t.pnl < 0 ? 'badge-danger' : '';
+                const statusBadge = t.status === 'CLOSED' ? 'badge-success' : 
+                                   t.status === 'OPEN' ? 'badge-info' : 'badge-warning';
+                const question = t.question || (t.market_id ? `${t.market_id.substring(0, 40)}...` : 'N/A');
+                html += `
+                    <tr>
+                        <td><strong>${question}</strong></td>
+                        <td><span class="badge ${t.side === 'YES' ? 'badge-success' : 'badge-danger'}">${t.side}</span></td>
+                        <td>${(t.entry_price * 100).toFixed(2)}%</td>
+                        <td>${t.exit_price ? (t.exit_price * 100).toFixed(2) + '%' : '-'}</td>
+                        <td>$${t.size.toFixed(2)}</td>
+                        <td>${t.pnl ? `<span class="badge ${pnlBadge}">$${t.pnl.toFixed(2)}</span>` : '-'}</td>
+                        <td><span class="badge ${statusBadge}">${t.status}</span></td>
+                        <td>${new Date(t.entry_time).toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        // Load Portfolio - Auto-loads from database
+        async function loadPortfolio(refresh = false) {
+            const container = document.getElementById('portfolio-content');
+            if (!refresh) showLoading('portfolio-content');
+
+            try {
+                const response = await fetch(`${API_BASE}/portfolio/latest`);
+                if (response.status === 404) {
+                    container.innerHTML = '<div class="empty-state"><p>No portfolio snapshot found yet. Portfolio is automatically updated when trades are executed - check back soon!</p></div>';
+                    return;
+                }
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const portfolio = await response.json();
+                displayPortfolio(portfolio, container);
+                updateLastUpdated('portfolio');
+            } catch (error) {
+                // Handle 404 or 503 errors gracefully
+                if (error.message.includes('404') || error.message.includes('503')) {
+                    container.innerHTML = '<div class="empty-state"><p>No portfolio snapshot found yet. Portfolio is automatically updated when trades are executed - check back soon!</p></div>';
+                } else {
+                    showError('portfolio-content', error.message);
+                }
+            }
+        }
+
+
+        // Display portfolio (shared function)
+        function displayPortfolio(portfolio, container, isDemo = false) {
+            const dailyPnlClass = portfolio.daily_pnl && portfolio.daily_pnl > 0 ? 'text-success' : 
+                                  portfolio.daily_pnl && portfolio.daily_pnl < 0 ? 'text-danger' : '';
+            const unrealizedPnlClass = portfolio.unrealized_pnl && portfolio.unrealized_pnl > 0 ? 'text-success' : 
+                                       portfolio.unrealized_pnl && portfolio.unrealized_pnl < 0 ? 'text-danger' : '';
+            const realizedPnlClass = portfolio.realized_pnl && portfolio.realized_pnl > 0 ? 'text-success' : 
+                                     portfolio.realized_pnl && portfolio.realized_pnl < 0 ? 'text-danger' : '';
+            
+            const html = `
+                ${isDemo ? '<div class="stat-card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); margin-bottom: 20px;"><h3>Data Source</h3><div class="value" style="font-size: 1.2em;">Demo Portfolio</div></div>' : ''}
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h3>Total Value</h3>
+                        <div class="value" style="font-size: 2em;">$${portfolio.total_value.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Cash</h3>
+                        <div class="value">$${portfolio.cash.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Positions Value</h3>
+                        <div class="value">$${portfolio.positions_value.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Exposure</h3>
+                        <div class="value">$${portfolio.total_exposure.toFixed(2)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Daily P&L</h3>
+                        <div class="value ${dailyPnlClass}">${portfolio.daily_pnl ? `$${portfolio.daily_pnl.toFixed(2)}` : '$0.00'}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Unrealized P&L</h3>
+                        <div class="value ${unrealizedPnlClass}">${portfolio.unrealized_pnl ? `$${portfolio.unrealized_pnl.toFixed(2)}` : '$0.00'}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Realized P&L</h3>
+                        <div class="value ${realizedPnlClass}">${portfolio.realized_pnl ? `$${portfolio.realized_pnl.toFixed(2)}` : '$0.00'}</div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">Portfolio Breakdown</h3>
+                    <p><strong>Total Value:</strong> Cash ($${portfolio.cash.toFixed(2)}) + Positions ($${portfolio.positions_value.toFixed(2)}) + Unrealized P&L ($${portfolio.unrealized_pnl ? portfolio.unrealized_pnl.toFixed(2) : '0.00'})</p>
+                    <p><strong>Total P&L:</strong> Realized ($${portfolio.realized_pnl ? portfolio.realized_pnl.toFixed(2) : '0.00'}) + Unrealized ($${portfolio.unrealized_pnl ? portfolio.unrealized_pnl.toFixed(2) : '0.00'}) = <strong>$${((portfolio.realized_pnl || 0) + (portfolio.unrealized_pnl || 0)).toFixed(2)}</strong></p>
+                    <p style="margin-bottom: 0; color: #666;">
+                        <strong>Last updated:</strong> ${new Date(portfolio.snapshot_time).toLocaleString()}
+                    </p>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        // Smooth scroll for anchor links in Help & FAQ
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Wallet Connection Functions
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('MetaMask is not installed. Please install MetaMask to continue.');
+                window.open('https://metamask.io/', '_blank');
+                return;
+            }
+
+            try {
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                if (accounts.length > 0) {
+                    const address = accounts[0];
+                    localStorage.setItem('walletAddress', address);
+                    localStorage.setItem('walletProvider', 'metamask');
+                    updateWalletStatus(address);
+                    alert('Wallet connected successfully!');
+                }
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                alert('Failed to connect wallet. Please try again.');
+            }
+        }
+
+        function updateWalletStatus(address) {
+            const statusText = document.getElementById('wallet-status-text');
+            if (statusText && address) {
+                statusText.innerHTML = `✅ Connected: <strong>${address.substring(0, 6)}...${address.substring(address.length - 4)}</strong>`;
+                statusText.style.color = '#28a745';
+            }
+        }
+
+        function checkWalletConnection() {
+            const address = localStorage.getItem('walletAddress');
+            if (address) {
+                updateWalletStatus(address);
+            }
+        }
+
+        // Toggle Live Mode
+        function toggleLiveMode() {
+            const liveMode = document.getElementById('live-mode').checked;
+            const modeStatus = document.getElementById('mode-status');
+            const fundingInfo = document.getElementById('funding-mode-info');
+            const depositBtn = document.getElementById('deposit-btn');
+            const currentModeDisplay = document.getElementById('current-mode-display');
+            const simulationLabel = document.getElementById('simulation-label');
+            const simulationItem1 = document.getElementById('simulation-item-1');
+            const simulationItem2 = document.getElementById('simulation-item-2');
+
+            localStorage.setItem('liveMode', liveMode ? 'true' : 'false');
+
+            if (liveMode) {
+                modeStatus.innerHTML = '<strong>✅ Live Mode Active:</strong> Real MetaMask connection and real deposits/trades enabled. Make sure your wallet is connected!';
+                modeStatus.style.background = '#d4edda';
+                modeStatus.style.color = '#155724';
+                fundingInfo.innerHTML = '<p style="margin: 0; color: #155724;"><strong>Live Mode:</strong> Deposits will be processed through your connected MetaMask wallet. Real funds will be transferred.</p>';
+                fundingInfo.style.background = '#d4edda';
+                fundingInfo.style.borderLeftColor = '#28a745';
+                depositBtn.textContent = 'Deposit Funds (Real)';
+                depositBtn.style.background = '#dc3545';
+                currentModeDisplay.textContent = 'Live Mode (Real Trading)';
+                simulationLabel.innerHTML = '<strong>✅ Real (Live Mode):</strong>';
+                simulationItem1.textContent = 'Fund deposits (real MetaMask transactions)';
+                simulationItem2.textContent = 'Trade execution (real Polymarket trades)';
+            } else {
+                modeStatus.innerHTML = '<strong>⚠️ Test Mode Active:</strong> Deposits and trades are simulated. Perfect for testing with $100!';
+                modeStatus.style.background = '#fff3cd';
+                modeStatus.style.color = '#856404';
+                fundingInfo.innerHTML = '<p style="margin: 0; color: #0c5460;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>';
+                fundingInfo.style.background = '#e7f3ff';
+                fundingInfo.style.borderLeftColor = '#2196F3';
+                depositBtn.textContent = 'Deposit Funds (Simulated)';
+                depositBtn.style.background = '#28a745';
+                currentModeDisplay.textContent = 'Test Mode (Simulated)';
+                simulationLabel.innerHTML = '<strong>⚠️ Simulated (Test Mode):</strong>';
+                simulationItem1.textContent = 'Fund deposits (simulated for testing)';
+                simulationItem2.textContent = 'Trade execution (simulated for testing)';
+            }
+        }
+
+        // Deposit Funds Function
+        async function depositFunds() {
+            const amount = document.getElementById('deposit-amount').value;
+            const liveMode = localStorage.getItem('liveMode') === 'true';
+            const walletAddress = localStorage.getItem('walletAddress');
+            
+            if (liveMode && !walletAddress) {
+                alert('Please connect your wallet first!');
+                return;
+            }
+
+            if (!amount || parseFloat(amount) < 10) {
+                alert('Please enter a valid amount (minimum $10)');
+                return;
+            }
+
+            const statusEl = document.getElementById('deposit-status');
+            
+            if (liveMode) {
+                // Real deposit flow
+                statusEl.textContent = 'Connecting to MetaMask...';
+                statusEl.style.color = '#667eea';
+                
+                try {
+                    // Request transaction from MetaMask
+                    const txHash = await window.ethereum.request({
+                        method: 'eth_sendTransaction',
+                        params: [{
+                            from: walletAddress,
+                            to: '0x...', // Your contract address (would be real in production)
+                            value: '0x0', // USDC transfer would be different
+                            data: '0x...' // Deposit function call
+                        }]
+                    });
+                    
+                    statusEl.textContent = `✅ Real deposit initiated! Transaction: ${txHash.substring(0, 10)}...`;
+                    statusEl.style.color = '#28a745';
+                    alert('Real deposit transaction sent to MetaMask. Please confirm in your wallet.');
+                } catch (error) {
+                    statusEl.textContent = '❌ Deposit failed. Please try again.';
+                    statusEl.style.color = '#dc3545';
+                    console.error('Deposit error:', error);
+                }
+            } else {
+                // Simulated deposit flow
+                statusEl.textContent = 'Processing simulated deposit...';
+                statusEl.style.color = '#667eea';
+
+                setTimeout(() => {
+                    statusEl.textContent = `✅ Successfully simulated deposit of $${amount}! Your test account balance has been updated.`;
+                    statusEl.style.color = '#28a745';
+                    // Update test balance in localStorage
+                    const currentBalance = parseFloat(localStorage.getItem('testBalance') || '0');
+                    localStorage.setItem('testBalance', (currentBalance + parseFloat(amount)).toString());
+                }, 2000);
+            }
+        }
+
+        // Save Preferences Function
+        function savePreferences() {
+            const preferences = {
+                tradingMode: document.getElementById('trading-mode').value,
+                riskLevel: document.getElementById('risk-level').value,
+                maxPosition: parseFloat(document.getElementById('max-position').value) || 200,
+                minEdge: parseFloat(document.getElementById('min-edge').value) || 10,
+                minConfidence: parseFloat(document.getElementById('min-confidence').value) || 60,
+            };
+
+            // Save to localStorage (in production, save to backend)
+            localStorage.setItem('tradingPreferences', JSON.stringify(preferences));
+
+            const statusEl = document.getElementById('preferences-status');
+            statusEl.textContent = '✅ Preferences saved successfully!';
+            statusEl.style.color = '#28a745';
+
+            setTimeout(() => {
+                statusEl.textContent = '';
+            }, 3000);
+        }
+
+        // Load saved preferences
+        function loadPreferences() {
+            const saved = localStorage.getItem('tradingPreferences');
+            if (saved) {
+                const prefs = JSON.parse(saved);
+                document.getElementById('trading-mode').value = prefs.tradingMode || 'auto';
+                document.getElementById('risk-level').value = prefs.riskLevel || 'moderate';
+                document.getElementById('max-position').value = prefs.maxPosition || 200;
+                document.getElementById('min-edge').value = prefs.minEdge || 10;
+                document.getElementById('min-confidence').value = prefs.minConfidence || 60;
+            }
+            
+            // Load live mode setting
+            const liveMode = localStorage.getItem('liveMode') === 'true';
+            if (document.getElementById('live-mode')) {
+                document.getElementById('live-mode').checked = liveMode;
+                toggleLiveMode(); // Update UI
+            }
+        }
+
+        // Auto-refresh intervals (30 seconds)
+        const REFRESH_INTERVAL = 30000; // 30 seconds
+        
+        // Auto-refresh functions
+        function startAutoRefresh() {
+            // Refresh markets every 30 seconds
+            setInterval(() => {
+                if (document.getElementById('markets').classList.contains('active')) {
+                    loadMarkets(true);
+                }
+            }, REFRESH_INTERVAL);
+            
+            // Refresh predictions every 30 seconds
+            setInterval(() => {
+                if (document.getElementById('predictions').classList.contains('active')) {
+                    loadPredictions(true);
+                }
+            }, REFRESH_INTERVAL);
+            
+            // Refresh signals every 30 seconds
+            setInterval(() => {
+                if (document.getElementById('signals').classList.contains('active')) {
+                    loadSignals(true);
+                }
+            }, REFRESH_INTERVAL);
+            
+            // Refresh trades every 30 seconds
+            setInterval(() => {
+                if (document.getElementById('trades').classList.contains('active')) {
+                    loadTrades(true);
+                }
+            }, REFRESH_INTERVAL);
+            
+            // Refresh portfolio every 30 seconds
+            setInterval(() => {
+                if (document.getElementById('portfolio').classList.contains('active')) {
+                    loadPortfolio(true);
+                }
+            }, REFRESH_INTERVAL);
+        }
+        
+        // Initialize
+        checkHealth();
+        loadMarkets(); // Auto-load on page load
+        checkWalletConnection();
+        loadPreferences();
+        startAutoRefresh(); // Start auto-refresh
+        setInterval(checkHealth, 30000); // Check health every 30 seconds
+        
+    </script>
+</body>
+</html>
+
