@@ -63,15 +63,19 @@ MIN_CONFIDENCE=0.60
 ## Step 3: Configure Build Settings
 
 Railway will automatically detect:
-- **Python** (from `requirements.txt`)
+- **Python** (from `requirements.txt` and `runtime.txt`)
 - **Build Command**: `pip install -r requirements.txt`
-- **Start Command**: From `Procfile` or `railway.json`
+- **Start Command**: From `Procfile` (uses PYTHONPATH for proper imports)
 
 ### Verify Configuration
 
 1. Go to Settings → Service
-2. Check "Start Command" is: `uvicorn src.api.app:app --host 0.0.0.0 --port $PORT`
+2. Check "Start Command" is: `PYTHONPATH=$PWD:$PYTHONPATH python -m uvicorn src.api.app:app --host 0.0.0.0 --port $PORT`
 3. Check "Healthcheck Path" (optional): `/health`
+
+### Important: Python Path
+
+The `Procfile` includes `PYTHONPATH=$PWD:$PYTHONPATH` to ensure Python can find the `src` module. This is required because Railway runs from the project root, and we need to import `src.api.app`.
 
 ## Step 4: Deploy
 
