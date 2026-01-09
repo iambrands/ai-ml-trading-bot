@@ -1003,7 +1003,8 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:8001';
+        // Auto-detect API base URL (works for localhost and Railway)
+        const API_BASE = window.location.origin;
 
         // Check API health on load
         async function checkHealth() {
