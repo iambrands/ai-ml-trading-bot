@@ -1,12 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 # Railway entrypoint script to handle PORT environment variable
 
-# Export PORT to ensure it's available
-export PORT=${PORT:-8000}
+set -e
 
-# Debug: Print the port being used
-echo "Starting uvicorn on port: $PORT"
+# Get PORT from environment or default to 8000
+PORT="${PORT:-8000}"
 
-# Start uvicorn with the port (using exec to replace shell process)
-exec python3 -m uvicorn src.api.app:app --host 0.0.0.0 --port $PORT
+# Debug output
+echo "=== Starting Application ==="
+echo "PORT environment variable: ${PORT}"
+echo "Working directory: $(pwd)"
+echo "Python path: ${PYTHONPATH:-not set}"
+
+# Start uvicorn - use eval to ensure variable expansion
+eval "exec python3 -m uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT}"
 

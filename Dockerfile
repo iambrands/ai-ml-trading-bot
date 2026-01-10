@@ -18,10 +18,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application code
 COPY . .
 
-# Copy entrypoint script and ensure it's executable
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh && \
-    sed -i 's/\r$//' /entrypoint.sh  # Remove Windows line endings if any
+# Copy startup scripts
+COPY entrypoint.sh start.sh ./
+RUN chmod +x entrypoint.sh start.sh && \
+    sed -i 's/\r$//' entrypoint.sh start.sh 2>/dev/null || true
 
 # Set Python path
 ENV PYTHONPATH=/app:$PYTHONPATH
@@ -29,6 +29,6 @@ ENV PYTHONPATH=/app:$PYTHONPATH
 # Expose port (Railway will set PORT env var)
 EXPOSE 8000
 
-# Use CMD in shell form to allow environment variable expansion
-CMD /entrypoint.sh
+# Use simple shell command that directly reads PORT
+CMD bash -c 'python3 -m uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT:-8000}'
 
