@@ -18,9 +18,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application code
 COPY . .
 
-# Copy entrypoint script
+# Copy entrypoint script and ensure it's executable
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh && \
+    sed -i 's/\r$//' /entrypoint.sh  # Remove Windows line endings if any
 
 # Set Python path
 ENV PYTHONPATH=/app:$PYTHONPATH
