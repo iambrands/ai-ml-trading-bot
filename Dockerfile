@@ -30,6 +30,6 @@ ENV PYTHONPATH=/app:$PYTHONPATH
 EXPOSE 8000
 
 # Use simple shell command that directly reads PORT
-# Use double quotes to allow variable expansion
-CMD bash -c "python3 -m uvicorn src.api.app:app --host 0.0.0.0 --port \${PORT:-8000}"
+# In shell form CMD, variables are expanded at container runtime
+CMD bash -c "python3 -m uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT:-8000}"
 
