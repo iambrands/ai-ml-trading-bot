@@ -18,13 +18,16 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy application code
 COPY . .
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Set Python path
 ENV PYTHONPATH=/app:$PYTHONPATH
 
 # Expose port (Railway will set PORT env var)
 EXPOSE 8000
 
-# Start command (Railway sets PORT env var)
-# Use shell form to allow variable expansion
-CMD python3 -m uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT:-8000}
+# Use entrypoint script to handle PORT variable
+ENTRYPOINT ["/entrypoint.sh"]
 

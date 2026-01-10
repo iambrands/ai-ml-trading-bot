@@ -71,3 +71,6 @@ htmlcov/
 # Models (if too large)
 # data/models/*.pkl
 
+# Keep entrypoint.sh for Docker
+!entrypoint.sh
+
