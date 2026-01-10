@@ -19,9 +19,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY . .
 
 # Copy startup scripts
-COPY entrypoint.sh start.sh ./
-RUN chmod +x entrypoint.sh start.sh && \
-    sed -i 's/\r$//' entrypoint.sh start.sh 2>/dev/null || true
+COPY entrypoint.sh start.sh start_server.py ./
+RUN chmod +x entrypoint.sh start.sh start_server.py && \
+    sed -i 's/\r$//' entrypoint.sh start.sh start_server.py 2>/dev/null || true
 
 # Set Python path
 ENV PYTHONPATH=/app:$PYTHONPATH
@@ -31,5 +31,6 @@ EXPOSE 8000
 
 # Use Python script to read PORT from environment
 # This avoids shell variable expansion issues
-CMD ["python3", "start_server.py"]
+# Use absolute path to ensure it's found
+CMD ["python3", "/app/start_server.py"]
 
