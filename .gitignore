@@ -41,7 +41,12 @@ ENV/
 data/raw/
 data/processed/
 data/models/
+# But allow specific trained models for deployment
+!data/models/xgboost_model.pkl
+!data/models/lightgbm_model.pkl
+!data/models/feature_names.pkl
 *.pkl
+!data/models/*.pkl
 *.h5
 *.ckpt
 
