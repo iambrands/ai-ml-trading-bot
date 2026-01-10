@@ -26,6 +26,8 @@ httpx>=0.25.0
 
 # Infrastructure
 asyncpg>=0.29.0
+sqlalchemy>=2.0.0
+greenlet>=3.0.0
 redis>=5.0.0
 celery>=5.3.0
 fastapi>=0.104.0

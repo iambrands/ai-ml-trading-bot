@@ -1,6 +1,6 @@
 """Temporal feature extraction."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict
 
 import numpy as np
@@ -25,7 +25,7 @@ class TemporalFeatureExtractor:
             Dictionary of feature names to values
         """
         features = {}
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
         # Days to resolution
         if market.resolution_date:

@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 # Configuration
 # Auto-detect API base from environment or default to localhost
 import os
-API_BASE = os.getenv("API_BASE_URL", "http://localhost:8001")
+API_BASE = os.getenv("API_BASE_URL", "http://localhost:8002")
 INTERVAL = 300  # 5 minutes in seconds
 MAX_RETRIES = 3
 RETRY_DELAY = 60  # 1 minute between retries

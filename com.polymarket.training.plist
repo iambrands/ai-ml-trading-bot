@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.polymarket.training</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/python3</string>
+        <string>/Users/iabadvisors/ai-ml-trading-bot/scripts/train_models.py</string>
+        <string>--start-date</string>
+        <string>2022-01-09T00:00:00Z</string>
+        <string>--end-date</string>
+        <string>2026-01-08T23:59:59Z</string>
+        <string>--time-points</string>
+        <string>1</string>
+        <string>3</string>
+        <string>7</string>
+        <string>14</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>/Users/iabadvisors/ai-ml-trading-bot</string>
+    <key>StandardOutPath</key>
+    <string>/Users/iabadvisors/ai-ml-trading-bot/logs/training.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/iabadvisors/ai-ml-trading-bot/logs/training.error.log</string>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>KeepAlive</key>
+    <false/>
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist>
+

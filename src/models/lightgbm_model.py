@@ -91,9 +91,22 @@ class LightGBMProbabilityModel(BaseModel):
         if self.model is None:
             raise ValueError("Model must be trained before prediction")
 
-        proba = self.model.predict_proba(X)
-        # Return probability of positive class (YES)
-        return proba[:, 1]
+        # Try sklearn wrapper first, fall back to booster if needed
+        try:
+            proba = self.model.predict_proba(X)
+            # Return probability of positive class (YES)
+            return proba[:, 1]
+        except (AttributeError, ValueError) as e:
+            # If sklearn wrapper fails, use booster directly
+            if hasattr(self.model, '_Booster'):
+                booster = self.model._Booster
+                # Get raw predictions (logits)
+                raw_pred = booster.predict(X, num_iteration=booster.best_iteration)
+                # Convert to probability using sigmoid
+                proba = 1.0 / (1.0 + np.exp(-raw_pred))
+                return proba
+            else:
+                raise ValueError(f"Model not properly loaded: {e}")
 
     def evaluate(self, X_test: np.ndarray, y_test: np.ndarray) -> Dict[str, float]:
         """
@@ -131,7 +144,10 @@ class LightGBMProbabilityModel(BaseModel):
         if self.model is None:
             raise ValueError("Model must be trained before saving")
 
-        self.model.booster_.save_model(path)
+        # Use pickle for sklearn-compatible models
+        import pickle
+        with open(path, 'wb') as f:
+            pickle.dump(self.model, f)
         logger.info("Saved LightGBM model", path=path)
 
     def load(self, path: str) -> None:
@@ -141,7 +157,23 @@ class LightGBMProbabilityModel(BaseModel):
         Args:
             path: Path to load model from
         """
-        self.model = lgb.Booster(model_file=path)
+        # Try pickle first, then native format
+        import pickle
+        try:
+            with open(path, 'rb') as f:
+                self.model = pickle.load(f)
+        except (pickle.UnpicklingError, EOFError):
+            # Fall back to native LightGBM format
+            # Load booster and create classifier wrapper
+            booster = lgb.Booster(model_file=path)
+            self.model = lgb.LGBMClassifier()
+            # Properly restore the model state
+            self.model._Booster = booster
+            self.model._n_features = booster.num_feature()
+            self.model._classes = np.array([0, 1])  # Binary classification
+            self.model._n_classes = 2
+            # Mark as fitted
+            self.model._fitted = True
         logger.info("Loaded LightGBM model", path=path)
 
     def get_feature_importance(self) -> Optional[Dict[str, float]]:

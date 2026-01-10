@@ -64,7 +64,8 @@ async def main():
 
     # Initialize components
     settings = get_settings()
-    async with PolymarketDataSource(settings.polymarket_api_url) as polymarket:
+    # Use CLOB API URL (not the old API URL)
+    async with PolymarketDataSource() as polymarket:
         data_aggregator = DataAggregator(polymarket=polymarket)
         feature_pipeline = FeaturePipeline()
 

@@ -62,17 +62,21 @@ class XGBoostProbabilityModel(BaseModel):
         """
         logger.info("Training XGBoost model", n_samples=X.shape[0], n_features=X.shape[1])
 
+        # For XGBoost 3.x, early_stopping_rounds goes in constructor, not fit()
+        model_params = self.params.copy()
         fit_params = {}
+        
         if sample_weights is not None:
             fit_params["sample_weight"] = sample_weights
 
         if eval_set:
             X_val, y_val = eval_set
             fit_params["eval_set"] = [(X_val, y_val)]
-            fit_params["early_stopping_rounds"] = 20
+            # XGBoost 3.x: early_stopping_rounds in constructor
+            model_params["early_stopping_rounds"] = 20
             fit_params["verbose"] = False
 
-        self.model = xgb.XGBClassifier(**self.params)
+        self.model = xgb.XGBClassifier(**model_params)
         self.model.fit(X, y, **fit_params)
 
         logger.info("XGBoost model training completed")
@@ -131,7 +135,10 @@ class XGBoostProbabilityModel(BaseModel):
         if self.model is None:
             raise ValueError("Model must be trained before saving")
 
-        self.model.save_model(path)
+        # XGBoost 3.x: Use pickle for sklearn-compatible models
+        import pickle
+        with open(path, 'wb') as f:
+            pickle.dump(self.model, f)
         logger.info("Saved XGBoost model", path=path)
 
     def load(self, path: str) -> None:
@@ -141,8 +148,10 @@ class XGBoostProbabilityModel(BaseModel):
         Args:
             path: Path to load model from
         """
-        self.model = xgb.XGBClassifier()
-        self.model.load_model(path)
+        # XGBoost 3.x: Use pickle for sklearn-compatible models
+        import pickle
+        with open(path, 'rb') as f:
+            self.model = pickle.load(f)
         logger.info("Loaded XGBoost model", path=path)
 
     def get_feature_importance(self) -> Optional[Dict[str, float]]:

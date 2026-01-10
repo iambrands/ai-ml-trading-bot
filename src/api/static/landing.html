@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polymarket AI Trading Bot - Welcome</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .landing-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .hero {
+            text-align: center;
+            color: white;
+            padding: 80px 20px;
+        }
+
+        .hero h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .hero p {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            padding: 18px 40px;
+            border: 2px solid white;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .features {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin-top: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .how-it-works {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin-top: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .step {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .step-content p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .cta-section {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin-top: 40px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .cta-section h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+
+        .wallet-connect {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 40px;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .wallet-connect h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .wallet-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .wallet-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .wallet-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .wallet-status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .wallet-status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5em;
+            }
+            .step {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing-container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>🤖 Polymarket AI Trading Bot</h1>
+            <p>Automated trading powered by machine learning</p>
+            <div class="hero-buttons">
+                <button class="btn-primary" onclick="connectWallet()">Connect Wallet</button>
+                <button class="btn-secondary" onclick="window.location.href='/static/index.html'">View Dashboard</button>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features">
+            <h2 style="text-align: center; color: #667eea; font-size: 2.5em; margin-bottom: 20px;">Why Choose Our AI Trading Bot?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>AI-Powered Predictions</h3>
+                    <p>Advanced machine learning models analyze markets, news, and social sentiment to predict outcomes with high accuracy.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Automated Trading</h3>
+                    <p>Set it and forget it. The bot automatically finds opportunities and executes trades based on your preferences.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Real-Time Analysis</h3>
+                    <p>Continuous monitoring of prediction markets, instant signal generation, and portfolio tracking.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🛡️</div>
+                    <h3>Risk Management</h3>
+                    <p>Built-in risk controls, position sizing, and portfolio limits to protect your capital.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3>Performance Tracking</h3>
+                    <p>Comprehensive portfolio analytics, P&L tracking, and performance metrics.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure & Transparent</h3>
+                    <p>Your funds stay in your wallet. All trades are transparent and trackable.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="how-it-works">
+            <h2 style="text-align: center; color: #667eea; font-size: 2.5em; margin-bottom: 20px;">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Connect Your Wallet</h3>
+                        <p>Connect your MetaMask or other Web3 wallet to get started. Your funds stay in your wallet - we never hold them.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Fund Your Account</h3>
+                        <p>Deposit funds to your trading account. Start with as little as $100 to test the system.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Set Your Preferences</h3>
+                        <p>Configure your trading preferences: risk level, position sizes, edge thresholds, and auto-trading settings.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Activate Auto-Trading</h3>
+                        <p>Turn on auto-trading and let the AI bot find opportunities and execute trades automatically.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h3>Monitor & Profit</h3>
+                        <p>Check your dashboard to see predictions, signals, trades, and portfolio performance. The bot works 24/7.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Connection Section -->
+        <div class="wallet-connect">
+            <h3>Ready to Start Trading?</h3>
+            <p style="color: #666; margin-bottom: 20px;">Connect your wallet to begin</p>
+            <div class="wallet-buttons">
+                <button class="wallet-btn" onclick="connectMetaMask()">🦊 MetaMask</button>
+                <button class="wallet-btn" onclick="connectWalletConnect()">🔗 WalletConnect</button>
+                <button class="wallet-btn" onclick="connectCoinbase()">🔷 Coinbase Wallet</button>
+            </div>
+            <div id="wallet-status" class="wallet-status"></div>
+        </div>
+
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <h2>Start Trading Today</h2>
+            <p>Join thousands of traders using AI to find profitable opportunities on Polymarket</p>
+            <button class="btn-primary" onclick="window.location.href='/static/index.html'">Go to Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        // Check if wallet is already connected
+        async function checkWalletConnection() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        showWalletStatus('connected', accounts[0]);
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('Error checking wallet:', error);
+                }
+            }
+            return false;
+        }
+
+        // Connect MetaMask
+        async function connectMetaMask() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('MetaMask is not installed. Please install MetaMask to continue.');
+                window.open('https://metamask.io/', '_blank');
+                return;
+            }
+
+            try {
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                if (accounts.length > 0) {
+                    showWalletStatus('connected', accounts[0]);
+                    // Store wallet address
+                    localStorage.setItem('walletAddress', accounts[0]);
+                    localStorage.setItem('walletProvider', 'metamask');
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = '/static/index.html';
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                alert('Failed to connect wallet. Please try again.');
+            }
+        }
+
+        // Connect WalletConnect (placeholder)
+        async function connectWalletConnect() {
+            alert('WalletConnect integration coming soon!');
+        }
+
+        // Connect Coinbase Wallet (placeholder)
+        async function connectCoinbase() {
+            alert('Coinbase Wallet integration coming soon!');
+        }
+
+        // Generic connect wallet
+        function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                connectMetaMask();
+            } else {
+                alert('Please install MetaMask or another Web3 wallet to continue.');
+                window.open('https://metamask.io/', '_blank');
+            }
+        }
+
+        // Show wallet status
+        function showWalletStatus(status, address) {
+            const statusDiv = document.getElementById('wallet-status');
+            if (status === 'connected') {
+                statusDiv.className = 'wallet-status connected';
+                statusDiv.innerHTML = `✅ Connected: ${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+            }
+        }
+
+        // Check on page load
+        window.addEventListener('load', () => {
+            checkWalletConnection();
+        });
+    </script>
+</body>
+</html>
+

@@ -92,7 +92,7 @@ python scripts/backtest.py --start-date 2024-01-01 --end-date 2024-06-30
 python src/main.py
 
 # Start API server
-uvicorn src.api.app:app --host 0.0.0.0 --port 8000
+uvicorn src.api.app:app --host 0.0.0.0 --port 8002
 ```
 
 ### Docker

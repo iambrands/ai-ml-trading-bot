@@ -1,6 +1,7 @@
 """Unified data aggregator for all data sources."""
 
 import asyncio
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 from ..models import AggregatedData, Market, MarketData, NewsArticle, SocialSentiment, WhaleTrade
@@ -8,6 +9,12 @@ from .news import NewsDataSource
 from .polymarket import PolymarketDataSource
 from .reddit import RedditDataSource
 from .twitter import TwitterDataSource
+
+# Import RSS news source (optional, for free alternative)
+try:
+    from .rss_news import RSSNewsDataSource
+except ImportError:
+    RSSNewsDataSource = None
 from ...utils.async_utils import gather_with_exceptions
 from ...utils.logging import get_logger
 
@@ -21,20 +28,30 @@ class DataAggregator:
         self,
         polymarket: Optional[PolymarketDataSource] = None,
         news: Optional[NewsDataSource] = None,
+        rss_news: Optional[RSSNewsDataSource] = None,
         twitter: Optional[TwitterDataSource] = None,
         reddit: Optional[RedditDataSource] = None,
+        use_rss: bool = True,  # Use RSS by default (free)
     ):
         """
         Initialize data aggregator.
 
         Args:
             polymarket: Polymarket data source
-            news: News data source
+            news: NewsAPI data source (paid)
+            rss_news: RSS news data source (free)
             twitter: Twitter data source
             reddit: Reddit data source
+            use_rss: Use RSS feeds instead of NewsAPI (default: True for free option)
         """
         self.polymarket = polymarket or PolymarketDataSource()
-        self.news = news or NewsDataSource()
+        self.use_rss = use_rss
+        if use_rss:
+            self.rss_news = rss_news or RSSNewsDataSource()
+            self.news = None  # Don't use paid NewsAPI
+        else:
+            self.news = news or NewsDataSource()
+            self.rss_news = None
         self.twitter = twitter or TwitterDataSource()
         self.reddit = reddit or RedditDataSource()
 
@@ -110,10 +127,17 @@ class DataAggregator:
         """
         from datetime import datetime, timedelta
 
-        to_date = datetime.utcnow()
+        to_date = datetime.now(timezone.utc)
         from_date = to_date - timedelta(days=days_back)
 
-        return await self.news.fetch_articles(query, from_date=from_date, to_date=to_date)
+        # Fetch news articles (use RSS if enabled, otherwise NewsAPI)
+        if self.use_rss and self.rss_news:
+            async with self.rss_news:
+                return await self.rss_news.fetch_articles(query, from_date=from_date, to_date=to_date)
+        elif self.news:
+            return await self.news.fetch_articles(query, from_date=from_date, to_date=to_date)
+        else:
+            return []
 
     async def fetch_social_sentiment(self, query: str) -> Optional[SocialSentiment]:
         """
@@ -210,8 +234,7 @@ class DataAggregator:
         if isinstance(market_data, Exception) or market_data is None:
             logger.warning("Failed to fetch market data", market_id=market.id)
             # Create minimal market data
-            from datetime import datetime
-        market_data = MarketData(market=market, timestamp=datetime.utcnow())
+            market_data = MarketData(market=market, timestamp=datetime.now(timezone.utc))
 
         if isinstance(news, Exception):
             news = []
@@ -220,9 +243,12 @@ class DataAggregator:
         if isinstance(whales, Exception):
             whales = []
 
-        from datetime import datetime
+        # Ensure market_data is a MarketData object
+        if isinstance(market_data, Exception) or market_data is None:
+            market_data = MarketData(market=market, timestamp=datetime.now(timezone.utc))
+
         return AggregatedData(
-            market=market_data if not isinstance(market_data, Exception) else MarketData(market=market, timestamp=datetime.utcnow()),
+            market=market_data,
             news=news if not isinstance(news, Exception) else [],
             social=social if not isinstance(social, Exception) else None,
             whales=whales if not isinstance(whales, Exception) else [],

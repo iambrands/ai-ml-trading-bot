@@ -282,7 +282,7 @@ class ModelTrainer:
         xgb_model, xgb_scores = self.train_with_time_series_cv(
             X, y, XGBoostProbabilityModel, self.model_config.xgboost, feature_names
         )
-        xgb_model.save(str(save_dir / "xgboost.model"))
+        xgb_model.save(str(save_dir / "xgboost_model.pkl"))
         models["xgboost"] = xgb_model
         logger.info("XGBoost training complete", avg_accuracy=np.mean([s["accuracy"] for s in xgb_scores]))
 
@@ -293,7 +293,7 @@ class ModelTrainer:
         lgb_model, lgb_scores = self.train_with_time_series_cv(
             X, y, LightGBMProbabilityModel, self.model_config.lightgbm, feature_names
         )
-        lgb_model.save(str(save_dir / "lightgbm.model"))
+        lgb_model.save(str(save_dir / "lightgbm_model.pkl"))
         models["lightgbm"] = lgb_model
         logger.info("LightGBM training complete", avg_accuracy=np.mean([s["accuracy"] for s in lgb_scores]))
 

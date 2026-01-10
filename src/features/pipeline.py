@@ -1,6 +1,6 @@
 """Main feature engineering pipeline."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List
 
 import numpy as np
@@ -75,7 +75,7 @@ class FeaturePipeline:
 
         return FeatureVector(
             market_id=market.id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
             features=features,
             embeddings=embeddings,
         )
