@@ -26,5 +26,5 @@ EXPOSE 8000
 
 # Start command (Railway sets PORT env var)
 # Use shell form to allow variable expansion
-CMD ["sh", "-c", "python3 -m uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD python3 -m uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT:-8000}
 
