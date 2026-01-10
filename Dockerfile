@@ -29,7 +29,7 @@ ENV PYTHONPATH=/app:$PYTHONPATH
 # Expose port (Railway will set PORT env var)
 EXPOSE 8000
 
-# Use simple shell command that directly reads PORT
-# In shell form CMD, variables are expanded at container runtime
-CMD bash -c "python3 -m uvicorn src.api.app:app --host 0.0.0.0 --port ${PORT:-8000}"
+# Use Python script to read PORT from environment
+# This avoids shell variable expansion issues
+CMD ["python3", "start_server.py"]
 
