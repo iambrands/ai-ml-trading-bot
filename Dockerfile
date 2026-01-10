@@ -29,6 +29,6 @@ ENV PYTHONPATH=/app:$PYTHONPATH
 # Expose port (Railway will set PORT env var)
 EXPOSE 8000
 
-# Use entrypoint script to handle PORT variable
-ENTRYPOINT ["/entrypoint.sh"]
+# Use CMD in shell form to allow environment variable expansion
+CMD /entrypoint.sh
 
