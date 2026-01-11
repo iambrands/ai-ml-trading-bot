@@ -16,10 +16,10 @@ router = APIRouter(prefix="/predictions", tags=["predictions"])
 
 @router.post("/generate")
 async def generate_predictions_endpoint(
+    background_tasks: BackgroundTasks,
     limit: int = 10,
     auto_signals: bool = True,
     auto_trades: bool = False,
-    background_tasks: BackgroundTasks,
 ):
     """
     Generate predictions for active markets.
