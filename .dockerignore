@@ -35,10 +35,15 @@ wheels/
 .env.local
 
 # Data and logs
-data/
+data/raw/
+data/processed/
 logs/
 *.log
 mlruns/
+
+# But allow trained models for deployment
+!data/models/
+!data/models/*.pkl
 
 # Git
 .git/
