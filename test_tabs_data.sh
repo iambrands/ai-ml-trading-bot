@@ -68,3 +68,4 @@ echo "1. Start API server: uvicorn src.api.app:app --host 0.0.0.0 --port 8002"
 echo "2. Open browser: http://localhost:8002/dashboard"
 echo "3. Check each tab - should show data above!"
 
+

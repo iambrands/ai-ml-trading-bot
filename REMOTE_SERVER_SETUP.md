@@ -304,3 +304,4 @@ tail -f logs/training_*.log
 
 Your training will now run independently on the server! 🚀
 
+

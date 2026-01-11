@@ -197,3 +197,4 @@ class Portfolio:
         """Get position for a market."""
         return self.positions.get(market_id)
 
+

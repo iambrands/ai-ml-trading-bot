@@ -239,3 +239,4 @@ class SentimentAnalyzer:
 
         return SentimentResult(score=float(score), confidence=float(confidence), label=label)
 
+

@@ -108,3 +108,4 @@ class TextEmbedder:
         else:
             return np.mean(embeddings, axis=0)
 
+

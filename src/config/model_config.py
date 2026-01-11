@@ -165,3 +165,4 @@ class ModelConfig:
             training=TrainingConfig.from_dict(data.get("training", {})),
         )
 
+

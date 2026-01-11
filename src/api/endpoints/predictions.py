@@ -19,8 +19,7 @@ async def generate_predictions_endpoint(
     limit: int = 10,
     auto_signals: bool = True,
     auto_trades: bool = False,
-    background_tasks: BackgroundTasks = None,
-    db: AsyncSession = Depends(get_db),
+    background_tasks: BackgroundTasks,
 ):
     """
     Generate predictions for active markets.
@@ -34,8 +33,7 @@ async def generate_predictions_endpoint(
         limit: Number of markets to process
         auto_signals: Automatically generate signals from predictions
         auto_trades: Automatically create trades from signals
-        background_tasks: FastAPI background tasks
-        db: Database session
+        background_tasks: FastAPI background tasks (always injected by FastAPI)
     """
     try:
         # Import here to avoid circular imports
@@ -46,36 +44,24 @@ async def generate_predictions_endpoint(
             sys.path.insert(0, str(project_root))
         from scripts.generate_predictions import generate_predictions
         
-        # Run in background if requested
-        if background_tasks:
-            background_tasks.add_task(
-                generate_predictions,
-                limit=limit,
-                auto_generate_signals=auto_signals,
-                auto_create_trades=auto_trades,
-            )
-            return {
-                "status": "started",
-                "message": "Prediction generation started in background",
-                "limit": limit,
-                "auto_signals": auto_signals,
-                "auto_trades": auto_trades,
-            }
-        else:
-            # Run synchronously (for testing)
-            await generate_predictions(
-                limit=limit,
-                auto_generate_signals=auto_signals,
-                auto_create_trades=auto_trades,
-            )
-            return {
-                "status": "completed",
-                "message": "Predictions generated successfully",
-                "limit": limit,
-            }
+        # Always run in background to avoid timeout
+        # Prediction generation can take 2-5 minutes, so we return immediately
+        background_tasks.add_task(
+            generate_predictions,
+            limit=limit,
+            auto_generate_signals=auto_signals,
+            auto_create_trades=auto_trades,
+        )
+        return {
+            "status": "started",
+            "message": "Prediction generation started in background",
+            "limit": limit,
+            "auto_signals": auto_signals,
+            "auto_trades": auto_trades,
+        }
     except Exception as e:
-        logger.error("Failed to generate predictions", error=str(e))
-        raise HTTPException(status_code=500, detail=f"Failed to generate predictions: {str(e)}")
+        logger.error("Failed to start prediction generation", error=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to start prediction generation: {str(e)}")
 
 
 @router.post("/process/{prediction_id}")

@@ -198,3 +198,4 @@ curl "https://web-production-c490dd.up.railway.app/trades?limit=10"
 *Updated: 2026-01-11*
 *Status: Predictions working, trades need auto_trades enabled*
 
+

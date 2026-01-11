@@ -6,3 +6,4 @@ from .xgboost_model import XGBoostProbabilityModel
 
 __all__ = ["BaseModel", "EnsembleModel", "EnsemblePrediction", "XGBoostProbabilityModel"]
 
+

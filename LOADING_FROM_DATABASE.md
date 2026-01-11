@@ -132,3 +132,4 @@ uvicorn src.api.app:app --host 127.0.0.1 --port 8001 --reload
 
 Generate more predictions and view them in the UI! 🚀
 
+

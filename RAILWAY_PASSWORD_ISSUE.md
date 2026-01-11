@@ -126,3 +126,4 @@ Then paste the SQL file content (already in your clipboard) into the psql shell.
 
 This bypasses the password authentication issue entirely because Railway CLI handles authentication automatically!
 
+

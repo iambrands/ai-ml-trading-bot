@@ -120,3 +120,4 @@ If predictions are generated after 5 minutes, the cron job is working correctly 
 
 *Railway URL: `https://web-production-c490dd.up.railway.app/`*
 
+

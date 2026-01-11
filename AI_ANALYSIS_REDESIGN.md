@@ -129,3 +129,4 @@ Next step: Check the Signals tab to see which predictions generated trading sign
 
 **The AI Analysis tab is now a helpful guide that explains the entire platform!** 🎉
 
+

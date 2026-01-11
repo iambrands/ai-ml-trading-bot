@@ -135,3 +135,4 @@ class CircuitBreaker:
             # Reset to HALF_OPEN after cooldown
             self.state = CircuitBreakerState.HALF_OPEN
 
+

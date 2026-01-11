@@ -48,3 +48,4 @@ vector_db:
   collection_name: "market_embeddings"
   embedding_model: "all-MiniLM-L6-v2"
 
+

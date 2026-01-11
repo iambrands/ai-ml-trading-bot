@@ -100,3 +100,4 @@ After adding variables and importing:
 - Or use Railway CLI: `railway connect postgres`
 - Then paste SQL content directly
 
+

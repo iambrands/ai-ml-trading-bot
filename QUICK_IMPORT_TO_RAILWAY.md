@@ -197,3 +197,4 @@ pg_restore -h HOST -U postgres -d railway -F c local_db_backup_20260110_140827.d
 
 Once you set up Railway PostgreSQL and import these files, all your data and models will be on Railway! 🚀
 
+

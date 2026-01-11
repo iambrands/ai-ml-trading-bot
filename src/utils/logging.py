@@ -40,3 +40,4 @@ def get_logger(name: str) -> Any:
     """Get a structured logger for the given name."""
     return structlog.get_logger(name)
 
+

@@ -116,3 +116,4 @@ class BaseModel(ABC):
         proba = self.predict_proba(X)
         return (proba >= threshold).astype(int)
 
+

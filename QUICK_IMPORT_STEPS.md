@@ -108,3 +108,4 @@ brew install postgresql
 - Your web service is already configured to use `DATABASE_URL` from environment
 - No code changes needed - it will automatically connect once database is imported
 
+

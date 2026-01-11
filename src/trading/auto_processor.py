@@ -158,3 +158,4 @@ class AutoProcessor:
             logger.warning("Failed to update portfolio snapshot", error=str(e))
             await db.rollback()
 
+

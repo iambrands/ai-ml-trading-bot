@@ -184,3 +184,4 @@ curl "https://web-production-c490dd.up.railway.app/predictions?limit=10"
 *Commit: 2df663e (Fixed .dockerignore to include model files)*
 *Status: Active - Testing prediction generation*
 
+

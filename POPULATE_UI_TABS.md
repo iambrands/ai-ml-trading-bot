@@ -91,3 +91,4 @@ python scripts/generate_demo_data.py
 
 Your UI should now show data on all tabs! 🎉
 
+

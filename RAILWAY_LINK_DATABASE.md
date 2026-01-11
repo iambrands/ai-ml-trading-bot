@@ -139,3 +139,4 @@ railway connect postgres
 - If tables already exist, the import will add data (or error if duplicates)
 - You can drop tables first if needed: `DROP TABLE IF EXISTS markets CASCADE;`
 
+

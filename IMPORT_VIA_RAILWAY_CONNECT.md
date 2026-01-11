@@ -69,3 +69,4 @@ DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST
 
 **Use Method 2 (Railway Query Interface)** - It's the easiest and doesn't require any terminal commands or connection string issues!
 
+

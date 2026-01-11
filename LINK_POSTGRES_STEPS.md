@@ -150,3 +150,4 @@ SELECT * FROM markets LIMIT 5;
 - Or upload SQL file through Railway's interface
 - Or use Railway CLI: `railway connect postgres`
 
+

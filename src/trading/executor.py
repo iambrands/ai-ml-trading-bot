@@ -159,3 +159,4 @@ class TradeExecutor:
             logger.error("Error closing position", market_id=market_id, error=str(e))
             return False
 
+

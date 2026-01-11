@@ -114,3 +114,4 @@ class FeatureVector:
         """Convert features to numpy array."""
         return np.array([self.features.get(name, 0.0) for name in feature_names])
 
+

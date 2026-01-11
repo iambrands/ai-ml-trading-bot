@@ -106,3 +106,4 @@ curl "https://web-production-c490dd.up.railway.app/predictions?limit=5"
 
 *Railway URL: `https://web-production-c490dd.up.railway.app/`*
 
+

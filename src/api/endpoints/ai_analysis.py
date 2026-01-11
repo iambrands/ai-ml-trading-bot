@@ -368,3 +368,4 @@ def _generate_markets_explanation(markets, total: int) -> str:
         f"**Next step**: Generate predictions for markets you want to analyze."
     )
 
+
