@@ -17,7 +17,7 @@ from src.features.pipeline import FeaturePipeline
 from src.models.ensemble import EnsembleModel, EnsemblePrediction
 from src.models.xgboost_model import XGBoostProbabilityModel
 from src.models.lightgbm_model import LightGBMProbabilityModel
-from src.database.connection import get_db
+from src.database.connection import AsyncSessionLocal, get_db
 from src.database.models import Market as DBMarket, Prediction, Signal, Trade, PortfolioSnapshot
 from src.trading.signal_generator import SignalGenerator
 from src.utils.logging import configure_logging, get_logger
@@ -218,7 +218,12 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
         signals_created = 0
         trades_created = 0
         
-        async for db in get_db():
+        # Create database session directly (not using get_db() dependency)
+        if not AsyncSessionLocal:
+            logger.error("Database not configured - cannot generate predictions")
+            return
+        
+        async with AsyncSessionLocal() as db:
             try:
                 for market in markets:
                     try:
@@ -269,7 +274,7 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
                         )
                         
                     except Exception as e:
-                        logger.error("Failed to process market", market_id=market.id, error=str(e))
+                        logger.error("Failed to process market", market_id=market.id, error=str(e), exc_info=True)
                         await db.rollback()  # Rollback on error
                         continue
                 
@@ -286,11 +291,11 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
                     signals_created=signals_created,
                     trades_created=trades_created,
                 )
-                break
                 
             except Exception as e:
-                logger.error("Database error", error=str(e))
-                break
+                logger.error("Database error", error=str(e), exc_info=True)
+                await db.rollback()
+                raise
 
 
 async def update_portfolio_snapshot(db):
