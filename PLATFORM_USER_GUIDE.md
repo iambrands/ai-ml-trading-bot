@@ -125,29 +125,38 @@ That's the core concept - finding markets where your AI disagrees with the crowd
    - Go to: http://localhost:8001/
    - You'll see the dashboard
 
-### Phase 2: Generate Predictions (Regular Task)
+### Phase 2: Generate Predictions (Fully Automated) ✅
 
-**What**: Run this to analyze markets and create predictions
+**Production (Railway)**: ✅ **FULLY AUTOMATED** - No manual action needed!
 
-**How**:
-```bash
-python scripts/generate_predictions.py --limit 20
-```
+**What**: System automatically analyzes markets and creates predictions
 
-**What Happens**:
-1. Fetches 20 active markets from Polymarket
-2. For each market:
+**How It Works**:
+- ✅ Cron job runs every 5 minutes
+- ✅ Calls: `POST /predictions/generate?limit=20&auto_signals=true&auto_trades=true`
+- ✅ Runs in background (no timeouts)
+- ✅ Fully automated - "set it and forget it"
+
+**What Happens Automatically**:
+1. ✅ Fetches 20 active markets from Polymarket
+2. ✅ For each market:
    - Gathers news, social media data
    - Generates features (sentiment, market data, etc.)
    - Runs AI models to predict probability
    - Compares prediction vs market price
    - Calculates edge (opportunity)
-3. Saves predictions to database
-4. **Automatically** creates signals if edge > 5%
-5. **Automatically** creates trades if `--auto-trades` is enabled
-6. **Automatically** updates portfolio snapshot
+3. ✅ Saves predictions to database
+4. ✅ **Automatically** creates signals if edge > 5%
+5. ✅ **Automatically** creates trades (paper trading mode)
+6. ✅ **Automatically** updates portfolio snapshot
+7. ✅ **Automatically** sends alerts if configured
 
-**Frequency**: Run this regularly (daily, hourly, etc.) to find new opportunities
+**Frequency**: ✅ Every 5 minutes automatically - no manual intervention needed!
+
+**Local Development** (if running locally):
+```bash
+python scripts/generate_predictions.py --limit 20 --auto-signals --auto-trades
+```
 
 ### Phase 3: View Results (In Browser)
 
