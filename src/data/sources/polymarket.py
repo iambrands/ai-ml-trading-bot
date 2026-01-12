@@ -201,6 +201,10 @@ class PolymarketDataSource:
             logger.debug("Fetched CLOB markets", count=len(clob_markets_list))
 
             markets = []
+            strict_filtered = 0
+            parse_failed = 0
+            outcome_filtered = 0
+            
             for item in clob_markets_list:
                 market_id = item.get('id') or item.get('conditionId')
                 condition_id = item.get('conditionId') or item.get('id')
@@ -227,16 +231,38 @@ class PolymarketDataSource:
                     )
                 )
                 
-                if is_active:
-                    market = self._parse_market(item)
-                    if market and not market.outcome:
-                        markets.append(market)
-                        if len(markets) >= limit:
-                            break
+                if not is_active:
+                    strict_filtered += 1
+                    if strict_filtered <= 3:  # Log first few to debug
+                        logger.debug("Market filtered by strict criteria", 
+                                   market_id=market_id[:20],
+                                   accepting_orders=item.get("accepting_orders"),
+                                   active=item.get("active"),
+                                   closed=item.get("closed"),
+                                   archived=item.get("archived"))
+                    continue
+                
+                market = self._parse_market(item)
+                if not market:
+                    parse_failed += 1
+                    if parse_failed <= 3:
+                        logger.debug("Market parse failed", market_id=market_id[:20], item_keys=list(item.keys())[:10])
+                    continue
+                    
+                if market.outcome:
+                    outcome_filtered += 1
+                    continue
+                
+                markets.append(market)
+                if len(markets) >= limit:
+                    break
+
+            logger.debug("Strict filter results", total=len(clob_markets_list), filtered=strict_filtered, parsed=len(markets) + parse_failed + outcome_filtered, markets=len(markets))
 
             # If no markets found with strict criteria, try a more lenient approach
             if not markets:
-                logger.debug("No markets found with strict criteria, trying lenient filter")
+                logger.debug("No markets found with strict criteria, trying lenient filter", 
+                           strict_filtered=strict_filtered, parse_failed=parse_failed, outcome_filtered=outcome_filtered)
                 for item in clob_markets_list:
                     market_id = item.get('id') or item.get('conditionId')
                     condition_id = item.get('conditionId') or item.get('id')
