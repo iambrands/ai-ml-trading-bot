@@ -1,66 +1,42 @@
 #!/bin/bash
-# Run database migration for alerts and paper trading on Railway
+# Run database migration on Railway
 
-set -e
-
-echo "🔧 Running Database Migration for Alerts & Paper Trading"
-echo "=========================================================="
-echo ""
+echo "🚀 Running Database Migration on Railway"
+echo "=========================================="
 
 # Check if DATABASE_URL is set
 if [ -z "$DATABASE_URL" ]; then
-    echo "❌ ERROR: DATABASE_URL environment variable not set"
+    echo "❌ ERROR: DATABASE_URL environment variable is not set"
     echo ""
-    echo "To get your DATABASE_URL from Railway:"
+    echo "To get your Railway DATABASE_URL:"
     echo "1. Go to Railway dashboard"
     echo "2. Select your PostgreSQL service"
-    echo "3. Go to Variables tab"
+    echo "3. Go to 'Variables' tab"
     echo "4. Copy the DATABASE_URL value"
     echo ""
-    echo "Or use Railway CLI:"
-    echo "  railway variables"
+    echo "Then run:"
+    echo "  export DATABASE_URL='your-railway-database-url'"
+    echo "  ./scripts/run_migration_railway.sh"
     echo ""
-    echo "Then set it:"
-    echo "  export DATABASE_URL='your-connection-string'"
-    echo ""
+    echo "OR use Railway CLI:"
+    echo "  railway connect postgres"
+    echo "  Then run: \\i src/database/migrations/002_performance_indexes.sql"
     exit 1
 fi
 
-echo "✅ DATABASE_URL found"
+echo "✅ DATABASE_URL is set"
+echo "📝 Running migration: src/database/migrations/002_performance_indexes.sql"
 echo ""
 
-# Migration file path
-MIGRATION_FILE="src/database/migrations/add_alerts_and_paper_trading.sql"
-
-if [ ! -f "$MIGRATION_FILE" ]; then
-    echo "❌ ERROR: Migration file not found: $MIGRATION_FILE"
-    exit 1
-fi
-
-echo "📄 Migration file: $MIGRATION_FILE"
-echo ""
-
-# Run migration using psql
-echo "🚀 Running migration..."
-echo ""
-
-psql "$DATABASE_URL" -f "$MIGRATION_FILE"
+# Run the migration
+psql "$DATABASE_URL" -f src/database/migrations/002_performance_indexes.sql
 
 if [ $? -eq 0 ]; then
     echo ""
     echo "✅ Migration completed successfully!"
-    echo ""
-    echo "New tables/columns added:"
-    echo "  - alerts table"
-    echo "  - alert_history table"
-    echo "  - analytics_cache table"
-    echo "  - paper_trading column on trades"
-    echo "  - paper_trading column on portfolio_snapshots"
-    echo ""
+    echo "📊 Database indexes have been added"
 else
     echo ""
     echo "❌ Migration failed. Check the error above."
     exit 1
 fi
-
-

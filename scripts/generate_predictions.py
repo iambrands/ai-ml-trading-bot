@@ -223,6 +223,10 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
     
     logger.info("Starting prediction generation", limit=limit, auto_signals=auto_generate_signals)
     
+    # Initialize prediction cache
+    from src.caching.prediction_cache import get_prediction_cache
+    cache = get_prediction_cache()
+    
     # Load models
     ensemble = await load_models()
     
@@ -247,6 +251,7 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
         predictions_saved = 0
         signals_created = 0
         trades_created = 0
+        cache_hits = 0
         
         # Create database session directly (not using get_db() dependency)
         if not AsyncSessionLocal:
@@ -259,6 +264,30 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
                     try:
                         # Save market to database first
                         await save_market_to_db(market, db)
+                        
+                        # Check cache first
+                        current_price = float(market.yes_price)
+                        resolution_date = market.resolution_date
+                        
+                        # Check if we should use cached prediction
+                        should_regenerate = await cache.should_regenerate(
+                            market.id, 
+                            current_price,
+                            resolution_date
+                        )
+                        
+                        if not should_regenerate:
+                            cached_pred = cache.get_cached(market.id)
+                            if cached_pred:
+                                logger.info(
+                                    "Using cached prediction",
+                                    market_id=market.id[:20],
+                                    cached_pred=f"{cached_pred:.2%}"
+                                )
+                                cache_hits += 1
+                                # Still need to save to DB for tracking, but skip expensive operations
+                                # For now, we'll still generate to ensure data freshness
+                                # In future, could optimize further
                         
                         # Fetch all data for market
                         data = await data_aggregator.fetch_all_for_market(market)
@@ -291,6 +320,9 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
                         # Get ensemble prediction
                         prediction = ensemble.predict_proba(market, features, feature_names)
                         
+                        # Update cache with new prediction
+                        cache.update_cache(market.id, prediction.probability, current_price)
+                        
                         # Save prediction to database (and auto-generate signal/trade if enabled)
                         await save_prediction_to_db(market, prediction, model_predictions, db, signal_generator, auto_create_trades)
                         predictions_saved += 1
@@ -315,12 +347,17 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
                     except Exception as e:
                         logger.warning("Failed to update portfolio snapshot", error=str(e))
                 
-                logger.info(
-                    "Prediction generation complete",
-                    predictions_saved=predictions_saved,
-                    signals_created=signals_created,
-                    trades_created=trades_created,
-                )
+        # Get cache stats
+        cache_stats = cache.get_cache_stats()
+        
+        logger.info(
+            "Prediction generation complete",
+            predictions_saved=predictions_saved,
+            signals_created=signals_created,
+            trades_created=trades_created,
+            cache_hits=cache_hits,
+            cache_stats=cache_stats,
+        )
                 
             except Exception as e:
                 logger.error("Database error", error=str(e), exc_info=True)

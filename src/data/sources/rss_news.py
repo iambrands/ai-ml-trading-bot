@@ -52,6 +52,8 @@ class RSSNewsDataSource:
         Returns:
             List of news articles as dictionaries
         """
+        from ...utils.rate_limiter import rate_limited, RateLimitExceeded
+        
         if not self.session:
             self.session = aiohttp.ClientSession()
 

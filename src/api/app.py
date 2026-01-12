@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..config.settings import get_settings
 from ..data.sources.polymarket import PolymarketDataSource
 from ..database import get_db, init_db
-from ..database.connection import AsyncSessionLocal
+from ..database.connection import AsyncSessionLocal, get_pool_stats
 from ..database.models import Market, Prediction, Signal, Trade, PortfolioSnapshot
 from ..utils.logging import configure_logging, get_logger
 

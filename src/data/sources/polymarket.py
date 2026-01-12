@@ -79,41 +79,50 @@ class PolymarketDataSource:
         Returns:
             List of market dictionaries from Gamma API
         """
+        from ...utils.rate_limiter import rate_limited, RateLimitExceeded
+        
         try:
-            async with aiohttp.ClientSession() as session:
-                url = f"{self.gamma_api_url}/markets"
-                params = {
-                    "limit": limit,
-                    "active": "true",
-                    "closed": "false",
-                    "order": "volume24hr",
-                    "ascending": "false",
-                }
-                logger.debug("Fetching from Gamma API", url=url, params=params)
-                async with session.get(
-                    url,
-                    params=params,
-                    timeout=aiohttp.ClientTimeout(total=30),
-                ) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        # Gamma API might return list directly or wrapped
-                        if isinstance(data, list):
-                            logger.debug("Gamma API returned list", count=len(data))
-                            return data
-                        elif isinstance(data, dict) and "data" in data:
-                            logger.debug("Gamma API returned dict with data", count=len(data.get("data", [])))
-                            return data["data"]
+            @rate_limited('gamma')
+            async def _fetch_with_rate_limit():
+                async with aiohttp.ClientSession() as session:
+                    url = f"{self.gamma_api_url}/markets"
+                    params = {
+                        "limit": limit,
+                        "active": "true",
+                        "closed": "false",
+                        "order": "volume24hr",
+                        "ascending": "false",
+                    }
+                    logger.debug("Fetching from Gamma API", url=url, params=params)
+                    async with session.get(
+                        url,
+                        params=params,
+                        timeout=aiohttp.ClientTimeout(total=30),
+                    ) as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            # Gamma API might return list directly or wrapped
+                            if isinstance(data, list):
+                                logger.debug("Gamma API returned list", count=len(data))
+                                return data
+                            elif isinstance(data, dict) and "data" in data:
+                                logger.debug("Gamma API returned dict with data", count=len(data.get("data", [])))
+                                return data["data"]
+                            else:
+                                logger.warning("Unexpected Gamma API response format", data_type=type(data), keys=list(data.keys()) if isinstance(data, dict) else None)
+                                return []
                         else:
-                            logger.warning("Unexpected Gamma API response format", data_type=type(data), keys=list(data.keys()) if isinstance(data, dict) else None)
+                            error_text = await response.text()
+                            logger.warning("Gamma API request failed", status=response.status, error=error_text[:200])
                             return []
-                    else:
-                        error_text = await response.text()
-                        logger.warning("Gamma API request failed", status=response.status, error=error_text[:200])
-                        return []
+            
+            return await _fetch_with_rate_limit()
+        except RateLimitExceeded as e:
+            logger.warning("Gamma API rate limit exceeded, continuing without volume data", error=str(e))
+            return []
         except Exception as e:
             logger.warning("Failed to fetch from Gamma API, continuing without volume data", error=str(e), exc_info=True)
-            return []  # ClobClient doesn't need explicit cleanup
+            return []
 
     @retry(max_attempts=3, delay=1.0)
     async def fetch_market(self, market_id: str) -> Optional[Market]:
