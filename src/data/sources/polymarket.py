@@ -162,7 +162,7 @@ class PolymarketDataSource:
     @retry(max_attempts=3, delay=1.0)
     async def fetch_active_markets(self, limit: int = 100) -> List[Market]:
         """
-        Fetch active markets.
+        Fetch active markets, combining volume from Gamma API and prices from CLOB API.
 
         Args:
             limit: Maximum number of markets to fetch
@@ -171,19 +171,35 @@ class PolymarketDataSource:
             List of active markets
         """
         try:
-            # Use get_markets() for full market details including question
+            # 1. Fetch markets from Gamma API for volume and other metadata
+            gamma_markets_data = await self._fetch_gamma_markets(limit=limit)
+            gamma_markets_map = {m.get('id'): m for m in gamma_markets_data if m.get('id')}
+
+            # 2. Fetch markets from CLOB API for real-time prices and order book
             markets_data = self.client.get_markets()
 
             if isinstance(markets_data, dict) and "data" in markets_data:
-                markets_list = markets_data["data"]
+                clob_markets_list = markets_data["data"]
             elif isinstance(markets_data, list):
-                markets_list = markets_data
+                clob_markets_list = markets_data
             else:
-                logger.warning("Unexpected markets data format", data_type=type(markets_data))
+                logger.warning("Unexpected CLOB markets data format", data_type=type(markets_data))
                 return []
 
             markets = []
-            for item in markets_list:
+            for item in clob_markets_list:
+                market_id = item.get('id') or item.get('conditionId')
+                if not market_id:
+                    continue
+
+                # Merge volume data from Gamma API if available
+                gamma_market_item = gamma_markets_map.get(market_id)
+                if gamma_market_item:
+                    # Merge volume data from Gamma API into the CLOB market item
+                    item['volume24hr'] = gamma_market_item.get('volume24hr', 0.0)
+                    item['liquidity'] = gamma_market_item.get('liquidity', 0.0)
+                    item['volume'] = gamma_market_item.get('volume', 0.0)  # Total volume
+
                 # Filter for active markets: accepting_orders=True is the best indicator
                 # Also check: active=True, closed=False, not archived
                 is_active = (
@@ -205,7 +221,18 @@ class PolymarketDataSource:
             # If no markets found with strict criteria, try a more lenient approach
             if not markets:
                 logger.debug("No markets found with strict criteria, trying lenient filter")
-                for item in markets_list:
+                for item in clob_markets_list:
+                    market_id = item.get('id') or item.get('conditionId')
+                    if not market_id:
+                        continue
+
+                    # Merge volume data from Gamma API if available
+                    gamma_market_item = gamma_markets_map.get(market_id)
+                    if gamma_market_item:
+                        item['volume24hr'] = gamma_market_item.get('volume24hr', 0.0)
+                        item['liquidity'] = gamma_market_item.get('liquidity', 0.0)
+                        item['volume'] = gamma_market_item.get('volume', 0.0)
+
                     # More lenient: just check if it's not closed and not archived
                     if not item.get("closed") and not item.get("archived"):
                         market = self._parse_market(item)

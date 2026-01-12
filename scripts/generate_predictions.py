@@ -29,22 +29,37 @@ logger = get_logger(__name__)
 
 async def load_models():
     """Load trained models."""
-    models_dir = Path("data/models")
+    # Get absolute path relative to project root
+    project_root = Path(__file__).parent.parent
+    models_dir = project_root / "data" / "models"
     
-    logger.info("Loading models...")
+    logger.info("Loading models...", models_dir=str(models_dir))
+    
+    # Check if models directory exists
+    if not models_dir.exists():
+        logger.error("Models directory not found", path=str(models_dir))
+        raise FileNotFoundError(f"Models directory not found: {models_dir}")
+    
+    # Check if model files exist
+    xgb_path = models_dir / "xgboost_model.pkl"
+    if not xgb_path.exists():
+        logger.error("XGBoost model file not found", path=str(xgb_path))
+        logger.debug("Available files in models directory", files=list(models_dir.glob("*")))
+        raise FileNotFoundError(f"XGBoost model not found: {xgb_path}")
     
     # Load XGBoost
     xgb_model = XGBoostProbabilityModel()
-    xgb_model.load(str(models_dir / "xgboost_model.pkl"))
-    logger.info("XGBoost model loaded")
+    xgb_model.load(str(xgb_path))
+    logger.info("XGBoost model loaded", path=str(xgb_path))
     
     # Load LightGBM (if available and working)
     models = {"xgboost": xgb_model}
     try:
+        lgb_path = models_dir / "lightgbm_model.pkl"
         lgb_model = LightGBMProbabilityModel()
-        lgb_model.load(str(models_dir / "lightgbm_model.pkl"))
+        lgb_model.load(str(lgb_path))
         models["lightgbm"] = lgb_model
-        logger.info("LightGBM model loaded")
+        logger.info("LightGBM model loaded", path=str(lgb_path))
     except Exception as e:
         logger.warning("LightGBM model not available, using XGBoost only", error=str(e))
     
