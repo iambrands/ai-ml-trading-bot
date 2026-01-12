@@ -94,3 +94,4 @@ asyncio.run(test())
 You're in great shape! The bot is functional with NewsAPI, and you have clear paths forward for Reddit and Polymarket.
 
 
+

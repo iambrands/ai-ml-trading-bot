@@ -87,3 +87,4 @@ CREATE INDEX
 
 If you see "already exists" messages, that's fine - it means the migration was already run!
 
+

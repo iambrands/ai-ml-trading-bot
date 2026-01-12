@@ -26,3 +26,4 @@ echo "Columns added:"
 echo "  - trades.paper_trading"
 echo "  - portfolio_snapshots.paper_trading"
 
+

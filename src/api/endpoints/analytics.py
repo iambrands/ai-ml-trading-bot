@@ -110,3 +110,4 @@ async def get_dashboard_summary(
         logger.error("Failed to get dashboard summary", error=str(e))
         return {}
 
+

@@ -369,3 +369,4 @@ def _generate_markets_explanation(markets, total: int) -> str:
     )
 
 
+

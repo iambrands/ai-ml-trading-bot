@@ -119,3 +119,4 @@ A typical portfolio might show:
 The Portfolio page gives you a complete view of your trading bot's financial health! 📊💰
 
 
+

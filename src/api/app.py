@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..config.settings import get_settings
 from ..data.sources.polymarket import PolymarketDataSource
 from ..database import get_db, init_db
+from ..database.connection import AsyncSessionLocal
 from ..database.models import Market, Prediction, Signal, Trade, PortfolioSnapshot
 from ..utils.logging import configure_logging, get_logger
 
@@ -244,10 +245,105 @@ async def favicon():
     return Response(status_code=204)
 
 
-@app.get("/health", response_model=HealthResponse)
+@app.get("/health")
 async def health():
-    """Health check endpoint."""
-    return HealthResponse(status="healthy", timestamp=datetime.now(timezone.utc))
+    """Comprehensive health check for all system components."""
+    from fastapi import status
+    from fastapi.responses import JSONResponse
+    from ..database.connection import get_pool_stats, engine
+    from ..config.settings import get_settings
+    
+    checks = {}
+    all_healthy = True
+    
+    # Check database
+    try:
+        if engine:
+            # Test query
+            async with AsyncSessionLocal() as session:
+                await session.execute(select(1))
+            
+            # Get pool stats
+            pool_stats = get_pool_stats()
+            if pool_stats:
+                pool_usage = pool_stats.get("utilization", 0)
+                checks["database"] = {
+                    "status": "healthy" if pool_usage < 0.9 else "degraded",
+                    "pool_usage": f"{pool_usage:.1%}",
+                    "connections": pool_stats
+                }
+                if pool_usage >= 0.8:
+                    logger.warning("High database pool utilization", usage=f"{pool_usage:.1%}")
+            else:
+                checks["database"] = {"status": "healthy", "pool_stats": "unavailable"}
+        else:
+            checks["database"] = {"status": "unavailable", "message": "Database not configured"}
+    except Exception as e:
+        checks["database"] = {"status": "unhealthy", "error": str(e)}
+        all_healthy = False
+    
+    # Check recent predictions
+    try:
+        if engine:
+            async with AsyncSessionLocal() as session:
+                result = await session.execute(
+                    select(Prediction.created_at)
+                    .order_by(desc(Prediction.created_at))
+                    .limit(1)
+                )
+                last_pred = result.scalar_one_or_none()
+                
+                if last_pred:
+                    age_minutes = (datetime.now(timezone.utc) - last_pred.replace(tzinfo=timezone.utc)).total_seconds() / 60
+                    checks["recent_predictions"] = {
+                        "status": "healthy" if age_minutes < 10 else "stale",
+                        "last_prediction": last_pred.isoformat(),
+                        "age_minutes": round(age_minutes, 1)
+                    }
+                    if age_minutes >= 10:
+                        all_healthy = False
+                else:
+                    checks["recent_predictions"] = {"status": "no_predictions", "message": "No predictions found"}
+        else:
+            checks["recent_predictions"] = {"status": "unavailable", "message": "Database not configured"}
+    except Exception as e:
+        checks["recent_predictions"] = {"status": "unhealthy", "error": str(e)}
+        all_healthy = False
+    
+    # Check paper trading mode
+    try:
+        settings = get_settings()
+        paper_trading = getattr(settings, 'paper_trading_mode', True)
+        checks["paper_trading"] = {
+            "status": "healthy",
+            "paper_trading_enabled": paper_trading,
+            "warning": None if paper_trading else "LIVE TRADING IS ENABLED"
+        }
+    except Exception as e:
+        checks["paper_trading"] = {"status": "unhealthy", "error": str(e)}
+    
+    # Check model files
+    try:
+        import os
+        model_path = os.path.join(os.path.dirname(__file__), "../../../data/models/xgboost_model.pkl")
+        model_exists = os.path.exists(model_path)
+        checks["model_loaded"] = {
+            "status": "healthy" if model_exists else "unavailable",
+            "model_path": model_path,
+            "exists": model_exists
+        }
+    except Exception as e:
+        checks["model_loaded"] = {"status": "unhealthy", "error": str(e)}
+    
+    results = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "status": "healthy" if all_healthy else "degraded",
+        "checks": checks
+    }
+    
+    http_status = status.HTTP_200_OK if all_healthy else status.HTTP_503_SERVICE_UNAVAILABLE
+    
+    return JSONResponse(content=results, status_code=http_status)
 
 
 @app.get("/markets", response_model=List[MarketResponse])

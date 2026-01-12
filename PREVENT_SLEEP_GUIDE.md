@@ -267,3 +267,4 @@ pkill caffeinate
 Your Mac mini will now stay awake for training! 🚀
 
 
+

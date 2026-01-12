@@ -40,3 +40,4 @@ ANALYZE portfolio_snapshots;
 ANALYZE predictions;
 ANALYZE markets;
 
+

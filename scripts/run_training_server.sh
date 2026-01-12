@@ -62,3 +62,4 @@ echo "📈 Check status:"
 echo "   ps -p $TRAINING_PID"
 
 
+

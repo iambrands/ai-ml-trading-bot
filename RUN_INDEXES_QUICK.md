@@ -66,3 +66,4 @@ You should see ~10 indexes.
 
 *Quick Reference: scripts/add_performance_indexes.sql*
 
+

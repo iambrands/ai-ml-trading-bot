@@ -178,3 +178,4 @@ Check:
 *Method: API endpoints + Database query*  
 *Status: Signals/trades exist but no new ones*
 
+

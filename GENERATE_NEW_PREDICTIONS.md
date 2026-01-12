@@ -287,3 +287,4 @@ curl -X POST "https://web-production-c490dd.up.railway.app/predictions/generate?
 *Railway URL: `https://web-production-c490dd.up.railway.app/`*
 
 
+

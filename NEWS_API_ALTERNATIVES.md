@@ -117,3 +117,4 @@ For a trading bot, **RSS feeds are the best option** because:
 I'll create an RSS-based news source that you can use instead of NewsAPI.
 
 
+

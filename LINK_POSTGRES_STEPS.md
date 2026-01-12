@@ -151,3 +151,4 @@ SELECT * FROM markets LIMIT 5;
 - Or use Railway CLI: `railway connect postgres`
 
 
+

@@ -19,9 +19,16 @@ try:
         settings.database_url,
         echo=False,  # Set to True for SQL query logging
         pool_pre_ping=True,  # Verify connections before using
-        pool_size=5,  # Reduced for Railway free tier limits
-        max_overflow=5,  # Reduced to prevent connection exhaustion
-        pool_timeout=30,  # Timeout after 30s if pool is exhausted
+        pool_size=10,  # Base pool size
+        max_overflow=20,  # Allow 20 additional connections during spikes
+        pool_recycle=3600,  # Recycle connections every hour (Railway limit)
+        pool_timeout=30,  # Max wait time for connection
+        connect_args={
+            "command_timeout": 30,  # 30 second query timeout
+            "server_settings": {
+                "statement_timeout": "30000",  # 30 second statement timeout
+            }
+        },
     )
     
     # Create async session factory
@@ -81,4 +88,23 @@ async def close_db():
     """Close database connections."""
     if engine:
         await engine.dispose()
+
+
+def get_pool_stats():
+    """Get connection pool statistics for monitoring."""
+    if not engine:
+        return None
+    
+    try:
+        pool = engine.pool
+        return {
+            "size": pool.size(),
+            "checked_out": pool.checkedout(),
+            "overflow": pool.overflow(),
+            "checked_in": pool.checkedin(),
+            "utilization": pool.checkedout() / pool.size() if pool.size() > 0 else 0,
+        }
+    except Exception as e:
+        logger.warning("Failed to get pool stats", error=str(e))
+        return None
 

@@ -57,3 +57,4 @@ CREATE TABLE IF NOT EXISTS analytics_cache (
 CREATE INDEX IF NOT EXISTS idx_analytics_cache_key ON analytics_cache(cache_key);
 CREATE INDEX IF NOT EXISTS idx_analytics_cache_expires ON analytics_cache(expires_at);
 
+

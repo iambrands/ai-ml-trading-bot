@@ -126,3 +126,4 @@ After fixing variables and redeploying, check Railway logs:
 ❌ Should NOT see: `ValidationError` or `int_parsing` errors
 
 
+

@@ -41,3 +41,4 @@ echo ""
 echo "3. Test performance after running ANALYZE"
 echo ""
 
+

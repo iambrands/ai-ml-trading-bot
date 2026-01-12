@@ -224,3 +224,4 @@ class PaperTradingService:
             logger.error("Failed to update paper portfolio", error=str(e))
             await self.db.rollback()
 
+

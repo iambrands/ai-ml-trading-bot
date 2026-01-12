@@ -74,3 +74,4 @@ if market.volume_24h > 0 and market.volume_24h < self.min_liquidity:
 *Created: 2026-01-11*  
 *Status: Signal generation fix deployed*
 
+

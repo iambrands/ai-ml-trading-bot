@@ -75,3 +75,4 @@ All tabs (Markets, Predictions, Signals, Trades) now support **demo data** that 
 The UI is now fully functional for exploring both demo and real data! 🎉
 
 
+

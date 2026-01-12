@@ -111,3 +111,4 @@ The UI will automatically load! No need to go to `/docs` - the root URL now serv
 Enjoy your beautiful trading bot dashboard! 🚀
 
 
+

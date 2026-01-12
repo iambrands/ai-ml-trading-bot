@@ -120,3 +120,4 @@ echo "2. Use Railway TCP Proxy (from Railway dashboard)"
 echo "   or use: psql \"\$DATABASE_URL\" -f $SQL_FILE"
 echo ""
 
+

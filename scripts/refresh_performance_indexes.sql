@@ -32,3 +32,4 @@ WHERE schemaname = 'public'
 GROUP BY tablename
 ORDER BY tablename;
 
+

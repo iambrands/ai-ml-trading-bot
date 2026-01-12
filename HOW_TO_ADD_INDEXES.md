@@ -224,3 +224,4 @@ The indexes are safe to add - they only improve query performance and don't modi
 *Created: 2026-01-11*
 *Script: scripts/add_performance_indexes.sql*
 
+

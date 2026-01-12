@@ -108,3 +108,4 @@ From terminal output:
 *Script: scripts/add_performance_indexes.sql*  
 *Status: SUCCESS ✅*
 
+

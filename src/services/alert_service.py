@@ -204,3 +204,4 @@ class AlertService:
             logger.error("Failed to record alert history", error=str(e))
             await self.db.rollback()
 
+

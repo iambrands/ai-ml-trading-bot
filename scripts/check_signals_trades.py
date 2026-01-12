@@ -177,3 +177,4 @@ async def check_signals_and_trades():
 if __name__ == "__main__":
     asyncio.run(check_signals_and_trades())
 
+

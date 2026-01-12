@@ -199,3 +199,4 @@ psql $DATABASE_URL -f src/database/migrations/add_alerts_and_paper_trading.sql
 
 *All endpoints are documented in the FastAPI docs at `/docs`*
 
+

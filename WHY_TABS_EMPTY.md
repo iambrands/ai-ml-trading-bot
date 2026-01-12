@@ -225,3 +225,4 @@ Markets (Live) → Predictions (Generate) → Signals (Auto) → Trades (With Fl
 *See `HOW_TO_POPULATE_TABS.md` for detailed step-by-step instructions*
 
 
+
