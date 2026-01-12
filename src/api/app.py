@@ -98,6 +98,25 @@ if predictions_endpoints:
 if ai_analysis_endpoints:
     app.include_router(ai_analysis_endpoints.router)
 
+# Include new feature routers
+try:
+    from .endpoints import alerts as alerts_endpoints
+    app.include_router(alerts_endpoints.router)
+except ImportError:
+    logger.warning("Alerts endpoints not available")
+
+try:
+    from .endpoints import paper_trading as paper_trading_endpoints
+    app.include_router(paper_trading_endpoints.router)
+except ImportError:
+    logger.warning("Paper trading endpoints not available")
+
+try:
+    from .endpoints import analytics as analytics_endpoints
+    app.include_router(analytics_endpoints.router)
+except ImportError:
+    logger.warning("Analytics endpoints not available")
+
 
 # Pydantic models for API responses
 class MarketResponse(BaseModel):

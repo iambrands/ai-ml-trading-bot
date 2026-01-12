@@ -165,6 +165,15 @@ async def save_prediction_to_db(market, prediction: EnsemblePrediction, model_pr
                         strength=signal.signal_strength,
                     )
                     
+                    # Send alerts for new signal
+                    try:
+                        from ...services.alert_service import AlertService
+                        alert_service = AlertService(db)
+                        await alert_service.check_and_send_alerts(db_signal)
+                    except Exception as e:
+                        logger.warning("Failed to send alerts", signal_id=db_signal.id, error=str(e))
+                        # Don't fail if alerts fail
+                    
                     # Auto-create trade if enabled
                     if auto_create_trades:
                         try:
@@ -177,6 +186,7 @@ async def save_prediction_to_db(market, prediction: EnsemblePrediction, model_pr
                                 exit_price=None,
                                 pnl=None,
                                 status="OPEN",
+                                paper_trading=False,  # Real trade by default
                                 entry_time=datetime.now(timezone.utc).replace(tzinfo=None),
                                 exit_time=None,
                             )

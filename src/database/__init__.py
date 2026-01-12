@@ -2,6 +2,9 @@
 
 from .connection import AsyncSessionLocal, Base, engine, get_db, init_db
 from .models import (
+    Alert,
+    AlertHistory,
+    AnalyticsCache,
     FeatureSnapshot,
     Market,
     ModelPerformance,
@@ -24,4 +27,7 @@ __all__ = [
     "Trade",
     "ModelPerformance",
     "PortfolioSnapshot",
+    "Alert",
+    "AlertHistory",
+    "AnalyticsCache",
 ]

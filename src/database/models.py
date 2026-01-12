@@ -104,6 +104,7 @@ class Trade(Base):
     exit_price = Column(Numeric(10, 6), nullable=True)
     pnl = Column(Numeric(20, 8), nullable=True)
     status = Column(String(20), nullable=False, index=True)  # OPEN/CLOSED/CANCELLED
+    paper_trading = Column(Boolean, default=False, nullable=False, index=True)
     entry_time = Column(DateTime, nullable=False, index=True)
     exit_time = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
@@ -145,5 +146,58 @@ class PortfolioSnapshot(Base):
     daily_pnl = Column(Numeric(20, 8), nullable=True)
     unrealized_pnl = Column(Numeric(20, 8), nullable=True)
     realized_pnl = Column(Numeric(20, 8), nullable=True)
+    paper_trading = Column(Boolean, default=False, nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+
+class Alert(Base):
+    """Alert configuration."""
+
+    __tablename__ = "alerts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String(100), default="default", nullable=False, index=True)
+    alert_type = Column(String(50), nullable=False, index=True)  # SIGNAL, PORTFOLIO, PREDICTION, CUSTOM
+    alert_rule = Column(JSON, nullable=False)  # Flexible rule configuration
+    notification_method = Column(String(50), nullable=False)  # EMAIL, WEBHOOK, TELEGRAM, SMS
+    notification_target = Column(Text, nullable=False)  # Email, webhook URL, etc.
+    enabled = Column(Boolean, default=True, nullable=False, index=True)
+    last_triggered = Column(DateTime, nullable=True)
+    trigger_count = Column(Integer, default=0, nullable=False)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    history = relationship("AlertHistory", back_populates="alert", cascade="all, delete-orphan")
+
+
+class AlertHistory(Base):
+    """Alert history for tracking."""
+
+    __tablename__ = "alert_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    alert_id = Column(Integer, ForeignKey("alerts.id", ondelete="CASCADE"), nullable=False, index=True)
+    signal_id = Column(Integer, ForeignKey("signals.id", ondelete="SET NULL"), nullable=True)
+    market_id = Column(String(66), nullable=True)
+    message = Column(Text, nullable=False)
+    sent_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+    success = Column(Boolean, default=True, nullable=False)
+    error_message = Column(Text, nullable=True)
+
+    # Relationships
+    alert = relationship("Alert", back_populates="history")
+    signal = relationship("Signal")
+
+
+class AnalyticsCache(Base):
+    """Analytics cache for performance."""
+
+    __tablename__ = "analytics_cache"
+
+    id = Column(Integer, primary_key=True, index=True)
+    cache_key = Column(String(255), unique=True, nullable=False, index=True)
+    cache_data = Column(JSON, nullable=False)
+    expires_at = Column(DateTime, nullable=False, index=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
