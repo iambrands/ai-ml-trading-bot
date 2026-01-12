@@ -1,7 +1,7 @@
 signals:
   min_edge: 0.05          # 5% minimum edge
-  min_confidence: 0.60    # 60% model confidence
-  min_liquidity: 1000     # $1000 minimum volume
+  min_confidence: 0.55    # 55% model confidence (lowered from 60% to allow more signals)
+  min_liquidity: 500      # $500 minimum volume (lowered from $1000 to allow more markets)
   max_signals_per_day: 10
   cooldown_minutes: 60    # Cooldown between signals for same market
 

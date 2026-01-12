@@ -78,8 +78,8 @@ class Settings(BaseSettings):
     # Trading Parameters
     initial_capital: float = Field(default=10000.0)
     min_edge: float = Field(default=0.05)
-    min_confidence: float = Field(default=0.60)
-    min_liquidity: float = Field(default=1000.0)
+    min_confidence: float = Field(default=0.55)  # Lowered from 0.60 to 0.55 to allow more signals
+    min_liquidity: float = Field(default=500.0)  # Lowered from 1000.0 to 500.0 to allow more markets
     kelly_fraction: float = Field(default=0.25)
     max_position_pct: float = Field(default=0.05)
     max_total_exposure: float = Field(default=0.50)
