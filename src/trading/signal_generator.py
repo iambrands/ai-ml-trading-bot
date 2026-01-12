@@ -95,7 +95,9 @@ class SignalGenerator:
             )
             return None
 
-        if market.volume_24h < self.min_liquidity:
+        # Skip liquidity check if volume is 0 (volume data unavailable from API)
+        # Only check liquidity if we have actual volume data
+        if market.volume_24h > 0 and market.volume_24h < self.min_liquidity:
             logger.info(
                 "Signal skipped - Liquidity too low",
                 market_id=market.id[:20],
@@ -104,6 +106,13 @@ class SignalGenerator:
                 volume_usd=f"${market.volume_24h:.2f}",
             )
             return None
+        
+        # Log if volume is 0 (data unavailable) but we're proceeding anyway
+        if market.volume_24h == 0:
+            logger.debug(
+                "Volume data unavailable (0.0), skipping liquidity check",
+                market_id=market.id[:20],
+            )
 
         # Determine side
         side = "YES" if edge > 0 else "NO"
