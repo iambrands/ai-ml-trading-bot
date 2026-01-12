@@ -330,7 +330,7 @@ async def get_markets(
 
 @app.get("/markets/{market_id}", response_model=MarketResponse)
 async def get_market(market_id: str, db: AsyncSession = Depends(get_db)):
-    """Get market by ID."""
+    """Get market by ID with prices from latest prediction or live API."""
     try:
         result = await db.execute(select(Market).where(Market.market_id == market_id))
         market = result.scalar_one_or_none()
@@ -338,7 +338,51 @@ async def get_market(market_id: str, db: AsyncSession = Depends(get_db)):
         if not market:
             raise HTTPException(status_code=404, detail="Market not found")
         
-        return MarketResponse.model_validate(market)
+        # Get latest prediction for prices
+        pred_query = select(Prediction).where(
+            Prediction.market_id == market.market_id
+        ).order_by(desc(Prediction.prediction_time)).limit(1)
+        
+        pred_result = await db.execute(pred_query)
+        latest_pred = pred_result.scalar_one_or_none()
+        
+        # Try to get live prices if no prediction
+        yes_price = None
+        no_price = None
+        category = market.category
+        
+        if latest_pred:
+            yes_price = float(latest_pred.market_price)
+            no_price = 1.0 - yes_price
+        else:
+            # Fallback to live market data
+            try:
+                async with PolymarketDataSource() as polymarket:
+                    live_market = await polymarket.fetch_market(market.market_id)
+                    if live_market and live_market.yes_price > 0:
+                        yes_price = float(live_market.yes_price)
+                        no_price = float(live_market.no_price)
+                        if not category:
+                            category = live_market.category
+            except Exception as e:
+                logger.debug("Failed to fetch live market for price", market_id=market.market_id, error=str(e))
+        
+        # Build response with prices
+        market_dict = {
+            "id": market.id,
+            "market_id": market.market_id,
+            "condition_id": market.condition_id,
+            "question": market.question,
+            "category": category,
+            "resolution_date": market.resolution_date,
+            "outcome": market.outcome,
+            "yes_price": yes_price,
+            "no_price": no_price,
+            "created_at": market.created_at,
+            "resolved_at": market.resolved_at,
+        }
+        
+        return MarketResponse(**market_dict)
     except HTTPException:
         raise
     except Exception as e:
