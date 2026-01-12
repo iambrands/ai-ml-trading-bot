@@ -892,20 +892,28 @@ If you want to monitor actively:
 
 ---
 
-## What Happens Behind the Scenes (Automatic)
+## What Happens Behind the Scenes (Fully Automated) ✅
 
-**Every Hour** (you don't need to do anything):
+**Every 5 Minutes** (fully automated via cron job - you don't need to do anything):
 
 1. ✅ System fetches new markets from Polymarket
 2. ✅ AI models analyze each market
-3. ✅ System generates predictions
+3. ✅ System generates predictions automatically
 4. ✅ System calculates edge (opportunity)
-5. ✅ System creates signals for opportunities
-6. ✅ System executes trades (if auto-trading ON)
-7. ✅ System updates portfolio
-8. ✅ System tracks performance
+5. ✅ System creates signals for opportunities automatically
+6. ✅ System creates trades automatically (paper trading mode)
+7. ✅ System updates portfolio automatically
+8. ✅ System tracks performance automatically
+9. ✅ System sends alerts if configured
 
-**You just check the results!**
+**Current Status**: ✅ **FULLY AUTOMATED** - Running on Railway with cron job every 5 minutes
+
+**Cron Job URL**: 
+```
+https://web-production-c490dd.up.railway.app/predictions/generate?limit=20&auto_signals=true&auto_trades=true
+```
+
+**You just check the results!** The system runs completely automatically - perfect for "set it and forget it" operation.
 
 ---
 
