@@ -172,3 +172,4 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ⚠️ **This software is for educational purposes only. Trading involves substantial risk of loss. Past performance does not guarantee future results. Use at your own risk.**
 
+# Deployment trigger - Sun Jan 11 21:31:32 CST 2026
