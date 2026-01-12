@@ -314,6 +314,8 @@
             <button class="tab" onclick="showTab('signals')">📡 Signals</button>
             <button class="tab" onclick="showTab('trades')">💼 Trades</button>
             <button class="tab" onclick="showTab('portfolio')">💰 Portfolio</button>
+            <button class="tab" onclick="showTab('analytics')">📈 Analytics</button>
+            <button class="tab" onclick="showTab('alerts')">🔔 Alerts</button>
             <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
             <button class="tab" onclick="showTab('help')">❓ Help & FAQ</button>
         </div>
@@ -433,6 +435,36 @@
                     <span id="portfolio-last-updated" style="color: #666; margin-left: 15px; font-size: 0.9em;"></span>
                 </div>
                 <div id="portfolio-content"></div>
+            </div>
+
+            <!-- Analytics Tab -->
+            <div id="analytics" class="tab-content">
+                <h2>📈 Advanced Analytics Dashboard</h2>
+                <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                    <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show the latest analytics. Analytics are calculated from your predictions, signals, and trades.
+                </div>
+                <div class="controls">
+                    <label style="display: flex; align-items: center; gap: 10px; color: #666;">
+                        <input type="checkbox" id="analytics-paper-trading" checked> Include Paper Trading
+                    </label>
+                    <button class="btn btn-secondary" onclick="loadAnalytics(true)">🔄 Refresh Now</button>
+                    <span id="analytics-last-updated" style="color: #666; margin-left: 15px; font-size: 0.9em;"></span>
+                </div>
+                <div id="analytics-content"></div>
+            </div>
+
+            <!-- Alerts Tab -->
+            <div id="alerts" class="tab-content">
+                <h2>🔔 Real-Time Alerts & Notifications</h2>
+                <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                    <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds. Alerts are sent automatically when signals match your configured rules.
+                </div>
+                <div class="controls">
+                    <button class="btn" onclick="showCreateAlertForm()">➕ Create New Alert</button>
+                    <button class="btn btn-secondary" onclick="loadAlerts(true)">🔄 Refresh Now</button>
+                    <span id="alerts-last-updated" style="color: #666; margin-left: 15px; font-size: 0.9em;"></span>
+                </div>
+                <div id="alerts-content"></div>
             </div>
 
             <!-- Settings Tab -->
@@ -1043,6 +1075,12 @@
                 case 'portfolio':
                     loadPortfolio();
                     break;
+                case 'analytics':
+                    loadAnalytics();
+                    break;
+                case 'alerts':
+                    loadAlerts();
+                    break;
             }
         }
 
@@ -1486,6 +1524,196 @@
                 </div>
             `;
             container.innerHTML = html;
+        }
+
+        // Load Analytics Dashboard
+        async function loadAnalytics(refresh = false) {
+            const container = document.getElementById('analytics-content');
+            if (!refresh) showLoading('analytics-content');
+
+            try {
+                const paperTrading = document.getElementById('analytics-paper-trading')?.checked || false;
+                const response = await fetch(`${API_BASE}/analytics/dashboard-summary?paper_trading=${paperTrading}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const analytics = await response.json();
+                displayAnalytics(analytics, container);
+                updateLastUpdated('analytics');
+            } catch (error) {
+                showError('analytics-content', error.message);
+            }
+        }
+
+        // Display Analytics
+        function displayAnalytics(analytics, container) {
+            const html = `
+                <div class="stats-grid">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <h3>Total Predictions</h3>
+                        <div class="value" style="font-size: 2em;">${analytics.total_predictions || 0}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Signals</h3>
+                        <div class="value">${analytics.total_signals || 0}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Trades</h3>
+                        <div class="value">${analytics.total_trades || 0}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Win Rate</h3>
+                        <div class="value">${analytics.win_rate ? (analytics.win_rate * 100).toFixed(1) + '%' : 'N/A'}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average Edge</h3>
+                        <div class="value">${analytics.average_edge ? (analytics.average_edge * 100).toFixed(2) + '%' : 'N/A'}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total P&L</h3>
+                        <div class="value ${analytics.total_pnl && analytics.total_pnl > 0 ? 'text-success' : analytics.total_pnl && analytics.total_pnl < 0 ? 'text-danger' : ''}">
+                            ${analytics.total_pnl ? '$' + analytics.total_pnl.toFixed(2) : '$0.00'}
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Sharpe Ratio</h3>
+                        <div class="value">${analytics.sharpe_ratio ? analytics.sharpe_ratio.toFixed(2) : 'N/A'}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Max Drawdown</h3>
+                        <div class="value ${analytics.max_drawdown && analytics.max_drawdown < 0 ? 'text-danger' : ''}">
+                            ${analytics.max_drawdown ? (analytics.max_drawdown * 100).toFixed(2) + '%' : 'N/A'}
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                    <h3 style="margin-top: 0;">Performance Metrics</h3>
+                    <p><strong>Prediction Accuracy:</strong> ${analytics.prediction_accuracy ? (analytics.prediction_accuracy * 100).toFixed(1) + '%' : 'N/A'}</p>
+                    <p><strong>Signal-to-Trade Conversion:</strong> ${analytics.signal_to_trade_conversion ? (analytics.signal_to_trade_conversion * 100).toFixed(1) + '%' : 'N/A'}</p>
+                    <p><strong>Average Confidence:</strong> ${analytics.average_confidence ? (analytics.average_confidence * 100).toFixed(1) + '%' : 'N/A'}</p>
+                    <p style="margin-bottom: 0; color: #666;">
+                        <strong>Data Source:</strong> ${document.getElementById('analytics-paper-trading')?.checked ? 'Paper Trading' : 'Real Trading'}
+                    </p>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        // Load Alerts
+        async function loadAlerts(refresh = false) {
+            const container = document.getElementById('alerts-content');
+            if (!refresh) showLoading('alerts-content');
+
+            try {
+                const response = await fetch(`${API_BASE}/alerts`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                
+                const alerts = await response.json();
+                displayAlerts(alerts, container);
+                updateLastUpdated('alerts');
+            } catch (error) {
+                showError('alerts-content', error.message);
+            }
+        }
+
+        // Display Alerts
+        function displayAlerts(alerts, container) {
+            if (!alerts || alerts.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No alerts configured yet. Click "Create New Alert" to set up notifications for high-confidence signals.</p></div>';
+                return;
+            }
+
+            let html = '<div class="table-container"><table><thead><tr><th>Type</th><th>Method</th><th>Target</th><th>Status</th><th>Triggered</th><th>Actions</th></tr></thead><tbody>';
+            
+            alerts.forEach(alert => {
+                const statusBadge = alert.enabled ? 'badge-success' : 'badge-secondary';
+                html += `
+                    <tr>
+                        <td><span class="badge">${alert.alert_type}</span></td>
+                        <td>${alert.notification_method}</td>
+                        <td>${alert.notification_target.substring(0, 30)}${alert.notification_target.length > 30 ? '...' : ''}</td>
+                        <td><span class="badge ${statusBadge}">${alert.enabled ? 'Enabled' : 'Disabled'}</span></td>
+                        <td>${alert.trigger_count || 0} times</td>
+                        <td>
+                            <button class="btn" style="padding: 6px 12px; font-size: 0.9em;" onclick="toggleAlert(${alert.id}, ${!alert.enabled})">
+                                ${alert.enabled ? 'Disable' : 'Enable'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        // Show Create Alert Form
+        function showCreateAlertForm() {
+            const container = document.getElementById('alerts-content');
+            container.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3>Create New Alert</h3>
+                    <form onsubmit="createAlert(event)">
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Alert Type</label>
+                            <select id="alert-type" required style="width: 100%; padding: 12px;">
+                                <option value="SIGNAL">Signal Alert</option>
+                                <option value="PORTFOLIO">Portfolio Alert</option>
+                                <option value="PREDICTION">Prediction Alert</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Notification Method</label>
+                            <select id="alert-method" required style="width: 100%; padding: 12px;">
+                                <option value="WEBHOOK">Webhook</option>
+                                <option value="EMAIL">Email</option>
+                                <option value="TELEGRAM">Telegram</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">Target (URL/Email/Telegram ID)</label>
+                            <input type="text" id="alert-target" required style="width: 100%; padding: 12px;" placeholder="https://your-webhook-url.com or email@example.com">
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" class="btn">Create Alert</button>
+                            <button type="button" class="btn btn-secondary" onclick="loadAlerts()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        // Create Alert
+        async function createAlert(event) {
+            event.preventDefault();
+            try {
+                const response = await fetch(`${API_BASE}/alerts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        alert_type: document.getElementById('alert-type').value,
+                        notification_method: document.getElementById('alert-method').value,
+                        notification_target: document.getElementById('alert-target').value,
+                        alert_rule: { min_edge: 0.1, min_confidence: 0.6 },
+                        enabled: true
+                    })
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                loadAlerts();
+            } catch (error) {
+                alert('Failed to create alert: ' + error.message);
+            }
+        }
+
+        // Toggle Alert
+        async function toggleAlert(alertId, enabled) {
+            try {
+                const endpoint = enabled ? 'enable' : 'disable';
+                const response = await fetch(`${API_BASE}/alerts/${alertId}/${endpoint}`, { method: 'PUT' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                loadAlerts();
+            } catch (error) {
+                alert('Failed to toggle alert: ' + error.message);
+            }
         }
 
         // Smooth scroll for anchor links in Help & FAQ
