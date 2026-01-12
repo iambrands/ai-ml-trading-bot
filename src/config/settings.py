@@ -83,6 +83,7 @@ class Settings(BaseSettings):
     kelly_fraction: float = Field(default=0.25)
     max_position_pct: float = Field(default=0.05)
     max_total_exposure: float = Field(default=0.50)
+    paper_trading_mode: bool = Field(default=True)  # Default to paper trading for demo/sharing
 
     # Risk Management
     max_daily_loss: float = Field(default=0.05)

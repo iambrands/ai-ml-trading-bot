@@ -69,6 +69,11 @@ async def create_trades_from_signals():
                     # Use suggested_size or default
                     size = signal.suggested_size if signal.suggested_size else Decimal("100.0")
                     
+                    # Check if paper trading mode is enabled
+                    from src.config.settings import get_settings
+                    settings = get_settings()
+                    paper_trading = settings.paper_trading_mode
+                    
                     # Create trade
                     trade = Trade(
                         signal_id=signal.id,
@@ -79,7 +84,7 @@ async def create_trades_from_signals():
                         exit_price=None,
                         pnl=None,
                         status="OPEN",
-                        paper_trading=False,  # Real trade
+                        paper_trading=paper_trading,  # Use setting for demo/real trading
                         entry_time=datetime.now(timezone.utc).replace(tzinfo=None),
                         exit_time=None,
                     )

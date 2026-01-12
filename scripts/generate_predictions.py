@@ -177,6 +177,11 @@ async def save_prediction_to_db(market, prediction: EnsemblePrediction, model_pr
                     # Auto-create trade if enabled
                     if auto_create_trades:
                         try:
+                            # Check if paper trading mode is enabled
+                            from ...config.settings import get_settings
+                            settings = get_settings()
+                            paper_trading = settings.paper_trading_mode
+                            
                             db_trade = Trade(
                                 signal_id=db_signal.id,
                                 market_id=signal.market_id,
@@ -186,7 +191,7 @@ async def save_prediction_to_db(market, prediction: EnsemblePrediction, model_pr
                                 exit_price=None,
                                 pnl=None,
                                 status="OPEN",
-                                paper_trading=False,  # Real trade by default
+                                paper_trading=paper_trading,  # Use setting for demo/real trading
                                 entry_time=datetime.now(timezone.utc).replace(tzinfo=None),
                                 exit_time=None,
                             )

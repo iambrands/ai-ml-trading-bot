@@ -81,6 +81,11 @@ class AutoProcessor:
                     # Auto-create trade if enabled
                     if self.auto_trades:
                         try:
+                            # Check if paper trading mode is enabled
+                            from ..config.settings import get_settings
+                            settings = get_settings()
+                            paper_trading = settings.paper_trading_mode
+                            
                             db_trade = Trade(
                                 signal_id=db_signal.id,
                                 market_id=signal.market_id,
@@ -90,6 +95,7 @@ class AutoProcessor:
                                 exit_price=None,
                                 pnl=None,
                                 status="OPEN",
+                                paper_trading=paper_trading,  # Use setting for demo/real trading
                                 entry_time=datetime.now(timezone.utc).replace(tzinfo=None),
                                 exit_time=None,
                             )
