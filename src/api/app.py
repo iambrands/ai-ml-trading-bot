@@ -312,7 +312,7 @@ async def get_markets(
                 "market_id": market.market_id,
                 "condition_id": market.condition_id,
                 "question": market.question,
-                "category": market.category or (live_markets_map.get(market.market_id).category if market.market_id in live_markets_map else None),
+                "category": market.category or (live_markets_map.get(market.market_id).category if market.market_id in live_markets_map and live_markets_map.get(market.market_id) else None),
                 "resolution_date": market.resolution_date,
                 "outcome": market.outcome,
                 "yes_price": yes_price,
