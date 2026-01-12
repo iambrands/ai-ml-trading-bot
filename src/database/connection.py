@@ -19,8 +19,9 @@ try:
         settings.database_url,
         echo=False,  # Set to True for SQL query logging
         pool_pre_ping=True,  # Verify connections before using
-        pool_size=10,
-        max_overflow=20,
+        pool_size=5,  # Reduced for Railway free tier limits
+        max_overflow=5,  # Reduced to prevent connection exhaustion
+        pool_timeout=30,  # Timeout after 30s if pool is exhausted
     )
     
     # Create async session factory
