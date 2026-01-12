@@ -273,6 +273,16 @@ async def get_markets(
         
         # Get latest prediction for each market to get prices
         market_responses = []
+        
+        # Try to fetch live prices for markets without predictions
+        live_markets_map = {}
+        try:
+            async with PolymarketDataSource() as polymarket:
+                live_markets = await polymarket.fetch_active_markets(limit=limit * 2)
+                live_markets_map = {m.id: m for m in live_markets}
+        except Exception as e:
+            logger.debug("Failed to fetch live markets for price fallback", error=str(e))
+        
         for market in markets:
             # Get latest prediction for this market
             pred_query = select(Prediction).where(
@@ -282,17 +292,31 @@ async def get_markets(
             pred_result = await db.execute(pred_query)
             latest_pred = pred_result.scalar_one_or_none()
             
-            # Build response with prices from prediction
+            # Get prices from prediction or live market data
+            yes_price = None
+            no_price = None
+            
+            if latest_pred:
+                yes_price = float(latest_pred.market_price)
+                no_price = 1.0 - yes_price
+            elif market.market_id in live_markets_map:
+                # Fallback to live market data
+                live_market = live_markets_map[market.market_id]
+                if live_market.yes_price > 0:
+                    yes_price = float(live_market.yes_price)
+                    no_price = float(live_market.no_price)
+            
+            # Build response with prices
             market_dict = {
                 "id": market.id,
                 "market_id": market.market_id,
                 "condition_id": market.condition_id,
                 "question": market.question,
-                "category": market.category,
+                "category": market.category or (live_markets_map.get(market.market_id).category if market.market_id in live_markets_map else None),
                 "resolution_date": market.resolution_date,
                 "outcome": market.outcome,
-                "yes_price": float(latest_pred.market_price) if latest_pred else None,
-                "no_price": (1.0 - float(latest_pred.market_price)) if latest_pred else None,
+                "yes_price": yes_price,
+                "no_price": no_price,
                 "created_at": market.created_at,
                 "resolved_at": market.resolved_at,
             }
