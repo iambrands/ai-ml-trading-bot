@@ -1965,6 +1965,20 @@
                     loadPortfolio(true);
                 }
             }, REFRESH_INTERVAL);
+            
+            // Refresh analytics every 30 seconds
+            setInterval(() => {
+                if (document.getElementById('analytics').classList.contains('active')) {
+                    loadAnalytics(true);
+                }
+            }, REFRESH_INTERVAL);
+            
+            // Refresh alerts every 30 seconds
+            setInterval(() => {
+                if (document.getElementById('alerts').classList.contains('active')) {
+                    loadAlerts(true);
+                }
+            }, REFRESH_INTERVAL);
         }
         
         // Initialize
