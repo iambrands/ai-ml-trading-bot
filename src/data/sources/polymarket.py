@@ -81,32 +81,38 @@ class PolymarketDataSource:
         """
         try:
             async with aiohttp.ClientSession() as session:
+                url = f"{self.gamma_api_url}/markets"
+                params = {
+                    "limit": limit,
+                    "active": "true",
+                    "closed": "false",
+                    "order": "volume24hr",
+                    "ascending": "false",
+                }
+                logger.debug("Fetching from Gamma API", url=url, params=params)
                 async with session.get(
-                    f"{self.gamma_api_url}/markets",
-                    params={
-                        "limit": limit,
-                        "active": "true",
-                        "closed": "false",
-                        "order": "volume24hr",
-                        "ascending": "false",
-                    },
+                    url,
+                    params=params,
                     timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         data = await response.json()
                         # Gamma API might return list directly or wrapped
                         if isinstance(data, list):
+                            logger.debug("Gamma API returned list", count=len(data))
                             return data
                         elif isinstance(data, dict) and "data" in data:
+                            logger.debug("Gamma API returned dict with data", count=len(data.get("data", [])))
                             return data["data"]
                         else:
-                            logger.warning("Unexpected Gamma API response format", data_type=type(data))
+                            logger.warning("Unexpected Gamma API response format", data_type=type(data), keys=list(data.keys()) if isinstance(data, dict) else None)
                             return []
                     else:
-                        logger.warning("Gamma API request failed", status=response.status)
+                        error_text = await response.text()
+                        logger.warning("Gamma API request failed", status=response.status, error=error_text[:200])
                         return []
         except Exception as e:
-            logger.warning("Failed to fetch from Gamma API, continuing without volume data", error=str(e))
+            logger.warning("Failed to fetch from Gamma API, continuing without volume data", error=str(e), exc_info=True)
             return []  # ClobClient doesn't need explicit cleanup
 
     @retry(max_attempts=3, delay=1.0)
@@ -171,9 +177,15 @@ class PolymarketDataSource:
             List of active markets
         """
         try:
-            # 1. Fetch markets from Gamma API for volume and other metadata
-            gamma_markets_data = await self._fetch_gamma_markets(limit=limit)
-            gamma_markets_map = {m.get('id'): m for m in gamma_markets_data if m.get('id')}
+            # 1. Try to fetch markets from Gamma API for volume and other metadata
+            gamma_markets_map = {}
+            try:
+                gamma_markets_data = await self._fetch_gamma_markets(limit=limit * 2)  # Fetch more to increase match chances
+                gamma_markets_map = {m.get('id'): m for m in gamma_markets_data if m.get('id')}
+                gamma_markets_map.update({m.get('conditionId'): m for m in gamma_markets_data if m.get('conditionId')})  # Also index by conditionId
+                logger.info("Fetched Gamma API markets", count=len(gamma_markets_data), mapped=len(gamma_markets_map))
+            except Exception as e:
+                logger.warning("Gamma API fetch failed, continuing without volume data", error=str(e))
 
             # 2. Fetch markets from CLOB API for real-time prices and order book
             markets_data = self.client.get_markets()
@@ -186,19 +198,23 @@ class PolymarketDataSource:
                 logger.warning("Unexpected CLOB markets data format", data_type=type(markets_data))
                 return []
 
+            logger.debug("Fetched CLOB markets", count=len(clob_markets_list))
+
             markets = []
             for item in clob_markets_list:
                 market_id = item.get('id') or item.get('conditionId')
+                condition_id = item.get('conditionId') or item.get('id')
                 if not market_id:
                     continue
 
-                # Merge volume data from Gamma API if available
-                gamma_market_item = gamma_markets_map.get(market_id)
+                # Merge volume data from Gamma API if available (try both id and conditionId)
+                gamma_market_item = gamma_markets_map.get(market_id) or gamma_markets_map.get(condition_id)
                 if gamma_market_item:
                     # Merge volume data from Gamma API into the CLOB market item
                     item['volume24hr'] = gamma_market_item.get('volume24hr', 0.0)
                     item['liquidity'] = gamma_market_item.get('liquidity', 0.0)
                     item['volume'] = gamma_market_item.get('volume', 0.0)  # Total volume
+                    logger.debug("Merged volume data from Gamma API", market_id=market_id[:20], volume24hr=item.get('volume24hr', 0.0))
 
                 # Filter for active markets: accepting_orders=True is the best indicator
                 # Also check: active=True, closed=False, not archived
@@ -223,11 +239,12 @@ class PolymarketDataSource:
                 logger.debug("No markets found with strict criteria, trying lenient filter")
                 for item in clob_markets_list:
                     market_id = item.get('id') or item.get('conditionId')
+                    condition_id = item.get('conditionId') or item.get('id')
                     if not market_id:
                         continue
 
                     # Merge volume data from Gamma API if available
-                    gamma_market_item = gamma_markets_map.get(market_id)
+                    gamma_market_item = gamma_markets_map.get(market_id) or gamma_markets_map.get(condition_id)
                     if gamma_market_item:
                         item['volume24hr'] = gamma_market_item.get('volume24hr', 0.0)
                         item['liquidity'] = gamma_market_item.get('liquidity', 0.0)
@@ -241,11 +258,11 @@ class PolymarketDataSource:
                             if len(markets) >= limit:
                                 break
 
-            logger.info("Fetched active markets", count=len(markets), limit=limit)
+            logger.info("Fetched active markets", count=len(markets), limit=limit, gamma_matches=len([m for m in markets if m.volume_24h > 0]))
             return markets
 
         except Exception as e:
-            logger.error("Failed to fetch active markets", error=str(e))
+            logger.error("Failed to fetch active markets", error=str(e), exc_info=True)
             raise
 
     @retry(max_attempts=3, delay=1.0)
