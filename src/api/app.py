@@ -14,7 +14,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..config.settings import get_settings
 from ..data.sources.polymarket import PolymarketDataSource
-from ..database import get_db, init_db, Market, Prediction, Signal, Trade, PortfolioSnapshot
+from ..database import get_db, init_db
+from ..database.models import Market, Prediction, Signal, Trade, PortfolioSnapshot
 from ..utils.logging import configure_logging, get_logger
 
 # Import endpoints (with error handling for optional modules)
@@ -129,6 +130,8 @@ class MarketResponse(BaseModel):
     category: Optional[str]
     resolution_date: Optional[datetime]
     outcome: Optional[str]
+    yes_price: Optional[float] = None  # From latest prediction or live API
+    no_price: Optional[float] = None  # From latest prediction or live API
     created_at: datetime
     resolved_at: Optional[datetime]
 
@@ -254,8 +257,10 @@ async def get_markets(
     outcome: Optional[str] = Query(default=None),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get list of markets."""
+    """Get list of markets with prices from latest predictions."""
     try:
+        from sqlalchemy.orm import joinedload
+        
         query = select(Market)
         
         if outcome:
@@ -266,7 +271,34 @@ async def get_markets(
         result = await db.execute(query)
         markets = result.scalars().all()
         
-        return [MarketResponse.model_validate(m) for m in markets]
+        # Get latest prediction for each market to get prices
+        market_responses = []
+        for market in markets:
+            # Get latest prediction for this market
+            pred_query = select(Prediction).where(
+                Prediction.market_id == market.market_id
+            ).order_by(desc(Prediction.prediction_time)).limit(1)
+            
+            pred_result = await db.execute(pred_query)
+            latest_pred = pred_result.scalar_one_or_none()
+            
+            # Build response with prices from prediction
+            market_dict = {
+                "id": market.id,
+                "market_id": market.market_id,
+                "condition_id": market.condition_id,
+                "question": market.question,
+                "category": market.category,
+                "resolution_date": market.resolution_date,
+                "outcome": market.outcome,
+                "yes_price": float(latest_pred.market_price) if latest_pred else None,
+                "no_price": (1.0 - float(latest_pred.market_price)) if latest_pred else None,
+                "created_at": market.created_at,
+                "resolved_at": market.resolved_at,
+            }
+            market_responses.append(MarketResponse(**market_dict))
+        
+        return market_responses
     except Exception as e:
         logger.warning("Database connection failed, returning empty list", error=str(e))
         return []  # Return empty list if DB not available
@@ -432,7 +464,7 @@ async def get_latest_portfolio_snapshot(db: AsyncSession = Depends(get_db)):
 # Live data endpoints (fetch from APIs, not database)
 @app.get("/live/markets", response_model=List[dict])
 async def get_live_markets(limit: int = Query(default=50, ge=1, le=100)):
-    """Get live markets from Polymarket API."""
+    """Get live markets from Polymarket API with real-time prices."""
     try:
         async with PolymarketDataSource() as polymarket:
             markets = await polymarket.fetch_active_markets(limit=limit)
@@ -442,8 +474,10 @@ async def get_live_markets(limit: int = Query(default=50, ge=1, le=100)):
                     "condition_id": m.condition_id,
                     "question": m.question,
                     "category": m.category,
-                    "yes_price": float(m.yes_price),
-                    "no_price": float(m.no_price),
+                    "yes_price": float(m.yes_price) if m.yes_price > 0 else None,
+                    "no_price": float(m.no_price) if m.no_price > 0 else None,
+                    "volume_24h": float(m.volume_24h) if m.volume_24h > 0 else None,
+                    "liquidity": float(m.liquidity) if m.liquidity > 0 else None,
                     "outcome": m.outcome,
                     "resolution_date": m.resolution_date.isoformat() if m.resolution_date else None,
                     "created_at": datetime.now(timezone.utc).isoformat(),
