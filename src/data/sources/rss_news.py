@@ -52,8 +52,6 @@ class RSSNewsDataSource:
         Returns:
             List of news articles as dictionaries
         """
-        from ...utils.rate_limiter import rate_limited, RateLimitExceeded
-        
         if not self.session:
             self.session = aiohttp.ClientSession()
 
@@ -79,7 +77,14 @@ class RSSNewsDataSource:
 
     async def _fetch_google_news(self, query: str, max_articles: int = 50) -> List[Dict]:
         """Fetch articles from Google News RSS."""
+        from ...utils.rate_limiter import get_rate_limiter, RateLimitExceeded
+        
         try:
+            # Check rate limit (RSS feeds are free, but still track)
+            limiter = get_rate_limiter()
+            if not limiter.check_and_increment('newsapi'):  # Use newsapi limit for RSS
+                logger.warning("RSS rate limit exceeded, skipping", remaining=limiter.get_remaining('newsapi'))
+                return []
             # Google News RSS format
             params = {
                 "q": query,
