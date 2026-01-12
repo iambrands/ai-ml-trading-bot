@@ -55,16 +55,19 @@ This is a **simple, step-by-step guide** for new users who want to understand ho
 7. Track Results (see your wins and losses)
 ```
 
-### What Happens Automatically
+### What Happens Automatically ✅
 
-Once set up, the system runs by itself:
+Once set up, the system runs by itself (FULLY AUTOMATED):
 
-1. **Every 5 minutes**: Checks for new markets and creates predictions
-2. **When it finds opportunities**: Creates trading signals
-3. **If auto-trading is on**: Places trades automatically
-4. **Always**: Updates your portfolio and tracks performance
+1. **Every 5 minutes**: ✅ Checks for new markets and creates predictions (via cron job)
+2. **When it finds opportunities**: ✅ Creates trading signals automatically
+3. **If auto-trading is on**: ✅ Creates trades automatically (paper trading mode by default)
+4. **Always**: ✅ Updates your portfolio and tracks performance
+5. **If alerts configured**: ✅ Sends notifications when signals match rules
 
 **You don't need to do anything daily** - it runs itself!
+
+**Current Status**: System is fully automated on Railway. Predictions, signals, and trades are created automatically every 5 minutes.
 
 ---
 
@@ -72,14 +75,19 @@ Once set up, the system runs by itself:
 
 ### Step 1: Open the Dashboard
 
-1. Start the API server (if running locally):
+**Production (Railway)**:
+1. Open your web browser and go to:
+   - **Live Dashboard**: `https://web-production-c490dd.up.railway.app/`
+   - No setup needed - fully deployed and running!
+
+**Local Development**:
+1. Start the API server:
    ```bash
-   uvicorn src.api.app:app --host 0.0.0.0 --port 8002
+   uvicorn src.api.app:app --host 0.0.0.0 --port 8001
    ```
 
 2. Open your web browser and go to:
-   - Local: `http://localhost:8002/dashboard`
-   - Railway (production): Your Railway URL + `/dashboard`
+   - Local: `http://localhost:8001/`
 
 3. You'll see the main dashboard with tabs at the top
 
@@ -112,12 +120,20 @@ Once set up, the system runs by itself:
 
 **How to populate it**:
 
-#### Option 1: Use the API (Easiest)
+#### Option 1: Production (Automatic) ✅
 
-1. Make sure your API server is running (port 8002)
+**On Railway**: Predictions are generated automatically every 5 minutes via cron job. No action needed!
+
+#### Option 2: Use the API (Manual Trigger)
+
+1. Make sure your API server is running (port 8001)
 2. Run this command:
    ```bash
-   curl -X POST http://localhost:8002/predictions/generate
+   # Production
+   curl -X POST https://web-production-c490dd.up.railway.app/predictions/generate?limit=20&auto_signals=true&auto_trades=true
+   
+   # Local
+   curl -X POST http://localhost:8001/predictions/generate?limit=20&auto_signals=true&auto_trades=true
    ```
 3. Wait 1-2 minutes for predictions to generate
 4. Refresh the Predictions tab (or wait for auto-refresh after 30 seconds)
@@ -194,18 +210,21 @@ python scripts/generate_predictions.py --limit 20
 
 **How to populate it**:
 
-Trades are created automatically from signals, but you must enable auto-trading:
+**Production (Railway)**: ✅ Trades are created automatically! The cron job includes `auto_trades=true`, so trades are generated every 5 minutes (in paper trading mode).
 
+**Local Development**:
 ```bash
 # Generate predictions AND create trades automatically
-curl -X POST "http://localhost:8002/predictions/generate?auto_trades=true"
+curl -X POST "http://localhost:8001/predictions/generate?limit=20&auto_signals=true&auto_trades=true"
 ```
 
 Or:
 
 ```bash
-python scripts/generate_predictions.py --auto-trades
+python scripts/generate_predictions.py --limit 20 --auto-signals --auto-trades
 ```
+
+**Note**: All trades are created in **paper trading mode** by default (safe for demo, no real money).
 
 **What you'll see after trades are created**:
 - All trades that have been executed
@@ -263,10 +282,12 @@ python scripts/generate_predictions.py --auto-trades
 Click on the **Settings** tab:
 
 #### A. Trading Mode
-- **Test Mode**: Practice with simulated money (default - recommended to start)
-- **Live Mode**: Trade with real money (only when ready)
+- **Paper Trading Mode**: ✅ Default - Practice with simulated money (recommended to start)
+- **Real Trading Mode**: Trade with real money (only when ready, requires API keys)
 
-**Start with Test Mode** until you understand how it works!
+**Current Status**: System is in **Paper Trading Mode** by default - safe for demo and sharing!
+
+**Note**: Even with auto-trading enabled, all trades are paper trades (simulated) unless you explicitly enable real trading mode and configure Polymarket API keys.
 
 #### B. Connect Wallet (for Live Mode only)
 - Click "Connect Wallet" button

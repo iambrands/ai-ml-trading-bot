@@ -732,9 +732,54 @@ CREATE TABLE portfolio_snapshots (
     daily_pnl FLOAT,
     unrealized_pnl FLOAT,
     realized_pnl FLOAT,
+    paper_trading BOOLEAN DEFAULT FALSE,  -- Paper vs real trading
     created_at TIMESTAMP DEFAULT NOW()
 );
 ```
+
+#### 6. `alerts` (New)
+```sql
+CREATE TABLE alerts (
+    id SERIAL PRIMARY KEY,
+    user_id VARCHAR(100) DEFAULT 'default',
+    alert_type VARCHAR(50) NOT NULL,  -- SIGNAL, PORTFOLIO, PREDICTION, CUSTOM
+    alert_rule JSONB NOT NULL,
+    notification_method VARCHAR(50) NOT NULL,  -- EMAIL, WEBHOOK, TELEGRAM, SMS
+    notification_target TEXT NOT NULL,
+    enabled BOOLEAN DEFAULT TRUE,
+    last_triggered TIMESTAMP,
+    trigger_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### 7. `alert_history` (New)
+```sql
+CREATE TABLE alert_history (
+    id SERIAL PRIMARY KEY,
+    alert_id INTEGER NOT NULL REFERENCES alerts(id) ON DELETE CASCADE,
+    signal_id INTEGER REFERENCES signals(id) ON DELETE SET NULL,
+    market_id VARCHAR(66),
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT NOW(),
+    success BOOLEAN DEFAULT TRUE,
+    error_message TEXT
+);
+```
+
+#### 8. `analytics_cache` (New)
+```sql
+CREATE TABLE analytics_cache (
+    id SERIAL PRIMARY KEY,
+    cache_key VARCHAR(255) UNIQUE NOT NULL,
+    cache_data JSONB NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+**Note**: `trades` table also has `paper_trading BOOLEAN DEFAULT FALSE` column added.
 
 **Models**: Defined in `src/database/models.py` using SQLAlchemy ORM
 
@@ -770,6 +815,29 @@ CREATE TABLE portfolio_snapshots (
 - `GET /portfolio/snapshots` - List portfolio snapshots
 - `GET /portfolio/latest` - Get latest portfolio snapshot
 
+#### Alerts Endpoints (New) ✅
+- `POST /alerts` - Create alert
+- `GET /alerts` - List all alerts
+- `GET /alerts/{id}` - Get specific alert
+- `GET /alerts/{id}/history` - Get alert history
+- `PUT /alerts/{id}/enable` - Enable alert
+- `PUT /alerts/{id}/disable` - Disable alert
+
+#### Paper Trading Endpoints (New) ✅
+- `POST /paper-trading/trades` - Create paper trade
+- `GET /paper-trading/trades` - List paper trades
+- `PUT /paper-trading/trades/{id}/close` - Close paper trade
+- `GET /paper-trading/portfolio` - Get paper portfolio
+- `GET /paper-trading/portfolio/snapshots` - Get paper portfolio snapshots
+
+#### Analytics Endpoints (New) ✅
+- `GET /analytics/dashboard-summary` - Complete dashboard metrics
+- `GET /analytics/prediction-accuracy` - Prediction accuracy metrics
+- `GET /analytics/trade-performance` - Trade performance stats
+- `GET /analytics/edge-distribution` - Edge distribution analysis
+- `GET /analytics/portfolio-metrics` - Portfolio performance metrics
+- `GET /analytics/signal-strength-performance` - Signal strength analysis
+
 #### Settings Endpoints
 - `GET /settings` - Get user preferences
 - `POST /settings` - Save user preferences
@@ -788,11 +856,19 @@ CREATE TABLE portfolio_snapshots (
 
 ## Automation Pipeline
 
-### Current State
+### Current State ✅
 
-**Important**: The automation pipeline is **NOT currently running automatically**. Predictions must be triggered manually or via API.
+**Status**: **FULLY AUTOMATED** - Running on Railway with cron job
 
-### How It Works (When Active)
+**Automation Setup**:
+- ✅ Cron job configured (every 5 minutes)
+- ✅ Endpoint: `POST /predictions/generate?limit=20&auto_signals=true&auto_trades=true`
+- ✅ Background task execution (prevents timeouts)
+- ✅ Automatic prediction generation
+- ✅ Automatic signal creation
+- ✅ Automatic trade creation (paper trading mode)
+
+### How It Works (Current Implementation)
 
 1. **Prediction Generation**:
    - Triggered via `POST /predictions/generate` endpoint
@@ -817,46 +893,60 @@ CREATE TABLE portfolio_snapshots (
    - Creates portfolio snapshot
    - Saves to database
 
-### Making It Fully Automated
+### Current Automated Setup ✅
 
-**Option 1: Scheduled API Calls**
+**Production (Railway)**:
+- ✅ External cron job (cron-job.org) calls endpoint every 5 minutes
+- ✅ URL: `https://web-production-c490dd.up.railway.app/predictions/generate?limit=20&auto_signals=true&auto_trades=true`
+- ✅ Background task execution prevents timeouts
+- ✅ Fully automated - no manual intervention needed
+
+**Local Development**:
 ```bash
-# Cron job (every 5 minutes)
-*/5 * * * * curl -X POST http://localhost:8001/predictions/generate
-```
-
-**Option 2: Celery Task Queue** (Future Enhancement)
-- Use Celery + Redis for background tasks
-- Scheduled tasks for prediction generation
-- Async task processing
-
-**Option 3: Background Service**
-- Python script running continuously
-- Polls for new markets
-- Generates predictions automatically
-
-### Current Manual Process
-
-To generate predictions manually:
-```bash
-# Option 1: API call
-curl -X POST http://localhost:8001/predictions/generate
+# Option 1: Manual API call
+curl -X POST http://localhost:8001/predictions/generate?limit=20&auto_signals=true&auto_trades=true
 
 # Option 2: Python script
-python scripts/generate_predictions.py --auto-trades
+python scripts/generate_predictions.py --limit 20 --auto-signals --auto-trades
+
+# Option 3: Set up local cron job
+*/5 * * * * curl -X POST http://localhost:8001/predictions/generate?limit=20&auto_signals=true&auto_trades=true
 ```
 
 ---
 
 ## Deployment Architecture
 
+### Production Deployment (Railway) ✅
+
+**Current Status**: **FULLY DEPLOYED AND OPERATIONAL**
+
+**Infrastructure**:
+- **Platform**: Railway (https://web-production-c490dd.up.railway.app/)
+- **API Server**: FastAPI with Uvicorn on port 8001
+- **Database**: PostgreSQL on Railway (managed)
+- **Auto-Deploy**: GitHub integration (auto-deploys on push)
+- **Cron Job**: External service (cron-job.org) calling endpoint every 5 minutes
+
+**Environment**:
+- **Port**: 8001 (Railway auto-assigned)
+- **Database**: PostgreSQL with connection pooling (optimized for free tier)
+- **Logging**: Structured logging to Railway logs
+- **Health Checks**: `/health` endpoint for monitoring
+
+**Performance Optimizations**:
+- ✅ Database indexes for fast queries
+- ✅ Connection pooling (pool_size=5, max_overflow=5)
+- ✅ Query optimization with ANALYZE
+- ✅ Background task execution
+- ✅ Analytics caching
+
 ### Development Setup
 
 **Requirements**:
 - Python 3.11+
 - PostgreSQL 14+
-- Redis (optional, for caching)
-- ChromaDB (optional, for vector storage)
+- Railway CLI (for database access)
 
 **Installation**:
 ```bash
@@ -865,7 +955,17 @@ pip install -r requirements.txt
 
 **Database Setup**:
 ```bash
-python scripts/init_db.py
+# Option 1: Use Railway database
+railway connect postgres
+\i src/database/schema.sql
+
+# Option 2: Local PostgreSQL
+psql -U postgres -d polymarket_trader -f src/database/schema.sql
+```
+
+**Run Migrations**:
+```bash
+psql $DATABASE_URL -f src/database/migrations/add_alerts_and_paper_trading.sql
 ```
 
 **Start API**:
@@ -873,9 +973,9 @@ python scripts/init_db.py
 uvicorn src.api.app:app --host 127.0.0.1 --port 8001 --reload
 ```
 
-### Production Deployment
+### Production Deployment (Alternative)
 
-**Recommended Stack**:
+**Recommended Stack** (for self-hosting):
 - **Web Server**: Nginx (reverse proxy)
 - **API Server**: Gunicorn + Uvicorn workers
 - **Database**: PostgreSQL (managed service recommended)

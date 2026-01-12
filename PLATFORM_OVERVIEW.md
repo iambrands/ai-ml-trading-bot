@@ -54,33 +54,44 @@
 
 ### **Data Intelligence**
 - ✅ **Real-Time Market Data**: Fetches live markets, prices, and orderbooks from Polymarket
+- ✅ **Hybrid API Integration**: Combines CLOB API (prices) + Gamma API (volume data)
 - ✅ **News Aggregation**: Collects news from NewsAPI and RSS feeds (Google News, Reuters)
 - ✅ **Social Media Analysis**: Monitors Twitter and Reddit for sentiment signals
 - ✅ **Historical Data**: Accesses resolved markets for model training and backtesting
 
 ### **Machine Learning**
-- ✅ **Ensemble Models**: Combines XGBoost, LightGBM, and NLP models for robust predictions
+- ✅ **Ensemble Models**: Combines XGBoost + LightGBM for robust predictions
 - ✅ **Sentiment Analysis**: Uses FinBERT and transformer models to understand market sentiment
 - ✅ **Text Embeddings**: Converts news and social media into numerical features
 - ✅ **Feature Engineering**: Extracts 100+ features from market data, sentiment, and temporal patterns
+- ✅ **Model Performance**: Tracks accuracy, Brier score, and confidence metrics
 
 ### **Automated Trading**
 - ✅ **Signal Generation**: Automatically creates trading signals when opportunities are detected
 - ✅ **Position Sizing**: Calculates optimal bet sizes using Kelly Criterion
-- ✅ **Trade Execution**: Executes trades via Polymarket's CLOB API (when enabled)
+- ✅ **Trade Execution**: Creates trade records automatically (paper trading mode by default)
 - ✅ **Portfolio Management**: Tracks positions, P&L, and exposure automatically
+- ✅ **Automated Pipeline**: Fully automated prediction → signal → trade flow
+
+### **Advanced Features** (Recently Implemented)
+- ✅ **Real-Time Alerts**: Webhook/Email/Telegram notifications for high-confidence signals
+- ✅ **Paper Trading Mode**: Risk-free virtual trading with separate portfolio tracking
+- ✅ **Advanced Analytics**: Comprehensive metrics, performance tracking, and insights
+- ✅ **Performance Optimization**: Database indexes, connection pooling, query optimization
 
 ### **Risk Management**
 - ✅ **Position Limits**: Limits maximum bet size per market and total exposure
 - ✅ **Daily Loss Limits**: Stops trading if daily losses exceed threshold
 - ✅ **Drawdown Monitoring**: Reduces risk during losing periods
 - ✅ **Circuit Breakers**: Emergency stops during extreme conditions
+- ✅ **Paper Trading Default**: Safe demo mode enabled by default
 
 ### **User Interface**
 - ✅ **Web Dashboard**: Real-time view of markets, predictions, signals, trades, and portfolio
-- ✅ **Settings Management**: Configure trading mode (test/live), risk levels, and preferences
+- ✅ **Settings Management**: Configure trading mode (paper/real), risk levels, and preferences
 - ✅ **Help & FAQ**: Comprehensive guide for understanding and using the platform
 - ✅ **Auto-Refresh**: Data updates automatically every 30 seconds
+- ✅ **Live Deployment**: Available at https://web-production-c490dd.up.railway.app/
 
 ---
 
@@ -266,19 +277,28 @@ The system is designed to achieve:
 - **Help & FAQ Tab**: Comprehensive user guide
 
 ### **2. API Server**
-**Location**: FastAPI REST API on port 8002
+**Location**: FastAPI REST API on port 8001 (Railway)
 
-**Endpoints**:
-- `/markets` - Get active markets
+**Core Endpoints**:
+- `/markets` - Get active markets with prices
 - `/predictions` - Get AI predictions
 - `/signals` - Get trading signals
 - `/trades` - Get trade history
 - `/portfolio` - Get portfolio status
 - `/predictions/generate` - Trigger prediction generation
 
+**New Feature Endpoints**:
+- `/alerts` - Real-time alerts management
+- `/paper-trading` - Paper trading operations
+- `/analytics` - Advanced analytics and metrics
+
+**Documentation**: Interactive API docs at `/docs`
+
 ### **3. Background Services**
-- **Prediction Service**: Automatically generates predictions every 5 minutes
-- **Model Training**: Trains ML models on historical data (runs periodically)
+- **Prediction Service**: ✅ Automatically generates predictions every 5 minutes (cron job)
+- **Signal Generation**: ✅ Automatic signal creation from predictions
+- **Trade Creation**: ✅ Automatic trade creation from signals (paper mode)
+- **Portfolio Updates**: ✅ Automatic portfolio snapshot updates
 
 ### **4. Database**
 - **PostgreSQL**: Stores all markets, predictions, signals, trades, and portfolio data
@@ -296,12 +316,16 @@ The system is designed to achieve:
 4. Connect wallet (MetaMask) for Live Mode
 5. Set trading preferences and risk limits
 
-### **Daily Operations (Automated)**
-1. ✅ System fetches new markets from Polymarket
-2. ✅ Generates predictions for active markets
-3. ✅ Creates signals when opportunities are found
-4. ✅ Executes trades (if auto-trading enabled)
-5. ✅ Updates portfolio and tracks performance
+### **Daily Operations (Fully Automated) ✅**
+1. ✅ System fetches new markets from Polymarket (every 5 minutes)
+2. ✅ Generates predictions for active markets (automated via cron)
+3. ✅ Creates signals when opportunities are found (automatic)
+4. ✅ Creates trades automatically (paper trading mode, safe for demo)
+5. ✅ Updates portfolio and tracks performance (automatic)
+6. ✅ Sends alerts when signals match rules (if configured)
+7. ✅ Updates analytics cache for dashboard performance
+
+**Status**: Fully automated - "set it and forget it" mode active
 
 ### **Weekly/Monthly Review**
 1. Review portfolio performance

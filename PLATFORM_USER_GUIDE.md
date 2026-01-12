@@ -58,38 +58,48 @@ That's the core concept - finding markets where your AI disagrees with the crowd
 
 ### Step-by-Step in Plain English
 
-**Step 1: Get Markets**
+**Step 1: Get Markets** ✅
 - The system fetches active prediction markets from Polymarket
 - These are questions like "Will X happen?" with YES/NO betting
+- **Automated**: Every 5 minutes via cron job
 
-**Step 2: AI Makes Predictions**
+**Step 2: AI Makes Predictions** ✅
 - Your trained ML models analyze each market
 - They consider: news, social media, market data, historical patterns
 - They output: "I think there's a 65% chance this happens"
+- **Automated**: Runs automatically with prediction generation
 
-**Step 3: Find the Edge**
+**Step 3: Find the Edge** ✅
 - Compare AI prediction (65%) vs Market price (40%)
 - Edge = 65% - 40% = 25% opportunity
 - If edge > 5%, there's a potential trade
+- **Automated**: Calculated automatically for each prediction
 
-**Step 4: Create Signals**
+**Step 4: Create Signals** ✅
 - System automatically creates a "signal" when edge is significant
 - Signal says: "Buy YES, edge is 25%, confidence is high"
+- **Automated**: Signals created automatically when criteria met
 
-**Step 5: Execute Trades (Optional)**
-- If auto-trading is enabled, system opens a position
-- If not, you review signals manually
+**Step 5: Execute Trades** ✅
+- **Automated**: Trades created automatically from signals (paper trading mode)
+- All trades are paper trades by default (safe for demo)
+- Real trading requires API keys and explicit enablement
 
-**Step 6: Track Results**
+**Step 6: Track Results** ✅
 - Monitor open positions
 - See profit/loss when markets resolve
 - Portfolio shows overall performance
+- **Automated**: Portfolio snapshots updated automatically
 
 ---
 
 ## The Complete Workflow
 
 ### Phase 1: Setup (One-Time)
+
+**Production (Railway)**: ✅ Already set up! Models are trained and deployed. System is running automatically.
+
+**Local Development**:
 
 1. **Train Models** (if not already done)
    ```bash
@@ -98,6 +108,13 @@ That's the core concept - finding markets where your AI disagrees with the crowd
    - This trains AI models on historical data
    - Models learn patterns from past markets
    - Takes time (hours), but only needed once or periodically
+
+2. **Run Database Migration** (for new features)
+   ```bash
+   psql $DATABASE_URL -f src/database/migrations/add_alerts_and_paper_trading.sql
+   ```
+   - Adds alerts, paper trading, and analytics tables
+   - Required for alerts, paper trading, and analytics features
 
 2. **Start API Server**
    ```bash
