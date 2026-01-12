@@ -74,26 +74,34 @@ class SignalGenerator:
         edge = model_prob - market_prob
         abs_edge = abs(edge)
 
-        # Check thresholds
+        # Check thresholds with detailed logging
         if abs_edge < self.min_edge:
-            logger.debug("Edge too small", market_id=market.id, edge=abs_edge, min_edge=self.min_edge)
+            logger.info(
+                "Signal skipped - Edge too small",
+                market_id=market.id[:20],
+                edge=round(abs_edge, 4),
+                min_edge=self.min_edge,
+                edge_pct=round(abs_edge * 100, 2),
+            )
             return None
 
         if prediction.confidence < self.min_confidence:
-            logger.debug(
-                "Confidence too low",
-                market_id=market.id,
-                confidence=prediction.confidence,
+            logger.info(
+                "Signal skipped - Confidence too low",
+                market_id=market.id[:20],
+                confidence=round(prediction.confidence, 4),
                 min_confidence=self.min_confidence,
+                confidence_pct=round(prediction.confidence * 100, 2),
             )
             return None
 
         if market.volume_24h < self.min_liquidity:
-            logger.debug(
-                "Liquidity too low",
-                market_id=market.id,
+            logger.info(
+                "Signal skipped - Liquidity too low",
+                market_id=market.id[:20],
                 volume=market.volume_24h,
                 min_liquidity=self.min_liquidity,
+                volume_usd=f"${market.volume_24h:.2f}",
             )
             return None
 
@@ -108,7 +116,7 @@ class SignalGenerator:
         else:
             strength = "WEAK"
 
-        return TradingSignal(
+        signal = TradingSignal(
             market_id=market.id,
             side=side,
             model_probability=model_prob,
@@ -117,6 +125,21 @@ class SignalGenerator:
             confidence=prediction.confidence,
             signal_strength=strength,
         )
+        
+        logger.info(
+            "Signal generated successfully",
+            market_id=market.id[:20],
+            side=side,
+            strength=strength,
+            edge=round(abs_edge, 4),
+            edge_pct=round(abs_edge * 100, 2),
+            confidence=round(prediction.confidence, 4),
+            confidence_pct=round(prediction.confidence * 100, 2),
+            volume=market.volume_24h,
+            volume_usd=f"${market.volume_24h:.2f}",
+        )
+        
+        return signal
 
     def filter_signals(self, signals: List[TradingSignal]) -> List[TradingSignal]:
         """
