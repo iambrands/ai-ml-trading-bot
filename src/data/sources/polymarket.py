@@ -317,6 +317,15 @@ class PolymarketDataSource:
             if not condition_id:
                 logger.warning("Market data missing condition_id", data_keys=list(data.keys()))
                 return None
+            
+            # Debug: Log available keys if volume is missing (only first time to avoid spam)
+            if "volume_24h" not in data and "volume24h" not in data and "volume" not in data:
+                logger.debug(
+                    "Volume fields not found in market data",
+                    market_id=data.get("condition_id", "unknown")[:20],
+                    available_keys=[k for k in data.keys() if "vol" in k.lower() or "liq" in k.lower() or "trade" in k.lower()],
+                    all_keys_sample=list(data.keys())[:10],
+                )
 
             # Parse outcome from tokens (winner field)
             outcome = None
@@ -397,8 +406,21 @@ class PolymarketDataSource:
                 outcome=outcome,
                 yes_price=yes_price,
                 no_price=no_price,
-                volume_24h=float(data.get("volume24h", data.get("volume_24h", 0.0))),
-                liquidity=float(data.get("liquidity", 0.0)),
+                # Try multiple possible volume field names
+                # Polymarket API might use different field names in different endpoints
+                volume_24h=float(
+                    data.get("volume24h") 
+                    or data.get("volume_24h") 
+                    or data.get("volume24H")
+                    or data.get("volumeUSD")
+                    or data.get("volume_usd")
+                    or data.get("volume")
+                    or data.get("tvl")  # Total Value Locked (sometimes used)
+                    or data.get("totalVolume")
+                    or data.get("total_volume")
+                    or 0.0
+                ),
+                liquidity=float(data.get("liquidity") or data.get("totalLiquidity") or data.get("total_liquidity") or 0.0),
                 created_at=None,  # Not available in get_markets() response
                 resolved_at=resolved_at,
             )
