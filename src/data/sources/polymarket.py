@@ -1,7 +1,8 @@
-"""Polymarket data source using py-clob-client."""
+"""Polymarket data source using py-clob-client and Gamma API."""
 
 from datetime import datetime, timezone
 from typing import List, Optional
+import aiohttp
 
 from py_clob_client.client import ClobClient
 from py_clob_client.constants import POLYGON
@@ -33,6 +34,7 @@ class PolymarketDataSource:
         """
         settings = get_settings()
         self.api_url = api_url or "https://clob.polymarket.com"
+        self.gamma_api_url = "https://gamma-api.polymarket.com"  # Gamma API for volume data
         self.private_key = private_key or settings.polymarket_private_key
         self.chain_id = chain_id
 
@@ -65,7 +67,47 @@ class PolymarketDataSource:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
-        pass  # ClobClient doesn't need explicit cleanup
+        pass
+    
+    async def _fetch_gamma_markets(self, limit: int = 100) -> List[dict]:
+        """
+        Fetch markets from Gamma API which includes volume data.
+        
+        Args:
+            limit: Maximum number of markets to return
+            
+        Returns:
+            List of market dictionaries from Gamma API
+        """
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(
+                    f"{self.gamma_api_url}/markets",
+                    params={
+                        "limit": limit,
+                        "active": "true",
+                        "closed": "false",
+                        "order": "volume24hr",
+                        "ascending": "false",
+                    },
+                    timeout=aiohttp.ClientTimeout(total=30),
+                ) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        # Gamma API might return list directly or wrapped
+                        if isinstance(data, list):
+                            return data
+                        elif isinstance(data, dict) and "data" in data:
+                            return data["data"]
+                        else:
+                            logger.warning("Unexpected Gamma API response format", data_type=type(data))
+                            return []
+                    else:
+                        logger.warning("Gamma API request failed", status=response.status)
+                        return []
+        except Exception as e:
+            logger.warning("Failed to fetch from Gamma API, continuing without volume data", error=str(e))
+            return []  # ClobClient doesn't need explicit cleanup
 
     @retry(max_attempts=3, delay=1.0)
     async def fetch_market(self, market_id: str) -> Optional[Market]:
@@ -406,18 +448,16 @@ class PolymarketDataSource:
                 outcome=outcome,
                 yes_price=yes_price,
                 no_price=no_price,
-                # Try multiple possible volume field names
-                # Polymarket API might use different field names in different endpoints
+                # Use volume24hr from Gamma API (correct field name per Polymarket docs)
+                # Fallback to other variations if needed
                 volume_24h=float(
-                    data.get("volume24h") 
-                    or data.get("volume_24h") 
+                    data.get("volume24hr")  # Correct field name from Gamma API
+                    or data.get("volume24h")
+                    or data.get("volume_24h")
                     or data.get("volume24H")
                     or data.get("volumeUSD")
                     or data.get("volume_usd")
                     or data.get("volume")
-                    or data.get("tvl")  # Total Value Locked (sometimes used)
-                    or data.get("totalVolume")
-                    or data.get("total_volume")
                     or 0.0
                 ),
                 liquidity=float(data.get("liquidity") or data.get("totalLiquidity") or data.get("total_liquidity") or 0.0),
