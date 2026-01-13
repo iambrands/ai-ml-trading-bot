@@ -151,27 +151,57 @@ async def get_arbitrage_opportunity(
         # Initialize detector
         detector = ArbitrageDetector()
         
-        # Fetch market data
-        from ...data.sources.polymarket import PolymarketDataSource
+        # Get market from database with latest prediction
+        from ...database.models import Prediction
         
-        async with PolymarketDataSource() as polymarket:
-            market = await polymarket.fetch_market(market_id)
-            
-            if not market:
-                raise HTTPException(status_code=404, detail="Market not found")
-            
-            # Detect arbitrage
-            opportunity = detector.detect_arbitrage(market)
-            
-            if not opportunity:
-                return {
-                    "opportunity": None,
-                    "message": "No arbitrage opportunity found for this market",
-                }
-            
+        # Get market from database
+        market_result = await db.execute(
+            select(DBMarket).where(DBMarket.market_id == market_id)
+        )
+        db_market = market_result.scalar_one_or_none()
+        
+        if not db_market:
+            raise HTTPException(status_code=404, detail="Market not found")
+        
+        # Get latest prediction for prices
+        pred_result = await db.execute(
+            select(Prediction)
+            .where(Prediction.market_id == market_id)
+            .order_by(desc(Prediction.created_at))
+            .limit(1)
+        )
+        latest_pred = pred_result.scalar_one_or_none()
+        
+        if not latest_pred:
             return {
-                "opportunity": opportunity.to_dict(),
+                "opportunity": None,
+                "message": "No price data available for this market",
             }
+        
+        # Create Market object
+        market = Market(
+            id=db_market.market_id,
+            condition_id=db_market.condition_id or "",
+            question=db_market.question,
+            category=db_market.category,
+            resolution_date=db_market.resolution_date,
+            outcome=db_market.outcome,
+            yes_price=float(latest_pred.market_price),
+            no_price=1.0 - float(latest_pred.market_price),
+        )
+        
+        # Detect arbitrage
+        opportunity = detector.detect_arbitrage(market)
+        
+        if not opportunity:
+            return {
+                "opportunity": None,
+                "message": "No arbitrage opportunity found for this market",
+            }
+        
+        return {
+            "opportunity": opportunity.to_dict(),
+        }
             
     except HTTPException:
         raise
