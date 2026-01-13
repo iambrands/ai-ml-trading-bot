@@ -119,6 +119,12 @@ try:
 except ImportError:
     logger.warning("Analytics endpoints not available")
 
+try:
+    from .endpoints import arbitrage as arbitrage_endpoints
+    app.include_router(arbitrage_endpoints.router)
+except ImportError:
+    logger.warning("Arbitrage endpoints not available")
+
 
 # Pydantic models for API responses
 class MarketResponse(BaseModel):
