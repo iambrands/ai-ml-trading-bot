@@ -362,11 +362,6 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
             cache_hits=cache_hits,
             cache_stats=cache_stats,
         )
-                
-            except Exception as e:
-                logger.error("Database error", error=str(e), exc_info=True)
-                await db.rollback()
-                raise
 
 
 async def update_portfolio_snapshot(db):
