@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc
 
@@ -23,7 +23,7 @@ async def get_arbitrage_opportunities(
     min_profit: float = Query(0.025, description="Minimum profit threshold (default: 0.025 = 2.5%)"),
     min_liquidity: float = Query(100.0, description="Minimum liquidity required (default: $100)"),
     limit: int = Query(50, description="Maximum number of opportunities to return"),
-    db: AsyncSession = get_db(),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     Get current arbitrage opportunities.
@@ -142,7 +142,7 @@ async def get_arbitrage_opportunities(
 @router.get("/opportunities/{market_id}")
 async def get_arbitrage_opportunity(
     market_id: str,
-    db: AsyncSession = get_db(),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     Get arbitrage opportunity for a specific market.
@@ -199,7 +199,7 @@ async def get_arbitrage_opportunity(
 async def calculate_arbitrage_execution(
     market_id: str,
     trade_size: float = Query(100.0, description="Trade size in dollars (default: $100)"),
-    db: AsyncSession = get_db(),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     Calculate execution details for an arbitrage trade.
@@ -258,7 +258,7 @@ async def calculate_arbitrage_execution(
 async def get_arbitrage_stats(
     min_profit: float = Query(0.025, description="Minimum profit threshold"),
     min_liquidity: float = Query(100.0, description="Minimum liquidity required"),
-    db: AsyncSession = get_db(),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     Get statistics about current arbitrage opportunities.
