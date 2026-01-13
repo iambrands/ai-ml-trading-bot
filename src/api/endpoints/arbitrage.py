@@ -67,49 +67,42 @@ async def get_arbitrage_opportunities(
                 "message": "No active markets found",
             }
         
-        # Convert to Market objects
-        # We need to fetch latest prices from Polymarket API
-        from ...data.sources.polymarket import PolymarketDataSource
+        # Convert to Market objects using latest predictions from database
+        # This is much faster than fetching from Polymarket API for each market
+        from ...database.models import Prediction
         
         markets = []
-        async with PolymarketDataSource() as polymarket:
-            for db_market in db_markets:
-                try:
-                    # Fetch latest market data with prices
-                    market_data = await polymarket.fetch_market(db_market.market_id)
-                    if market_data:
-                        markets.append(market_data)
-                except Exception as e:
-                    logger.warning(
-                        "Failed to fetch market data",
-                        market_id=db_market.market_id,
-                        error=str(e),
+        for db_market in db_markets:
+            try:
+                # Get latest prediction for this market
+                pred_result = await db.execute(
+                    select(Prediction)
+                    .where(Prediction.market_id == db_market.market_id)
+                    .order_by(desc(Prediction.created_at))
+                    .limit(1)
+                )
+                latest_pred = pred_result.scalar_one_or_none()
+                
+                if latest_pred:
+                    # Create Market object with prices from prediction
+                    market = Market(
+                        id=db_market.market_id,
+                        condition_id=db_market.condition_id or "",
+                        question=db_market.question,
+                        category=db_market.category,
+                        resolution_date=db_market.resolution_date,
+                        outcome=db_market.outcome,
+                        yes_price=float(latest_pred.market_price),
+                        no_price=1.0 - float(latest_pred.market_price),
                     )
-                    # Use database data as fallback
-                    if db_market.market_id:
-                        # Create Market object from DB data
-                        # We'll need latest prediction for prices
-                        from ...database.models import Prediction
-                        pred_result = await db.execute(
-                            select(Prediction)
-                            .where(Prediction.market_id == db_market.market_id)
-                            .order_by(desc(Prediction.created_at))
-                            .limit(1)
-                        )
-                        latest_pred = pred_result.scalar_one_or_none()
-                        
-                        if latest_pred:
-                            market = Market(
-                                id=db_market.market_id,
-                                condition_id=db_market.condition_id,
-                                question=db_market.question,
-                                category=db_market.category,
-                                resolution_date=db_market.resolution_date,
-                                outcome=db_market.outcome,
-                                yes_price=float(latest_pred.market_price),
-                                no_price=1.0 - float(latest_pred.market_price),
-                            )
-                            markets.append(market)
+                    markets.append(market)
+            except Exception as e:
+                logger.warning(
+                    "Failed to create market object",
+                    market_id=db_market.market_id,
+                    error=str(e),
+                )
+                continue
         
         # Detect arbitrage opportunities
         opportunities = detector.detect_arbitrage_batch(markets)
@@ -216,28 +209,58 @@ async def calculate_arbitrage_execution(
         # Initialize detector
         detector = ArbitrageDetector()
         
-        # Fetch market data
-        from ...data.sources.polymarket import PolymarketDataSource
+        # Get market from database with latest prediction
+        from ...database.models import Prediction
         
-        async with PolymarketDataSource() as polymarket:
-            market = await polymarket.fetch_market(market_id)
-            
-            if not market:
-                raise HTTPException(status_code=404, detail="Market not found")
-            
-            # Detect arbitrage
-            opportunity = detector.detect_arbitrage(market)
-            
-            if not opportunity:
-                raise HTTPException(
-                    status_code=400,
-                    detail="No arbitrage opportunity found for this market",
-                )
-            
-            # Calculate execution
-            execution = detector.calculate_execution_cost(opportunity, trade_size)
-            
-            return execution
+        # Get market from database
+        market_result = await db.execute(
+            select(DBMarket).where(DBMarket.market_id == market_id)
+        )
+        db_market = market_result.scalar_one_or_none()
+        
+        if not db_market:
+            raise HTTPException(status_code=404, detail="Market not found")
+        
+        # Get latest prediction for prices
+        pred_result = await db.execute(
+            select(Prediction)
+            .where(Prediction.market_id == market_id)
+            .order_by(desc(Prediction.created_at))
+            .limit(1)
+        )
+        latest_pred = pred_result.scalar_one_or_none()
+        
+        if not latest_pred:
+            raise HTTPException(
+                status_code=400,
+                detail="No price data available for this market",
+            )
+        
+        # Create Market object
+        market = Market(
+            id=db_market.market_id,
+            condition_id=db_market.condition_id or "",
+            question=db_market.question,
+            category=db_market.category,
+            resolution_date=db_market.resolution_date,
+            outcome=db_market.outcome,
+            yes_price=float(latest_pred.market_price),
+            no_price=1.0 - float(latest_pred.market_price),
+        )
+        
+        # Detect arbitrage
+        opportunity = detector.detect_arbitrage(market)
+        
+        if not opportunity:
+            raise HTTPException(
+                status_code=400,
+                detail="No arbitrage opportunity found for this market",
+            )
+        
+        # Calculate execution
+        execution = detector.calculate_execution_cost(opportunity, trade_size)
+        
+        return execution
             
     except HTTPException:
         raise
