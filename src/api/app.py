@@ -306,7 +306,10 @@ async def health():
                 last_pred = result.scalar_one_or_none()
                 
                 if last_pred:
-                    age_minutes = (datetime.now(timezone.utc) - last_pred.replace(tzinfo=timezone.utc)).total_seconds() / 60
+                    # Convert to timezone-aware for comparison, then calculate age
+                    now_aware = datetime.now(timezone.utc)
+                    last_pred_aware = last_pred.replace(tzinfo=timezone.utc) if last_pred.tzinfo is None else last_pred
+                    age_minutes = (now_aware - last_pred_aware).total_seconds() / 60
                     # Predictions can be up to 30 minutes old before considered stale
                     # (cron runs every 5 min, but allow buffer for delays)
                     is_stale = age_minutes >= 30

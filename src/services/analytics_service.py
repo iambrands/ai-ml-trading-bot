@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..database.models import Prediction, Signal, Trade, PortfolioSnapshot
 from ..utils.logging import get_logger
+from ..utils.datetime_utils import make_naive_utc, now_naive_utc
 
 logger = get_logger(__name__)
 
@@ -33,7 +34,7 @@ class AnalyticsService:
             Dictionary with accuracy metrics
         """
         try:
-            cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
+            cutoff_date = make_naive_utc(datetime.now(timezone.utc) - timedelta(days=days))
             
             # Get resolved predictions (markets that have outcomes)
             query = select(Prediction).join(
@@ -107,7 +108,7 @@ class AnalyticsService:
             Dictionary with performance metrics
         """
         try:
-            cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
+            cutoff_date = make_naive_utc(datetime.now(timezone.utc) - timedelta(days=days))
             
             query = select(Trade).where(
                 and_(
@@ -180,7 +181,7 @@ class AnalyticsService:
             Dictionary with edge distribution data
         """
         try:
-            cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
+            cutoff_date = make_naive_utc(datetime.now(timezone.utc) - timedelta(days=days))
             
             query = select(Signal).join(
                 Signal.prediction
@@ -231,7 +232,7 @@ class AnalyticsService:
             Dictionary with portfolio metrics
         """
         try:
-            cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
+            cutoff_date = make_naive_utc(datetime.now(timezone.utc) - timedelta(days=days))
             
             query = select(PortfolioSnapshot).where(
                 and_(
@@ -308,7 +309,7 @@ class AnalyticsService:
             Dictionary with performance by signal strength
         """
         try:
-            cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
+            cutoff_date = make_naive_utc(datetime.now(timezone.utc) - timedelta(days=days))
             
             query = select(Signal).where(
                 Signal.created_at >= cutoff_date

@@ -72,7 +72,7 @@ class PaperTradingService:
                 size=Decimal(str(size)),
                 status="OPEN",
                 paper_trading=True,
-                entry_time=datetime.now(timezone.utc)
+                entry_time=datetime.now(timezone.utc).replace(tzinfo=None)
             )
             
             self.db.add(trade)
@@ -122,7 +122,7 @@ class PaperTradingService:
             trade.exit_price = Decimal(str(exit_price))
             trade.pnl = Decimal(str(pnl))
             trade.status = "CLOSED"
-            trade.exit_time = datetime.now(timezone.utc)
+            trade.exit_time = datetime.now(timezone.utc).replace(tzinfo=None)
             
             await self.db.commit()
             
@@ -140,7 +140,7 @@ class PaperTradingService:
         """Initialize paper trading portfolio."""
         try:
             snapshot = PortfolioSnapshot(
-                snapshot_time=datetime.now(timezone.utc),
+                snapshot_time=datetime.now(timezone.utc).replace(tzinfo=None),
                 total_value=self.initial_capital,
                 cash=self.initial_capital,
                 positions_value=Decimal("0"),
@@ -205,7 +205,7 @@ class PaperTradingService:
             
             # Create new snapshot
             snapshot = PortfolioSnapshot(
-                snapshot_time=datetime.now(timezone.utc),
+                snapshot_time=datetime.now(timezone.utc).replace(tzinfo=None),
                 total_value=total_value,
                 cash=cash,
                 positions_value=positions_value,

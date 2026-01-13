@@ -56,7 +56,7 @@ class AlertService:
                         await self._record_alert_history(alert, signal, success)
                         
                         # Update alert stats
-                        alert.last_triggered = datetime.now(timezone.utc)
+                        alert.last_triggered = datetime.now(timezone.utc).replace(tzinfo=None)
                         alert.trigger_count += 1
                         await self.db.commit()
                         
