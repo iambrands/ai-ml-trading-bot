@@ -213,17 +213,40 @@ class PolymarketDataSource:
                 logger.warning("Unexpected CLOB markets data format", data_type=type(markets_data))
                 return []
 
-            logger.debug("Fetched CLOB markets", count=len(clob_markets_list))
+            logger.info("Fetched CLOB markets", count=len(clob_markets_list))
+            
+            # Log sample markets from both APIs for debugging
+            if clob_markets_list and len(clob_markets_list) > 0:
+                sample_clob = clob_markets_list[0]
+                logger.debug("Sample CLOB market", 
+                           market_id=sample_clob.get('id', 'N/A')[:20],
+                           condition_id=sample_clob.get('conditionId', 'N/A')[:20],
+                           accepting_orders=sample_clob.get('accepting_orders'),
+                           active=sample_clob.get('active'),
+                           closed=sample_clob.get('closed'),
+                           archived=sample_clob.get('archived'),
+                           keys=list(sample_clob.keys())[:15])
+            
+            if gamma_markets_data and len(gamma_markets_data) > 0:
+                sample_gamma = gamma_markets_data[0]
+                logger.debug("Sample Gamma market",
+                           id=sample_gamma.get('id', 'N/A')[:20],
+                           conditionId=sample_gamma.get('conditionId', 'N/A')[:20],
+                           keys=list(sample_gamma.keys())[:15])
 
             markets = []
             strict_filtered = 0
             parse_failed = 0
             outcome_filtered = 0
+            no_market_id = 0
             
             for item in clob_markets_list:
                 market_id = item.get('id') or item.get('conditionId')
                 condition_id = item.get('conditionId') or item.get('id')
                 if not market_id:
+                    no_market_id += 1
+                    if no_market_id <= 3:
+                        logger.debug("Market skipped - no ID", item_keys=list(item.keys())[:10])
                     continue
 
                 # Merge volume data from Gamma API if available (try both id and conditionId)
@@ -235,26 +258,27 @@ class PolymarketDataSource:
                     item['volume'] = gamma_market_item.get('volume', 0.0)  # Total volume
                     logger.debug("Merged volume data from Gamma API", market_id=market_id[:20], volume24hr=item.get('volume24hr', 0.0))
 
-                # Filter for active markets: accepting_orders=True is the best indicator
-                # Also check: active=True, closed=False, not archived
-                is_active = (
-                    item.get("accepting_orders", False)
-                    or (
-                        item.get("active")
-                        and not item.get("closed")
-                        and not item.get("archived")
-                    )
-                )
+                # Filter for active markets
+                # More lenient: check if market is NOT closed and NOT archived
+                # accepting_orders might not be present in all API responses
+                is_closed = item.get("closed", False)
+                is_archived = item.get("archived", False)
+                accepting_orders = item.get("accepting_orders")
+                is_active_flag = item.get("active")
+                
+                # More lenient filter: just exclude closed and archived markets
+                # Many valid markets don't have accepting_orders or active flags set
+                is_active = not is_closed and not is_archived
                 
                 if not is_active:
                     strict_filtered += 1
-                    if strict_filtered <= 3:  # Log first few to debug
-                        logger.debug("Market filtered by strict criteria", 
+                    if strict_filtered <= 5:  # Log first few to debug
+                        logger.debug("Market filtered - closed or archived", 
                                    market_id=market_id[:20],
-                                   accepting_orders=item.get("accepting_orders"),
-                                   active=item.get("active"),
-                                   closed=item.get("closed"),
-                                   archived=item.get("archived"))
+                                   closed=is_closed,
+                                   archived=is_archived,
+                                   accepting_orders=accepting_orders,
+                                   active=is_active_flag)
                     continue
                 
                 market = self._parse_market(item)
@@ -272,32 +296,38 @@ class PolymarketDataSource:
                 if len(markets) >= limit:
                     break
 
-            logger.debug("Strict filter results", total=len(clob_markets_list), filtered=strict_filtered, parsed=len(markets) + parse_failed + outcome_filtered, markets=len(markets))
+            logger.info("Filter results", 
+                       total_clob=len(clob_markets_list),
+                       no_market_id=no_market_id,
+                       strict_filtered=strict_filtered, 
+                       parse_failed=parse_failed, 
+                       outcome_filtered=outcome_filtered,
+                       markets_found=len(markets))
 
-            # If no markets found with strict criteria, try a more lenient approach
+            # If no markets found, log detailed debugging info
             if not markets:
-                logger.debug("No markets found with strict criteria, trying lenient filter", 
-                           strict_filtered=strict_filtered, parse_failed=parse_failed, outcome_filtered=outcome_filtered)
-                for item in clob_markets_list:
+                logger.warning("No active markets found after filtering", 
+                             total_clob=len(clob_markets_list),
+                             strict_filtered=strict_filtered,
+                             parse_failed=parse_failed,
+                             outcome_filtered=outcome_filtered,
+                             no_market_id=no_market_id)
+                
+                # Log first few markets that were filtered to understand why
+                sample_count = 0
+                for item in clob_markets_list[:10]:
                     market_id = item.get('id') or item.get('conditionId')
-                    condition_id = item.get('conditionId') or item.get('id')
-                    if not market_id:
-                        continue
-
-                    # Merge volume data from Gamma API if available
-                    gamma_market_item = gamma_markets_map.get(market_id) or gamma_markets_map.get(condition_id)
-                    if gamma_market_item:
-                        item['volume24hr'] = gamma_market_item.get('volume24hr', 0.0)
-                        item['liquidity'] = gamma_market_item.get('liquidity', 0.0)
-                        item['volume'] = gamma_market_item.get('volume', 0.0)
-
-                    # More lenient: just check if it's not closed and not archived
-                    if not item.get("closed") and not item.get("archived"):
-                        market = self._parse_market(item)
-                        if market and not market.outcome:
-                            markets.append(market)
-                            if len(markets) >= limit:
-                                break
+                    if market_id:
+                        logger.debug("Sample filtered market",
+                                   market_id=market_id[:20],
+                                   question=item.get('question', item.get('title', 'N/A'))[:50],
+                                   closed=item.get('closed'),
+                                   archived=item.get('archived'),
+                                   accepting_orders=item.get('accepting_orders'),
+                                   active=item.get('active'))
+                        sample_count += 1
+                        if sample_count >= 5:
+                            break
 
             logger.info("Fetched active markets", count=len(markets), limit=limit, gamma_matches=len([m for m in markets if m.volume_24h > 0]))
             return markets
