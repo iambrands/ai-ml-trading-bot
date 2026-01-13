@@ -346,7 +346,11 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
                         await update_portfolio_snapshot(db)
                     except Exception as e:
                         logger.warning("Failed to update portfolio snapshot", error=str(e))
-                
+            except Exception as e:
+                logger.error("Failed during prediction generation", error=str(e), exc_info=True)
+                await db.rollback()
+                raise
+        
         # Get cache stats
         cache_stats = cache.get_cache_stats()
         
