@@ -37,12 +37,14 @@ class AnalyticsService:
             cutoff_date = make_naive_utc(datetime.now(timezone.utc) - timedelta(days=days))
             
             # Get resolved predictions (markets that have outcomes)
+            from ..database.models import Market as DBMarket
+            
             query = select(Prediction).join(
-                Prediction.market
+                DBMarket, Prediction.market_id == DBMarket.market_id
             ).where(
                 and_(
                     Prediction.prediction_time >= cutoff_date,
-                    Prediction.market.has(outcome__isnot=None)
+                    DBMarket.outcome.isnot(None)
                 )
             )
             
