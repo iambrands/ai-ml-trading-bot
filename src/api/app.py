@@ -343,12 +343,31 @@ async def health():
     # Check model files
     try:
         import os
-        model_path = os.path.join(os.path.dirname(__file__), "../../../data/models/xgboost_model.pkl")
-        model_exists = os.path.exists(model_path)
+        from pathlib import Path
+        
+        # Try multiple possible paths
+        possible_paths = [
+            Path(__file__).parent.parent.parent.parent / "data" / "models" / "xgboost_model.pkl",
+            Path("/app/data/models/xgboost_model.pkl"),  # Railway/Docker path
+            Path("data/models/xgboost_model.pkl"),  # Relative path
+        ]
+        
+        model_path = None
+        model_exists = False
+        for path in possible_paths:
+            if path.exists():
+                model_path = str(path)
+                model_exists = True
+                break
+        
+        if not model_path:
+            model_path = str(possible_paths[0])  # Use first as default for display
+        
         checks["model_loaded"] = {
             "status": "healthy" if model_exists else "unavailable",
             "model_path": model_path,
-            "exists": model_exists
+            "exists": model_exists,
+            "checked_paths": [str(p) for p in possible_paths]
         }
     except Exception as e:
         checks["model_loaded"] = {"status": "unhealthy", "error": str(e)}
