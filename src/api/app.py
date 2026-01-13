@@ -267,13 +267,19 @@ async def health():
             pool_stats = get_pool_stats()
             if pool_stats:
                 pool_usage = pool_stats.get("utilization", 0)
+                # Only mark as degraded if pool usage is very high (>95%)
+                is_degraded = pool_usage >= 0.95
                 checks["database"] = {
-                    "status": "healthy" if pool_usage < 0.9 else "degraded",
+                    "status": "healthy" if not is_degraded else "degraded",
                     "pool_usage": f"{pool_usage:.1%}",
-                    "connections": pool_stats
+                    "connections": pool_stats,
+                    "warning": f"High pool usage: {pool_usage:.1%}" if pool_usage >= 0.8 else None
                 }
                 if pool_usage >= 0.8:
                     logger.warning("High database pool utilization", usage=f"{pool_usage:.1%}")
+                # Only fail health check if pool is critically exhausted
+                if pool_usage >= 0.95:
+                    all_healthy = False
             else:
                 checks["database"] = {"status": "healthy", "pool_stats": "unavailable"}
         else:
@@ -295,15 +301,21 @@ async def health():
                 
                 if last_pred:
                     age_minutes = (datetime.now(timezone.utc) - last_pred.replace(tzinfo=timezone.utc)).total_seconds() / 60
+                    # Predictions can be up to 30 minutes old before considered stale
+                    # (cron runs every 5 min, but allow buffer for delays)
+                    is_stale = age_minutes >= 30
                     checks["recent_predictions"] = {
-                        "status": "healthy" if age_minutes < 10 else "stale",
+                        "status": "healthy" if not is_stale else "stale",
                         "last_prediction": last_pred.isoformat(),
-                        "age_minutes": round(age_minutes, 1)
+                        "age_minutes": round(age_minutes, 1),
+                        "warning": f"Predictions are {round(age_minutes, 1)} minutes old" if is_stale else None
                     }
-                    if age_minutes >= 10:
+                    # Only mark unhealthy if predictions are very stale (>60 minutes)
+                    if age_minutes >= 60:
                         all_healthy = False
                 else:
                     checks["recent_predictions"] = {"status": "no_predictions", "message": "No predictions found"}
+                    # Don't fail health check if no predictions yet - system might be starting up
         else:
             checks["recent_predictions"] = {"status": "unavailable", "message": "Database not configured"}
     except Exception as e:
