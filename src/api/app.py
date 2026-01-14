@@ -285,14 +285,14 @@ async def health():
                     logger.warning("High database pool utilization", usage=f"{pool_usage:.1%}")
                 # Only fail health check if pool is critically exhausted
                 if pool_usage >= 0.95:
-                    all_healthy = False
+                    critical_healthy = False
             else:
                 checks["database"] = {"status": "healthy", "pool_stats": "unavailable"}
         else:
             checks["database"] = {"status": "unavailable", "message": "Database not configured"}
     except Exception as e:
         checks["database"] = {"status": "unhealthy", "error": str(e)}
-        all_healthy = False
+        critical_healthy = False
     
     # Check recent predictions
     try:
@@ -310,26 +310,32 @@ async def health():
                     now_aware = datetime.now(timezone.utc)
                     last_pred_aware = last_pred.replace(tzinfo=timezone.utc) if last_pred.tzinfo is None else last_pred
                     age_minutes = (now_aware - last_pred_aware).total_seconds() / 60
-                    # Predictions can be up to 30 minutes old before considered stale
-                    # (cron runs every 5 min, but allow buffer for delays)
-                    is_stale = age_minutes >= 30
+                    
+                    # Predictions freshness is informational, not critical for health
+                    # Predictions are valid for hours/days, not just minutes
+                    # Only warn if predictions are very old (>24 hours), but don't fail health check
+                    is_very_old = age_minutes >= 1440  # 24 hours
                     checks["recent_predictions"] = {
-                        "status": "healthy" if not is_stale else "stale",
+                        "status": "ok",  # Always OK if predictions exist
                         "last_prediction": last_pred.isoformat(),
                         "age_minutes": round(age_minutes, 1),
-                        "warning": f"Predictions are {round(age_minutes, 1)} minutes old" if is_stale else None
+                        "age_hours": round(age_minutes / 60, 1),
+                        "warning": f"Predictions are {round(age_minutes / 60, 1)} hours old" if is_very_old else None,
+                        "note": "Predictions refresh periodically via cron job"
                     }
-                    # Only mark unhealthy if predictions are very stale (>60 minutes)
-                    if age_minutes >= 60:
-                        all_healthy = False
+                    # Don't mark unhealthy based on prediction age - predictions are still valid
+                    # Only fail if critical systems (DB, models) are down
                 else:
-                    checks["recent_predictions"] = {"status": "no_predictions", "message": "No predictions found"}
+                    checks["recent_predictions"] = {
+                        "status": "no_predictions", 
+                        "message": "No predictions found yet (system may be starting up)"
+                    }
                     # Don't fail health check if no predictions yet - system might be starting up
         else:
             checks["recent_predictions"] = {"status": "unavailable", "message": "Database not configured"}
     except Exception as e:
-        checks["recent_predictions"] = {"status": "unhealthy", "error": str(e)}
-        all_healthy = False
+        checks["recent_predictions"] = {"status": "error", "error": str(e)}
+        # Don't fail health check for prediction check errors - informational only
     
     # Check paper trading mode
     try:

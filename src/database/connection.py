@@ -19,9 +19,9 @@ try:
         settings.database_url,
         echo=False,  # Set to True for SQL query logging
         pool_pre_ping=True,  # Verify connections before using
-        pool_size=10,  # Base pool size
-        max_overflow=20,  # Allow 20 additional connections during spikes
-        pool_recycle=3600,  # Recycle connections every hour (Railway limit)
+        pool_size=20,  # Increased from 10 - base pool size for better performance
+        max_overflow=30,  # Increased from 20 - allow more connections during spikes
+        pool_recycle=1800,  # Recycle connections every 30 min (reduced from 1 hour for better connection health)
         pool_timeout=30,  # Max wait time for connection
         connect_args={
             "command_timeout": 30,  # 30 second query timeout
