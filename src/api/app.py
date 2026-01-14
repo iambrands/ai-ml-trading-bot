@@ -125,6 +125,12 @@ try:
 except ImportError:
     logger.warning("Arbitrage endpoints not available")
 
+try:
+    from .endpoints import dashboard as dashboard_endpoints
+    app.include_router(dashboard_endpoints.router)
+except ImportError:
+    logger.warning("Dashboard endpoints not available")
+
 
 # Pydantic models for API responses
 class MarketResponse(BaseModel):
