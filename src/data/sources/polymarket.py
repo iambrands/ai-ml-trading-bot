@@ -274,27 +274,23 @@ class PolymarketDataSource:
                     item['volume'] = gamma_market_item.get('volume', 0.0)  # Total volume
                     logger.debug("Merged volume data from Gamma API", market_id=market_id[:20], volume24hr=item.get('volume24hr', 0.0))
 
-                # Filter for active markets
-                # More lenient: check if market is NOT closed and NOT archived
-                # accepting_orders might not be present in all API responses
-                is_closed = item.get("closed", False)
+                # Filter for valid markets (more permissive)
+                # Only filter out archived markets - these are completely removed
+                # Closed markets are just resolved markets - still valid for predictions
+                # accepting_orders and active flags are not reliable indicators
                 is_archived = item.get("archived", False)
-                accepting_orders = item.get("accepting_orders")
-                is_active_flag = item.get("active")
                 
-                # More lenient filter: just exclude closed and archived markets
-                # Many valid markets don't have accepting_orders or active flags set
-                is_active = not is_closed and not is_archived
-                
-                if not is_active:
+                # Only reject if archived (completely removed from platform)
+                # Keep all other markets (active, closed/resolved, etc.)
+                if is_archived:
                     strict_filtered += 1
                     if strict_filtered <= 5:  # Log first few to debug
-                        logger.debug("Market filtered - closed or archived", 
+                        logger.debug("Market filtered - archived", 
                                    market_id=market_id[:20],
-                                   closed=is_closed,
                                    archived=is_archived,
-                                   accepting_orders=accepting_orders,
-                                   active=is_active_flag)
+                                   closed=item.get("closed"),
+                                   active=item.get("active"),
+                                   accepting_orders=item.get("accepting_orders"))
                     continue
                 
                 market = self._parse_market(item)
