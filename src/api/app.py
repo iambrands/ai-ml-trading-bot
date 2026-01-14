@@ -260,9 +260,11 @@ async def health():
     from ..config.settings import get_settings
     
     checks = {}
-    all_healthy = True
+    # Only critical systems affect health status
+    # Prediction age and other informational checks don't cause failures
+    critical_healthy = True
     
-    # Check database
+    # Check database (CRITICAL)
     try:
         if engine:
             # Test query
@@ -380,14 +382,18 @@ async def health():
         }
     except Exception as e:
         checks["model_loaded"] = {"status": "unhealthy", "error": str(e)}
+        # Model loading is critical - fail health check if unavailable
+        critical_healthy = False
     
+    # Only return 503 if critical systems (DB, models) are down
+    # Prediction age and other informational checks don't affect health status
     results = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "status": "healthy" if all_healthy else "degraded",
+        "status": "healthy" if critical_healthy else "degraded",
         "checks": checks
     }
     
-    http_status = status.HTTP_200_OK if all_healthy else status.HTTP_503_SERVICE_UNAVAILABLE
+    http_status = status.HTTP_200_OK if critical_healthy else status.HTTP_503_SERVICE_UNAVAILABLE
     
     return JSONResponse(content=results, status_code=http_status)
 
