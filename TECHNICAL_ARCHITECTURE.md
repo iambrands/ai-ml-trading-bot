@@ -838,6 +838,12 @@ CREATE TABLE analytics_cache (
 - `GET /analytics/portfolio-metrics` - Portfolio performance metrics
 - `GET /analytics/signal-strength-performance` - Signal strength analysis
 
+#### Dashboard Endpoints (New) ✅
+- `GET /dashboard/stats` - Quick stats for dashboard widget (portfolio, P&L, win rate, etc.)
+- `GET /dashboard/activity` - Recent activity feed (trades and signals)
+- `GET /dashboard/settings` - Get current trading settings
+- `POST /dashboard/settings` - Update trading settings (min edge, confidence, liquidity, etc.)
+
 #### Settings Endpoints
 - `GET /settings` - Get user preferences
 - `POST /settings` - Save user preferences
