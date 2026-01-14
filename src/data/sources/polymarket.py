@@ -218,14 +218,16 @@ class PolymarketDataSource:
             # Log sample markets from both APIs for debugging
             if clob_markets_list and len(clob_markets_list) > 0:
                 sample_clob = clob_markets_list[0]
-                logger.debug("Sample CLOB market", 
-                           market_id=sample_clob.get('id', 'N/A')[:20],
-                           condition_id=sample_clob.get('conditionId', 'N/A')[:20],
+                logger.info("Sample CLOB market structure", 
+                           condition_id_snake=sample_clob.get('condition_id', 'N/A')[:20] if sample_clob.get('condition_id') else None,
+                           condition_id_camel=sample_clob.get('conditionId', 'N/A')[:20] if sample_clob.get('conditionId') else None,
+                           id_field=sample_clob.get('id', 'N/A')[:20] if sample_clob.get('id') else None,
+                           question_id=sample_clob.get('question_id', 'N/A')[:20] if sample_clob.get('question_id') else None,
                            accepting_orders=sample_clob.get('accepting_orders'),
                            active=sample_clob.get('active'),
                            closed=sample_clob.get('closed'),
                            archived=sample_clob.get('archived'),
-                           keys=list(sample_clob.keys())[:15])
+                           all_keys=list(sample_clob.keys()))
             
             if gamma_markets_data and len(gamma_markets_data) > 0:
                 sample_gamma = gamma_markets_data[0]
@@ -241,12 +243,26 @@ class PolymarketDataSource:
             no_market_id = 0
             
             for item in clob_markets_list:
-                market_id = item.get('id') or item.get('conditionId')
-                condition_id = item.get('conditionId') or item.get('id')
+                # CLOB API may use 'condition_id' (snake_case) or 'conditionId' (camelCase)
+                # Also check for 'id' or 'question_id'
+                market_id = (
+                    item.get('condition_id') or 
+                    item.get('conditionId') or 
+                    item.get('id') or 
+                    item.get('question_id') or
+                    item.get('questionId')
+                )
+                condition_id = (
+                    item.get('condition_id') or 
+                    item.get('conditionId') or 
+                    item.get('id')
+                )
                 if not market_id:
                     no_market_id += 1
                     if no_market_id <= 3:
-                        logger.debug("Market skipped - no ID", item_keys=list(item.keys())[:10])
+                        logger.warning("Market skipped - no ID found", 
+                                     item_keys=list(item.keys())[:15],
+                                     sample_item=dict(list(item.items())[:5]))
                     continue
 
                 # Merge volume data from Gamma API if available (try both id and conditionId)
@@ -316,7 +332,13 @@ class PolymarketDataSource:
                 # Log first few markets that were filtered to understand why
                 sample_count = 0
                 for item in clob_markets_list[:10]:
-                    market_id = item.get('id') or item.get('conditionId')
+                    market_id = (
+                        item.get('condition_id') or 
+                        item.get('conditionId') or 
+                        item.get('id') or 
+                        item.get('question_id') or
+                        item.get('questionId')
+                    )
                     if market_id:
                         logger.debug("Sample filtered market",
                                    market_id=market_id[:20],
