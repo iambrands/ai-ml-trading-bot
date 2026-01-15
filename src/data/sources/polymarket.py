@@ -1,6 +1,6 @@
 """Polymarket data source using py-clob-client and Gamma API."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 import aiohttp
 
@@ -274,25 +274,44 @@ class PolymarketDataSource:
                     item['volume'] = gamma_market_item.get('volume', 0.0)  # Total volume
                     logger.debug("Merged volume data from Gamma API", market_id=market_id[:20], volume24hr=item.get('volume24hr', 0.0))
 
-                # Filter for valid markets (more permissive)
-                # Only filter out archived markets - these are completely removed
-                # Closed markets are just resolved markets - still valid for predictions
-                # accepting_orders and active flags are not reliable indicators
+                # Filter for valid markets
+                # 1. Filter out archived markets (completely removed from platform)
                 is_archived = item.get("archived", False)
-                
-                # Only reject if archived (completely removed from platform)
-                # Keep all other markets (active, closed/resolved, etc.)
                 if is_archived:
                     strict_filtered += 1
                     if strict_filtered <= 5:  # Log first few to debug
                         logger.debug("Market filtered - archived", 
                                    market_id=market_id[:20],
-                                   archived=is_archived,
-                                   closed=item.get("closed"),
-                                   active=item.get("active"),
-                                   accepting_orders=item.get("accepting_orders"))
+                                   archived=is_archived)
                     continue
                 
+                # 2. Filter out markets that have already ended (stale data)
+                end_date_str = item.get("end_date_iso") or item.get("end_date")
+                if end_date_str:
+                    try:
+                        # Parse ISO date string
+                        if end_date_str.endswith('Z'):
+                            end_date_str = end_date_str.replace('Z', '+00:00')
+                        end_date = datetime.fromisoformat(end_date_str)
+                        # Use UTC if timezone-naive
+                        if end_date.tzinfo is None:
+                            end_date = end_date.replace(tzinfo=timezone.utc)
+                        # Filter out markets that ended more than 1 day ago
+                        # (Allow some buffer for recently resolved markets)
+                        now = datetime.now(timezone.utc)
+                        if end_date < (now - timedelta(days=1)):
+                            strict_filtered += 1
+                            if strict_filtered <= 5:
+                                logger.debug("Market filtered - ended", 
+                                           market_id=market_id[:20],
+                                           end_date=end_date_str,
+                                           days_ago=(now - end_date).days)
+                            continue
+                    except (ValueError, TypeError) as e:
+                        # If date parsing fails, log but don't filter (might be valid market)
+                        logger.debug("Could not parse end_date", market_id=market_id[:20], end_date=end_date_str, error=str(e))
+                
+                # 3. Parse market object
                 market = self._parse_market(item)
                 if not market:
                     parse_failed += 1
@@ -300,6 +319,7 @@ class PolymarketDataSource:
                         logger.debug("Market parse failed", market_id=market_id[:20], item_keys=list(item.keys())[:10])
                     continue
                     
+                # 4. Filter out markets with resolved outcomes (already resolved)
                 if market.outcome:
                     outcome_filtered += 1
                     continue
