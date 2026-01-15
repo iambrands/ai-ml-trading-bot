@@ -684,16 +684,6 @@
                 <div id="alerts-content"></div>
             </div>
 
-                
-                <!-- Recent Activity Feed -->
-                <div class="activity-feed">
-                    <h3>📊 Recent Activity</h3>
-                    <ul id="activityList">
-                        <li style="text-align: center; color: #94a3b8; padding: 20px;">Loading activity...</li>
-                    </ul>
-                </div>
-            </div>
-
             <!-- Settings Tab -->
             <div id="settings" class="tab-content">
                 <h2>⚙️ Settings & Preferences</h2>
@@ -2449,7 +2439,7 @@
         checkWalletConnection();
         loadPreferences();
         loadDashboardStats(); // Load dashboard stats
-        loadActivity(); // Load activity feed
+        loadActivity(); // Load activity feed (only for dashboard)
         loadTradingSettings(); // Load trading settings
         startAutoRefresh(); // Start auto-refresh
         setInterval(checkHealth, 30000); // Check health every 30 seconds
