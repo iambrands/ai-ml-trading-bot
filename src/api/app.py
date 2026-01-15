@@ -415,7 +415,15 @@ async def get_markets(
     try:
         from sqlalchemy.orm import joinedload
         
-        query = select(Market)
+        from datetime import timedelta
+        
+        # Filter out markets that ended more than 1 day ago (stale data)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=1)
+        
+        query = select(Market).where(
+            # Only include markets that haven't ended yet, or ended recently (<1 day ago)
+            (Market.resolution_date.is_(None)) | (Market.resolution_date >= cutoff_date)
+        )
         
         if outcome:
             query = query.where(Market.outcome == outcome.upper())
