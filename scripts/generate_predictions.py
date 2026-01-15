@@ -21,6 +21,7 @@ from src.database.connection import AsyncSessionLocal, get_db
 from src.database.models import Market as DBMarket, Prediction, Signal, Trade, PortfolioSnapshot
 from src.trading.signal_generator import SignalGenerator
 from src.utils.logging import configure_logging, get_logger
+from src.utils.async_utils import batch_process
 from sqlalchemy import select, func, desc
 from decimal import Decimal
 
@@ -247,109 +248,136 @@ async def generate_predictions(limit: int = 10, auto_generate_signals: bool = Tr
             logger.warning("No active markets found")
             return
         
-        # Get database connection
-        predictions_saved = 0
-        signals_created = 0
-        trades_created = 0
-        cache_hits = 0
-        
         # Create database session directly (not using get_db() dependency)
         if not AsyncSessionLocal:
             logger.error("Database not configured - cannot generate predictions")
             return
         
-        async with AsyncSessionLocal() as db:
-            try:
-                for market in markets:
+        # Process markets in batches to improve performance and avoid timeouts
+        # Use smaller batches to prevent database session exhaustion
+        batch_size = min(5, limit)  # Process 5 markets at a time
+        predictions_saved = 0
+        signals_created = 0
+        trades_created = 0
+        cache_hits = 0
+        
+        async def process_single_market(market):
+            """Process a single market - extracted for parallel processing."""
+            # Create new database session for each market to avoid session exhaustion
+            async with AsyncSessionLocal() as db:
+                try:
+                    # Save market to database first
+                    await save_market_to_db(market, db)
+                    
+                    # Check cache first
+                    current_price = float(market.yes_price)
+                    resolution_date = market.resolution_date
+                    
+                    # Check if we should use cached prediction
+                    should_regenerate = await cache.should_regenerate(
+                        market.id, 
+                        current_price,
+                        resolution_date
+                    )
+                    
+                    if not should_regenerate:
+                        cached_pred = cache.get_cached(market.id)
+                        if cached_pred:
+                            logger.info(
+                                "Using cached prediction",
+                                market_id=market.id[:20],
+                                cached_pred=f"{cached_pred:.2%}"
+                            )
+                            # Still need to save to DB for tracking, but skip expensive operations
+                            # For now, we'll still generate to ensure data freshness
+                    
+                    # Fetch all data for market (with timeout protection)
+                    import asyncio
                     try:
-                        # Save market to database first
-                        await save_market_to_db(market, db)
-                        
-                        # Check cache first
-                        current_price = float(market.yes_price)
-                        resolution_date = market.resolution_date
-                        
-                        # Check if we should use cached prediction
-                        should_regenerate = await cache.should_regenerate(
-                            market.id, 
-                            current_price,
-                            resolution_date
+                        data = await asyncio.wait_for(
+                            data_aggregator.fetch_all_for_market(market),
+                            timeout=30.0  # 30 second timeout per market
                         )
-                        
-                        if not should_regenerate:
-                            cached_pred = cache.get_cached(market.id)
-                            if cached_pred:
-                                logger.info(
-                                    "Using cached prediction",
-                                    market_id=market.id[:20],
-                                    cached_pred=f"{cached_pred:.2%}"
-                                )
-                                cache_hits += 1
-                                # Still need to save to DB for tracking, but skip expensive operations
-                                # For now, we'll still generate to ensure data freshness
-                                # In future, could optimize further
-                        
-                        # Fetch all data for market
-                        data = await data_aggregator.fetch_all_for_market(market)
-                        
-                        # Generate features
-                        features = await feature_pipeline.generate_features(market, data)
-                        
-                        # Get feature names
-                        feature_names = feature_pipeline.get_feature_names()
-                        if not feature_names:
-                            feature_names = sorted(features.features.keys())
-                        
-                        # Get predictions from individual models
-                        import numpy as np
-                        X = np.array([[features.features.get(name, 0.0) for name in feature_names]])
-                        
-                        model_predictions = {}
-                        for name, model in ensemble.models.items():
-                            try:
-                                pred = model.predict_proba(X)[0]
-                                model_predictions[name] = float(pred)
-                            except Exception as e:
-                                logger.warning("Model prediction failed", model=name, error=str(e))
-                                # Use XGBoost prediction as fallback if available
-                                if name == "lightgbm" and "xgboost" in model_predictions:
-                                    model_predictions[name] = model_predictions["xgboost"]
-                                else:
-                                    model_predictions[name] = 0.5
-                        
-                        # Get ensemble prediction
-                        prediction = ensemble.predict_proba(market, features, feature_names)
-                        
-                        # Update cache with new prediction
-                        cache.update_cache(market.id, prediction.probability, current_price)
-                        
-                        # Save prediction to database (and auto-generate signal/trade if enabled)
-                        await save_prediction_to_db(market, prediction, model_predictions, db, signal_generator, auto_create_trades)
-                        predictions_saved += 1
-                        
-                        logger.info(
-                            "Prediction generated",
-                            market_id=market.id[:20],
-                            model_prob=f"{prediction.probability:.4f}",
-                            market_price=f"{market.yes_price:.4f}",
-                            edge=f"{prediction.probability - market.yes_price:.4f}",
-                        )
-                        
-                    except Exception as e:
-                        logger.error("Failed to process market", market_id=market.id, error=str(e), exc_info=True)
+                    except asyncio.TimeoutError:
+                        logger.warning("Market data fetch timeout", market_id=market.id[:20])
+                        return 0, 0, 0  # Skip this market
+                    
+                    # Generate features
+                    features = await feature_pipeline.generate_features(market, data)
+                    
+                    # Get feature names
+                    feature_names = feature_pipeline.get_feature_names()
+                    if not feature_names:
+                        feature_names = sorted(features.features.keys())
+                    
+                    # Get predictions from individual models
+                    import numpy as np
+                    X = np.array([[features.features.get(name, 0.0) for name in feature_names]])
+                    
+                    model_predictions = {}
+                    for name, model in ensemble.models.items():
+                        try:
+                            pred = model.predict_proba(X)[0]
+                            model_predictions[name] = float(pred)
+                        except Exception as e:
+                            logger.warning("Model prediction failed", model=name, error=str(e))
+                            # Use XGBoost prediction as fallback if available
+                            if name == "lightgbm" and "xgboost" in model_predictions:
+                                model_predictions[name] = model_predictions["xgboost"]
+                            else:
+                                model_predictions[name] = 0.5
+                    
+                    # Get ensemble prediction
+                    prediction = ensemble.predict_proba(market, features, feature_names)
+                    
+                    # Update cache with new prediction
+                    cache.update_cache(market.id, prediction.probability, current_price)
+                    
+                    # Save prediction to database (and auto-generate signal/trade if enabled)
+                    await save_prediction_to_db(market, prediction, model_predictions, db, signal_generator, auto_create_trades)
+                    
+                    logger.info(
+                        "Prediction generated",
+                        market_id=market.id[:20],
+                        model_prob=f"{prediction.probability:.4f}",
+                        market_price=f"{market.yes_price:.4f}",
+                        edge=f"{prediction.probability - market.yes_price:.4f}",
+                    )
+                    
+                    return 1, 1 if signal_generator else 0, 1 if auto_create_trades else 0
+                    
+                except Exception as e:
+                    logger.error("Failed to process market", market_id=market.id, error=str(e), exc_info=True)
+                    try:
                         await db.rollback()  # Rollback on error
-                        continue
-                
-                # Update portfolio snapshot if we created trades
-                if trades_created > 0:
-                    try:
-                        await update_portfolio_snapshot(db)
-                    except Exception as e:
-                        logger.warning("Failed to update portfolio snapshot", error=str(e))
-            except Exception as e:
-                logger.error("Failed during prediction generation", error=str(e), exc_info=True)
-                await db.rollback()
-                raise
+                    except:
+                        pass
+                    return 0, 0, 0
+        
+        # Process markets in batches with controlled concurrency
+        # This prevents overwhelming the database and APIs
+        logger.info("Processing markets in batches", total_markets=len(markets), batch_size=batch_size, concurrency=3)
+        
+        results = await batch_process(
+            markets,
+            process_single_market,
+            batch_size=batch_size,
+            concurrency=3  # Process 3 markets concurrently (not all at once)
+        )
+        
+        # Sum up results
+        for pred_count, signal_count, trade_count in results:
+            predictions_saved += pred_count
+            signals_created += signal_count
+            trades_created += trade_count
+        
+        # Update portfolio snapshot if we created trades (single session for this)
+        if trades_created > 0:
+            async with AsyncSessionLocal() as db:
+                try:
+                    await update_portfolio_snapshot(db)
+                except Exception as e:
+                    logger.warning("Failed to update portfolio snapshot", error=str(e))
         
         # Get cache stats
         cache_stats = cache.get_cache_stats()
