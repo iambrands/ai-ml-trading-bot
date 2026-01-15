@@ -125,14 +125,11 @@ client = ClobClient(api_url="https://clob.polymarket.com")
 # Only uses: client.get_markets(), client.get_market(), etc.
 # NEVER uses: client.create_order(), client.place_order(), etc.
 
-# Missing: Order execution
-# client.create_order(
-#     token_id=market_id,
-#     side="BUY",
-#     price=0.50,
-#     size=100,
-#     fee_rate=0.02
-# )
+# TradeExecutor._place_order() - STUB ONLY
+async def _place_order(self, signal, size, price):
+    # TODO: Integrate with Polymarket CLOB API
+    # For now, simulate successful order placement
+    return True  # Always returns True (simulated)
 ```
 
 **Status**: ❌ **NOT IMPLEMENTED**
@@ -354,10 +351,11 @@ client = ClobClient(api_url="https://clob.polymarket.com")
 - Real Transactions: Not possible
 
 ### 🎯 Current State:
-- **System is in Paper Trading Mode by default**
-- **All trades are simulated**
+- **System is in Paper Trading Mode by default** (`paper_trading_mode=True`)
+- **All trades are simulated** (stored with `paper_trading=True`)
 - **No real money is at risk**
 - **Perfect for testing and demos**
+- **TradeExecutor exists but only simulates orders** (no real API calls)
 
 ### 📋 To Enable Live Trading:
 1. Implement wallet integration
