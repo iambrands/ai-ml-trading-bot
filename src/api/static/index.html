@@ -537,7 +537,13 @@
                 <!-- Dashboard content will be loaded by JavaScript -->
                 <div id="dashboard-content">
                     <div id="dashboard-stats"></div>
-                    <div id="activity-feed"></div>
+                    <!-- Recent Activity Feed - ONLY in Dashboard -->
+                    <div class="activity-feed" style="margin-top: 30px;">
+                        <h3>📊 Recent Activity</h3>
+                        <ul id="activityList">
+                            <li style="text-align: center; color: #94a3b8; padding: 20px;">Loading activity...</li>
+                        </ul>
+                    </div>
                     <div id="trading-settings-preview"></div>
                 </div>
             </div>
