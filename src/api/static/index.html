@@ -379,22 +379,22 @@
 
         .badge-success {
             background: #1e3a5f;
-            color: #155724;
+            color: #10b981;
         }
 
         .badge-danger {
             background: #f8d7da;
-            color: #721c24;
+            color: #ef4444;
         }
 
         .badge-warning {
-            background: #fff3cd;
-            color: #856404;
+            background: #1e3a5f;
+            color: #f59e0b;
         }
 
         .badge-info {
             background: #d1ecf1;
-            color: #0c5460;
+            color: #3b82f6;
         }
 
         .loading {
@@ -420,7 +420,7 @@
 
         .error {
             background: #f8d7da;
-            color: #721c24;
+            color: #ef4444;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
@@ -757,7 +757,7 @@
                             </div>
                         </label>
                     </div>
-                    <div id="mode-status" style="padding: 15px; border-radius: 8px; background: #fff3cd; color: #856404;">
+                    <div id="mode-status" style="padding: 15px; border-radius: 8px; background: #1e3a5f; color: #f59e0b;">
                         <strong>⚠️ Test Mode Active:</strong> Deposits and trades are simulated. Perfect for testing with $100!
                     </div>
                 </div>
@@ -766,7 +766,7 @@
                 <div style="background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <h3 style="color: #3b82f6; margin-bottom: 20px;">💰 Account Funding</h3>
                     <div id="funding-mode-info" style="margin-bottom: 20px; padding: 15px; background: #1e3a5f; border-left: 4px solid #2196F3; border-radius: 8px;">
-                        <p style="margin: 0; color: #0c5460;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>
+                        <p style="margin: 0; color: #3b82f6;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>
                     </div>
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-weight: 600;">Deposit Amount (USD)</label>
@@ -879,7 +879,7 @@
                     <div style="margin-bottom: 25px;">
                         <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Step 2: Choose Your Mode</h4>
                         <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;">Go to Settings tab and choose:</p>
-                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
+                        <div style="background: #1e3a5f; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
                             <strong>Test Mode (Recommended for First Time):</strong>
                             <ul style="margin-top: 10px; margin-left: 20px;">
                                 <li>Simulate deposits (test with $100)</li>
@@ -1318,13 +1318,27 @@
 
         // Tab switching with auto-load
         function showTab(tabName) {
+            // Remove active from all tabs
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
+            
+            // Set active tab button
+            const tabButtons = document.querySelectorAll('.tab');
+            tabButtons.forEach(btn => {
+                if (btn.getAttribute('onclick') === `showTab('${tabName}')`) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Set active content
             document.getElementById(tabName).classList.add('active');
             
             // Auto-load data when tab is switched
             switch(tabName) {
+                case 'dashboard':
+                    loadDashboardStats();
+                    loadActivity();
+                    break;
                 case 'markets':
                     loadMarkets();
                     break;
@@ -2065,8 +2079,8 @@
             if (liveMode) {
                 modeStatus.innerHTML = '<strong>✅ Live Mode Active:</strong> Real MetaMask connection and real deposits/trades enabled. Make sure your wallet is connected!';
                 modeStatus.style.background = '#1e3a5f';
-                modeStatus.style.color = '#155724';
-                fundingInfo.innerHTML = '<p style="margin: 0; color: #155724;"><strong>Live Mode:</strong> Deposits will be processed through your connected MetaMask wallet. Real funds will be transferred.</p>';
+                modeStatus.style.color = '#10b981';
+                fundingInfo.innerHTML = '<p style="margin: 0; color: #10b981;"><strong>Live Mode:</strong> Deposits will be processed through your connected MetaMask wallet. Real funds will be transferred.</p>';
                 fundingInfo.style.background = '#1e3a5f';
                 fundingInfo.style.borderLeftColor = '#10b981';
                 depositBtn.textContent = 'Deposit Funds (Real)';
@@ -2077,9 +2091,9 @@
                 simulationItem2.textContent = 'Trade execution (real Polymarket trades)';
             } else {
                 modeStatus.innerHTML = '<strong>⚠️ Test Mode Active:</strong> Deposits and trades are simulated. Perfect for testing with $100!';
-                modeStatus.style.background = '#fff3cd';
-                modeStatus.style.color = '#856404';
-                fundingInfo.innerHTML = '<p style="margin: 0; color: #0c5460;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>';
+                modeStatus.style.background = '#1e3a5f';
+                modeStatus.style.color = '#f59e0b';
+                fundingInfo.innerHTML = '<p style="margin: 0; color: #3b82f6;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>';
                 fundingInfo.style.background = '#1e3a5f';
                 fundingInfo.style.borderLeftColor = '#2196F3';
                 depositBtn.textContent = 'Deposit Funds (Simulated)';
