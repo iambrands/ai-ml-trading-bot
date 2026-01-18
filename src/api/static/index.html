@@ -335,7 +335,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: var(--card-gradient, linear-gradient(90deg, #0066FF, #8b5cf6));
+            background: var(--card-gradient, linear-gradient(90deg, #0066FF, #338EFF));
         }
 
         .stat-card:hover {
@@ -527,23 +527,52 @@
         }
 
         .badge-success {
-            background: #1e3a5f;
-            color: #10b981;
+            background: #d1fae5; /* Light green background */
+            color: #065f46; /* Dark green text */
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
         }
 
         .badge-danger {
-            background: #f8d7da;
-            color: #ef4444;
+            background: #fee2e2; /* Light red background */
+            color: #991b1b; /* Dark red text */
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
         }
 
         .badge-warning {
-            background: #1e3a5f;
-            color: #f59e0b;
+            background: #fef3c7; /* Light yellow background */
+            color: #92400e; /* Dark yellow text */
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
         }
 
         .badge-info {
-            background: #d1ecf1;
-            color: #0066FF;
+            background: #dbeafe; /* Light blue background */
+            color: #1e40af; /* Dark blue text */
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        /* Text utility classes for P&L and status indicators */
+        .text-success {
+            color: #10B981; /* Green for positive/profit */
+        }
+
+        .text-danger {
+            color: #EF4444; /* Red for negative/loss */
+        }
+
+        .text-warning {
+            color: #F59E0B; /* Yellow for warnings/neutral */
         }
 
         .loading {
@@ -583,22 +612,25 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #0066FF 0%, #003D99 100%);
-            color: white;
+            background: #FFFFFF; /* White background */
+            color: #1A1A1A; /* Black text */
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #F1F3F5; /* Light gray border */
         }
 
         .stat-card h3 {
             font-size: 0.9em;
-            opacity: 0.9;
+            color: #6B7280; /* Gray text */
             margin-bottom: 10px;
+            font-weight: 600;
         }
 
         .stat-card .value {
             font-size: 2.5em;
             font-weight: 700;
+            color: #1A1A1A; /* Black text */
         }
 
         .empty-state {
@@ -878,7 +910,7 @@
             <button class="tab" onclick="showTab('help')">❓ Help & FAQ</button>
         </div>
         
-        <div style="background: #1e3a5f; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+        <div style="background: #E6F0FF; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
             <strong>✅ Auto-Refresh Active:</strong> All pages automatically refresh every 30 seconds to show the latest data. Predictions are generated every 5 minutes by the background service. No manual refresh needed - just wait and new data will appear!
         </div>
 
@@ -886,7 +918,7 @@
             <!-- Dashboard Tab -->
             <div id="dashboard" class="tab-content active">
                 <h2>🏠 Dashboard</h2>
-                <div style="background: #1e3a5f; border-left: 4px solid #0066FF; padding: 12px; margin-bottom: 20px; border-radius: 4px; color: #e0f2fe;">
+                <div style="background: #E6F0FF; border-left: 4px solid #0066FF; padding: 12px; margin-bottom: 20px; border-radius: 4px; color: #e0f2fe;">
                     <strong>✅ Auto-Refresh:</strong> Dashboard updates every 30 seconds with latest stats and activity.
                 </div>
                 <!-- Dashboard content will be loaded by JavaScript -->
@@ -940,7 +972,7 @@
             <!-- Predictions Tab -->
             <div id="predictions" class="tab-content">
                 <h2>Model Predictions</h2>
-                <div style="background: #1e3a5f; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                <div style="background: #E6F0FF; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
                     <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show new predictions. Predictions are generated every 5 minutes by the background service.
                 </div>
                 <div class="controls">
@@ -961,7 +993,7 @@
             <!-- Signals Tab -->
             <div id="signals" class="tab-content">
                 <h2>Trading Signals</h2>
-                <div style="background: #1e3a5f; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                <div style="background: #E6F0FF; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
                     <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show new signals. Signals are created automatically when predictions meet the edge threshold.
                 </div>
                 <div class="controls">
@@ -987,7 +1019,7 @@
             <!-- Trades Tab -->
             <div id="trades" class="tab-content">
                 <h2>Trades</h2>
-                <div style="background: #1e3a5f; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                <div style="background: #E6F0FF; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
                     <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show new trades. Trades are created automatically from signals (if auto-trading is enabled).
                 </div>
                 <div class="controls">
@@ -1014,7 +1046,7 @@
             <!-- Portfolio Tab -->
             <div id="portfolio" class="tab-content">
                 <h2>Portfolio</h2>
-                <div style="background: #1e3a5f; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                <div style="background: #E6F0FF; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
                     <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show portfolio updates. Portfolio is updated automatically when trades are executed.
                 </div>
                 <div class="controls">
@@ -1027,7 +1059,7 @@
             <!-- Analytics Tab -->
             <div id="analytics" class="tab-content">
                 <h2>📈 Advanced Analytics Dashboard</h2>
-                <div style="background: #1e3a5f; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                <div style="background: #E6F0FF; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
                     <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show the latest analytics. Analytics are calculated from your predictions, signals, and trades.
                 </div>
                 <div class="controls">
@@ -1043,7 +1075,7 @@
             <!-- Alerts Tab -->
             <div id="alerts" class="tab-content">
                 <h2>🔔 Real-Time Alerts & Notifications</h2>
-                <div style="background: #1e3a5f; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
+                <div style="background: #E6F0FF; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
                     <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds. Alerts are sent automatically when signals match your configured rules.
                 </div>
                 <div class="controls">
@@ -1117,7 +1149,7 @@
                             </div>
                         </label>
                     </div>
-                    <div id="mode-status" style="padding: 15px; border-radius: 8px; background: #1e3a5f; color: #f59e0b;">
+                    <div id="mode-status" style="padding: 15px; border-radius: 8px; background: #E6F0FF; color: #f59e0b;">
                         <strong>⚠️ Test Mode Active:</strong> Deposits and trades are simulated. Perfect for testing with $100!
                     </div>
                 </div>
@@ -1125,7 +1157,7 @@
                 <!-- Account Funding -->
                 <div style="background: #FFFFFF; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <h3 style="color: #0066FF; margin-bottom: 20px;">💰 Account Funding</h3>
-                    <div id="funding-mode-info" style="margin-bottom: 20px; padding: 15px; background: #1e3a5f; border-left: 4px solid #2196F3; border-radius: 8px;">
+                    <div id="funding-mode-info" style="margin-bottom: 20px; padding: 15px; background: #E6F0FF; border-left: 4px solid #2196F3; border-radius: 8px;">
                         <p style="margin: 0; color: #0066FF;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>
                     </div>
                     <div style="margin-bottom: 20px;">
@@ -1239,7 +1271,7 @@
                     <div style="margin-bottom: 25px;">
                         <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.3em;">Step 2: Choose Your Mode</h4>
                         <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;">Go to Settings tab and choose:</p>
-                        <div style="background: #1e3a5f; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
+                        <div style="background: #E6F0FF; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
                             <strong>Test Mode (Recommended for First Time):</strong>
                             <ul style="margin-top: 10px; margin-left: 20px;">
                                 <li>Simulate deposits (test with $100)</li>
@@ -1247,7 +1279,7 @@
                                 <li>No real money at risk</li>
                             </ul>
                         </div>
-                        <div style="background: #1e3a5f; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
+                        <div style="background: #E6F0FF; padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
                             <strong>Live Mode (When Ready):</strong>
                             <ul style="margin-top: 10px; margin-left: 20px;">
                                 <li>Real MetaMask deposits</li>
@@ -1306,7 +1338,7 @@
                             <li>Browse markets to find interesting questions</li>
                             <li>Use "Refresh Now" button for manual refresh if needed</li>
                         </ul>
-                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-100 markets</span> (Default: 50) - Controls how many markets appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #E6F0FF; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-100 markets</span> (Default: 50) - Controls how many markets appear on the page. Higher = more data but slower loading.</p>
                         <p style="color: #6B7280; line-height: 1.8;"><strong>Key fields:</strong> Question, YES/NO prices, Outcome (Active/Resolved/Closed), Resolution Date</p>
                     </div>
 
@@ -1320,7 +1352,7 @@
                             <li>Look for predictions with <strong>high edge</strong> (>10%) = opportunity</li>
                             <li>Look for predictions with <strong>high confidence</strong> (>60%) = model is sure</li>
                         </ul>
-                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 predictions</span> (Default: 50) - Controls how many predictions appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #E6F0FF; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 predictions</span> (Default: 50) - Controls how many predictions appear on the page. Higher = more data but slower loading.</p>
                         <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Understanding the data:</strong></p>
                         <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li><strong>Model Probability:</strong> What the AI thinks (0-100%)</li>
@@ -1341,7 +1373,7 @@
                             <li>Focus on <strong>STRONG signals</strong> (best opportunities)</li>
                             <li>Signals are automatically created from predictions</li>
                         </ul>
-                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 signals</span> (Default: 50) - Controls how many signals appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #E6F0FF; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 signals</span> (Default: 50) - Controls how many signals appear on the page. Higher = more data but slower loading.</p>
                         <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Signal Strength:</strong></p>
                         <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li><strong>STRONG:</strong> >15% edge (best opportunities)</li>
@@ -1361,7 +1393,7 @@
                             <li>Monitor <strong>OPEN trades</strong> for active positions</li>
                             <li>Review <strong>P&L</strong> on closed trades</li>
                         </ul>
-                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 trades</span> (Default: 50) - Controls how many trades appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #E6F0FF; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 trades</span> (Default: 50) - Controls how many trades appear on the page. Higher = more data but slower loading.</p>
                         <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Understanding the data:</strong></p>
                         <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li><strong>Side:</strong> YES or NO position</li>
@@ -1381,7 +1413,7 @@
                             <li>Data refreshes every 30 seconds automatically</li>
                             <li>Monitor your portfolio performance in real-time</li>
                         </ul>
-                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Shows latest snapshot</span> - Portfolio displays the most recent snapshot automatically.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #E6F0FF; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Shows latest snapshot</span> - Portfolio displays the most recent snapshot automatically.</p>
                         <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Key Metrics:</strong></p>
                         <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li><strong>Total Value:</strong> Entire portfolio (cash + positions + P&L)</li>
@@ -2304,9 +2336,9 @@
             const html = `
                 ${isDemo ? '<div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #20c997 100%); margin-bottom: 20px;"><h3>Data Source</h3><div class="value" style="font-size: 1.2em;">Demo Portfolio</div></div>' : ''}
                 <div class="stats-grid">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #0066FF 0%, #003D99 100%);">
+                    <div class="stat-card" style="background: #FFFFFF; border-top: 4px solid #0066FF;">
                         <h3>Total Value</h3>
-                        <div class="value" style="font-size: 2em;">$${portfolio.total_value.toFixed(2)}</div>
+                        <div class="value" style="font-size: 2em; color: #0066FF;">$${portfolio.total_value.toFixed(2)}</div>
                     </div>
                     <div class="stat-card">
                         <h3>Cash</h3>
@@ -2366,9 +2398,9 @@
         function displayAnalytics(analytics, container) {
             const html = `
                 <div class="stats-grid">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #0066FF 0%, #003D99 100%);">
+                    <div class="stat-card" style="background: #FFFFFF; border-top: 4px solid #0066FF;">
                         <h3>Total Predictions</h3>
-                        <div class="value" style="font-size: 2em;">${analytics.total_predictions || 0}</div>
+                        <div class="value" style="font-size: 2em; color: #0066FF;">${analytics.total_predictions || 0}</div>
                     </div>
                     <div class="stat-card">
                         <h3>Total Signals</h3>
@@ -2614,10 +2646,10 @@
 
             if (liveMode) {
                 modeStatus.innerHTML = '<strong>✅ Live Mode Active:</strong> Real MetaMask connection and real deposits/trades enabled. Make sure your wallet is connected!';
-                modeStatus.style.background = '#1e3a5f';
+                modeStatus.style.background = '#E6F0FF';
                 modeStatus.style.color = '#10b981';
                 fundingInfo.innerHTML = '<p style="margin: 0; color: #10b981;"><strong>Live Mode:</strong> Deposits will be processed through your connected MetaMask wallet. Real funds will be transferred.</p>';
-                fundingInfo.style.background = '#1e3a5f';
+                fundingInfo.style.background = '#E6F0FF';
                 fundingInfo.style.borderLeftColor = '#10b981';
                 depositBtn.textContent = 'Deposit Funds (Real)';
                 depositBtn.style.background = '#ef4444';
@@ -2627,10 +2659,10 @@
                 simulationItem2.textContent = 'Trade execution (real Polymarket trades)';
             } else {
                 modeStatus.innerHTML = '<strong>⚠️ Test Mode Active:</strong> Deposits and trades are simulated. Perfect for testing with $100!';
-                modeStatus.style.background = '#1e3a5f';
+                modeStatus.style.background = '#E6F0FF';
                 modeStatus.style.color = '#f59e0b';
                 fundingInfo.innerHTML = '<p style="margin: 0; color: #0066FF;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>';
-                fundingInfo.style.background = '#1e3a5f';
+                fundingInfo.style.background = '#E6F0FF';
                 fundingInfo.style.borderLeftColor = '#2196F3';
                 depositBtn.textContent = 'Deposit Funds (Simulated)';
                 depositBtn.style.background = '#10b981';
