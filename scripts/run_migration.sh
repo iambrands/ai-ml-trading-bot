@@ -1,29 +1,42 @@
 #!/bin/bash
-# Run database migration for alerts and paper trading
+# Run migration on Railway
 
-set -e
+set -e  # Exit on error
 
-echo "🚀 Running database migration for alerts and paper trading..."
+echo "🚀 Running database migration on Railway..."
+echo ""
 
 # Check if DATABASE_URL is set
 if [ -z "$DATABASE_URL" ]; then
-    echo "❌ DATABASE_URL not set. Please set it or use Railway CLI:"
-    echo "   railway connect postgres"
+    echo "❌ ERROR: DATABASE_URL not set"
+    echo ""
+    echo "Get it from Railway:"
+    echo "1. Go to Railway Dashboard"
+    echo "2. Click Postgres service"
+    echo "3. Click Variables tab"
+    echo "4. Copy DATABASE_URL value"
+    echo ""
+    echo "Then run:"
+    echo "  export DATABASE_URL='postgresql://...'"
+    echo "  ./scripts/run_migration.sh"
     exit 1
 fi
 
+# Check if Python is available
+if ! command -v python3 &> /dev/null; then
+    echo "❌ ERROR: python3 not found"
+    exit 1
+fi
+
+# Install dependencies if needed
+if ! python3 -c "import psycopg2" 2>/dev/null; then
+    echo "📦 Installing psycopg2-binary..."
+    pip install psycopg2-binary --quiet
+    echo ""
+fi
+
 # Run migration
-psql "$DATABASE_URL" -f src/database/migrations/add_alerts_and_paper_trading.sql
+python3 scripts/run_migration.py
 
-echo "✅ Migration completed successfully!"
 echo ""
-echo "New tables created:"
-echo "  - alerts"
-echo "  - alert_history"
-echo "  - analytics_cache"
-echo ""
-echo "Columns added:"
-echo "  - trades.paper_trading"
-echo "  - portfolio_snapshots.paper_trading"
-
-
+echo "✅ Migration complete!"
