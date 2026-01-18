@@ -18,6 +18,7 @@ from ..database import get_db, init_db
 from ..database.connection import AsyncSessionLocal, get_pool_stats
 from ..database.models import Market, Prediction, Signal, Trade, PortfolioSnapshot
 from ..utils.logging import configure_logging, get_logger
+from .cache import cache_response
 
 # Import endpoints (with error handling for optional modules)
 try:
@@ -258,6 +259,7 @@ async def favicon():
 
 
 @app.get("/health")
+@cache_response(seconds=30)  # Cache for 30 seconds - health checks don't need real-time
 async def health():
     """Comprehensive health check for all system components."""
     from fastapi import status
@@ -405,6 +407,7 @@ async def health():
 
 
 @app.get("/markets", response_model=List[MarketResponse])
+@cache_response(seconds=30)  # Cache for 30 seconds - markets don't change frequently
 async def get_markets(
     limit: int = Query(default=100, ge=1, le=1000),
     offset: int = Query(default=0, ge=0),

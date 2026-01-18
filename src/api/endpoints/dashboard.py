@@ -12,6 +12,7 @@ from ...database.models import Trade, PortfolioSnapshot, Signal, Prediction, Mar
 from ...config.settings import get_settings
 from ...utils.logging import get_logger
 from ...utils.datetime_utils import make_naive_utc, now_naive_utc
+from ..cache import cache_response
 
 
 class TradingSettingsUpdate(BaseModel):
@@ -28,6 +29,7 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 @router.get("/stats")
+@cache_response(seconds=60)  # Cache for 60 seconds to avoid hitting DB on every request
 async def get_dashboard_stats(db: AsyncSession = Depends(get_db)) -> dict:
     """
     Get quick stats for dashboard widget.

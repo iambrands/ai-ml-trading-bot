@@ -1,90 +1,182 @@
-# 🚀 Run Database Migration - Quick Guide
+# 🚨 CRITICAL: Run Database Migration NOW
 
-## Migration Will Add:
-- ✅ `alerts` table (for notifications)
-- ✅ `alert_history` table (alert tracking)
-- ✅ `analytics_cache` table (performance optimization)
-- ✅ `paper_trading` column on `trades` table
-- ✅ `paper_trading` column on `portfolio_snapshots` table
+**The dashboard timeout error will NOT be fixed until you run this migration!**
 
-## Method 1: Railway CLI (Easiest) ✅
+---
+
+## ✅ FIXES ALREADY DEPLOYED (Code)
+
+- ✅ Query optimization in `dashboard.py`
+- ✅ 404 error handling in `polymarket.py`
+- ✅ Relaxed market filtering in `polymarket.py`
+
+## ❌ MISSING: Database Indexes
+
+**The dashboard query is still slow because the indexes don't exist yet!**
+
+---
+
+## 🎯 STEP 1: Get the Migration SQL
+
+**File**: `src/database/migrations/003_fix_dashboard_timeout.sql`
+
+**Contents**:
+```sql
+-- Fix dashboard stats timeout by adding missing indexes
+-- This migration fixes the "canceling statement due to statement timeout" error
+
+-- Add composite index for dashboard stats query
+-- Query: WHERE paper_trading = true AND snapshot_time < X ORDER BY snapshot_time DESC LIMIT 1
+CREATE INDEX IF NOT EXISTS idx_portfolio_paper_snapshot 
+ON portfolio_snapshots(paper_trading, snapshot_time DESC) 
+WHERE paper_trading = true;
+
+-- Add index on snapshot_time for sorting (if not exists)
+CREATE INDEX IF NOT EXISTS idx_portfolio_snapshot_time_desc 
+ON portfolio_snapshots(snapshot_time DESC);
+
+-- Add index on created_at if used in queries
+CREATE INDEX IF NOT EXISTS idx_portfolio_created_at_desc 
+ON portfolio_snapshots(created_at DESC);
+
+-- Analyze table to update query planner statistics
+ANALYZE portfolio_snapshots;
+
+-- Verify indexes were created
+SELECT 
+    indexname, 
+    indexdef 
+FROM pg_indexes 
+WHERE tablename = 'portfolio_snapshots'
+ORDER BY indexname;
+```
+
+---
+
+## 🎯 STEP 2: Apply Migration (Choose ONE Method)
+
+### **Method A: Railway Dashboard (Easiest)** ⭐ RECOMMENDED
+
+1. Go to **Railway Dashboard**: https://railway.app
+2. Select your **PostgreSQL service** (not the web service)
+3. Click the **"Query"** tab (or "Data" → "Query")
+4. **Copy the SQL** from `src/database/migrations/003_fix_dashboard_timeout.sql` (above)
+5. **Paste** into the query editor
+6. Click **"Execute"** or **"Run"**
+7. You should see:
+   ```
+   CREATE INDEX
+   CREATE INDEX
+   CREATE INDEX
+   ANALYZE
+   (indexes listed in results)
+   ```
+
+### **Method B: Railway CLI**
 
 ```bash
-# Connect to Railway database
+# Connect to PostgreSQL
 railway connect postgres
 
-# Once connected, run:
-\i src/database/migrations/add_alerts_and_paper_trading.sql
-
-# Or copy-paste the SQL directly:
+# Then paste the SQL from the migration file
+# (Copy from 003_fix_dashboard_timeout.sql)
+# Type \q to exit
 ```
 
-Then copy the contents of `src/database/migrations/add_alerts_and_paper_trading.sql` and paste into the psql prompt.
+### **Method C: Direct psql (If you have DATABASE_URL)**
 
-## Method 2: Using psql with DATABASE_URL
-
-### Step 1: Get DATABASE_URL from Railway
-1. Go to Railway Dashboard
-2. Click on your **PostgreSQL service**
-3. Click **"Variables"** tab
-4. Copy the `DATABASE_URL` value
-
-### Step 2: Run Migration
 ```bash
-# Set DATABASE_URL
-export DATABASE_URL='your-connection-string-here'
+# Set your Railway DATABASE_URL
+export DATABASE_URL="postgresql://user:pass@host:port/db"
 
 # Run migration
-psql "$DATABASE_URL" -f src/database/migrations/add_alerts_and_paper_trading.sql
+psql $DATABASE_URL -f src/database/migrations/003_fix_dashboard_timeout.sql
 ```
 
-Or use the script:
-```bash
-export DATABASE_URL='your-connection-string-here'
-./scripts/run_migration_railway.sh
-```
+---
 
-## Method 3: Railway Web Interface
+## ✅ STEP 3: Verify Indexes Were Created
 
-If Railway has a SQL query interface:
-1. Go to PostgreSQL service in Railway
-2. Look for "Query" or "SQL" tab
-3. Copy contents of `src/database/migrations/add_alerts_and_paper_trading.sql`
-4. Paste and run
+**After running the migration, verify in Railway PostgreSQL Query tab**:
 
-## Verification
-
-After running, verify with:
 ```sql
--- Check tables exist
-SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public' 
-AND table_name IN ('alerts', 'alert_history', 'analytics_cache');
-
--- Check columns exist
-SELECT column_name FROM information_schema.columns 
-WHERE table_name = 'trades' AND column_name = 'paper_trading';
-
-SELECT column_name FROM information_schema.columns 
-WHERE table_name = 'portfolio_snapshots' AND column_name = 'paper_trading';
+SELECT 
+    indexname, 
+    indexdef 
+FROM pg_indexes 
+WHERE tablename = 'portfolio_snapshots'
+ORDER BY indexname;
 ```
 
-## Expected Output
-
-You should see:
+**Expected Output**:
 ```
-CREATE TABLE
-CREATE INDEX
-CREATE TABLE
-CREATE INDEX
-ALTER TABLE
-CREATE INDEX
-ALTER TABLE
-CREATE INDEX
-CREATE TABLE
-CREATE INDEX
+idx_portfolio_paper_snapshot
+idx_portfolio_snapshot_time_desc
+idx_portfolio_created_at_desc
+(plus any existing indexes)
 ```
 
-If you see "already exists" messages, that's fine - it means the migration was already run!
+**If you see these indexes, the migration worked!** ✅
 
+---
 
+## 🧪 STEP 4: Test Dashboard Stats Endpoint
+
+**After migration is applied**:
+
+```bash
+# Test the endpoint
+curl https://web-production-c490dd.up.railway.app/dashboard/stats
+
+# Should return JSON in < 500ms (not timeout!)
+```
+
+**Expected**: Fast response with portfolio data  
+**Before**: 30s timeout error  
+**After**: < 500ms ✅
+
+---
+
+## 📊 EXPECTED RESULTS AFTER MIGRATION
+
+| Metric | Before (No Indexes) | After (With Indexes) |
+|--------|---------------------|----------------------|
+| Dashboard Stats Query | **30s+ timeout** ❌ | **< 50ms** ✅ |
+| Execution Plan | Full table scan | Index scan |
+| Endpoint Response | 500 error | 200 OK with data |
+
+---
+
+## ❓ TROUBLESHOOTING
+
+### "Index already exists"
+✅ **Good!** This means the index was already created. Continue to Step 3.
+
+### "Permission denied"
+- Make sure you're connected to the **PostgreSQL service** (not web service)
+- Make sure you're using an admin database user
+
+### "Table does not exist"
+- Check that `portfolio_snapshots` table exists:
+  ```sql
+  SELECT * FROM portfolio_snapshots LIMIT 1;
+  ```
+
+### Still timing out after migration?
+1. Verify indexes exist (Step 3)
+2. Check Railway logs for query performance
+3. Try running `ANALYZE portfolio_snapshots;` again
+
+---
+
+## ⚡ QUICK REFERENCE
+
+**Migration File**: `src/database/migrations/003_fix_dashboard_timeout.sql`  
+**Railway Dashboard**: https://railway.app → PostgreSQL → Query  
+**Test Endpoint**: `https://web-production-c490dd.up.railway.app/dashboard/stats`
+
+---
+
+**Status**: ⚠️ **MIGRATION REQUIRED** - Code fixes are deployed, but indexes must be created manually.
+
+**After migration**: Dashboard will work perfectly! 🚀
