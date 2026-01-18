@@ -1299,11 +1299,131 @@
         // Auto-detect API base URL (works for localhost and Railway)
         const API_BASE = window.location.origin;
 
-        // Check API health on load
+        // ============================================================================
+        // PERFORMANCE OPTIMIZATION: API Caching Layer
+        // ============================================================================
+        const DataCache = {
+            cache: new Map(),
+            activeRequests: new Map(),
+            
+            // Cache durations (in milliseconds)
+            CACHE_DURATIONS: {
+                markets: 30 * 1000,        // 30 seconds
+                predictions: 60 * 1000,     // 1 minute
+                signals: 60 * 1000,         // 1 minute
+                trades: 60 * 1000,          // 1 minute
+                portfolio: 5 * 60 * 1000,   // 5 minutes
+                dashboard: 30 * 1000,       // 30 seconds
+                health: 10 * 1000,          // 10 seconds
+                default: 30 * 1000          // 30 seconds default
+            },
+            
+            getCacheKey(endpoint, params = {}) {
+                // Create cache key from endpoint and params
+                const paramsStr = JSON.stringify(params);
+                return `${endpoint}:${paramsStr}`;
+            },
+            
+            getCacheDuration(endpoint) {
+                // Determine cache duration based on endpoint
+                if (endpoint.includes('markets')) return this.CACHE_DURATIONS.markets;
+                if (endpoint.includes('predictions')) return this.CACHE_DURATIONS.predictions;
+                if (endpoint.includes('signals')) return this.CACHE_DURATIONS.signals;
+                if (endpoint.includes('trades')) return this.CACHE_DURATIONS.trades;
+                if (endpoint.includes('portfolio')) return this.CACHE_DURATIONS.portfolio;
+                if (endpoint.includes('dashboard')) return this.CACHE_DURATIONS.dashboard;
+                if (endpoint.includes('health')) return this.CACHE_DURATIONS.health;
+                return this.CACHE_DURATIONS.default;
+            },
+            
+            get(cacheKey) {
+                const entry = this.cache.get(cacheKey);
+                if (!entry) return null;
+                
+                // Check if expired
+                if (Date.now() > entry.expiresAt) {
+                    this.cache.delete(cacheKey);
+                    return null;
+                }
+                
+                return entry.data;
+            },
+            
+            set(cacheKey, data, duration) {
+                const now = Date.now();
+                this.cache.set(cacheKey, {
+                    data,
+                    timestamp: now,
+                    expiresAt: now + (duration || this.CACHE_DURATIONS.default)
+                });
+            },
+            
+            invalidate(pattern) {
+                // Invalidate all keys matching pattern
+                for (const key of this.cache.keys()) {
+                    if (key.includes(pattern)) {
+                        this.cache.delete(key);
+                    }
+                }
+            },
+            
+            clear() {
+                this.cache.clear();
+            }
+        };
+        
+        // Optimized fetch with caching and request deduplication
+        async function cachedFetch(endpoint, options = {}, params = {}) {
+            const cacheKey = DataCache.getCacheKey(endpoint, params);
+            const duration = DataCache.getCacheDuration(endpoint);
+            const forceRefresh = options.forceRefresh || false;
+            
+            // Check cache first (unless force refresh)
+            if (!forceRefresh) {
+                const cached = DataCache.get(cacheKey);
+                if (cached) {
+                    console.log(`✅ Cache hit: ${endpoint}`);
+                    return cached;
+                }
+            }
+            
+            // Deduplicate identical requests
+            if (DataCache.activeRequests.has(cacheKey)) {
+                console.log(`🔄 Deduping request: ${endpoint}`);
+                return DataCache.activeRequests.get(cacheKey);
+            }
+            
+            // Make request
+            const requestPromise = fetch(`${API_BASE}${endpoint}`, options)
+                .then(async response => {
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const data = await response.json();
+                    
+                    // Cache successful responses
+                    DataCache.set(cacheKey, data, duration);
+                    
+                    return data;
+                })
+                .finally(() => {
+                    // Remove from active requests
+                    DataCache.activeRequests.delete(cacheKey);
+                });
+            
+            // Track active request
+            DataCache.activeRequests.set(cacheKey, requestPromise);
+            
+            return requestPromise;
+        }
+        
+        // Parallel fetch helper
+        async function parallelFetch(requests) {
+            return Promise.all(requests);
+        }
+
+        // Check API health on load (cached)
         async function checkHealth() {
             try {
-                const response = await fetch(`${API_BASE}/health`);
-                const data = await response.json();
+                const data = await cachedFetch('/health');
                 document.getElementById('api-status').textContent = data.status;
                 document.getElementById('api-version').textContent = data.version;
             } catch (error) {
@@ -1332,8 +1452,11 @@
             // Auto-load data when tab is switched
             switch(tabName) {
                 case 'dashboard':
-                    loadDashboardStats();
-                    loadActivity();
+                    // OPTIMIZED: Load dashboard data in parallel
+                    parallelFetch([
+                        loadDashboardStats(),
+                        loadActivity()
+                    ]).catch(err => console.error('Dashboard load error:', err));
                     break;
                 case 'markets':
                     loadMarkets();
@@ -1396,34 +1519,35 @@
             }
         }
 
-        // Load Markets - Auto-loads live data from API
+        // Load Markets - OPTIMIZED with caching and parallel fetching
         async function loadMarkets(refresh = false) {
             const container = document.getElementById('markets-content');
             if (!refresh) showLoading('markets-content');
 
             try {
-                const limit = document.getElementById('markets-limit').value || 50;
+                // OPTIMIZED: Reduce default limit from 50 to 20 for faster loads
+                const limit = document.getElementById('markets-limit').value || 20;
                 const outcome = document.getElementById('markets-outcome').value;
                 
-                // Try live data first, fallback to DB
+                // OPTIMIZED: Try live and DB in parallel, then use best result
+                const params = { limit, outcome };
                 let markets = [];
-                try {
-                    const liveResponse = await fetch(`${API_BASE}/live/markets?limit=${limit}`);
-                    if (liveResponse.ok) {
-                        markets = await liveResponse.json();
-                    }
-                } catch (e) {
-                    // Fallback to DB if live fails
-                }
                 
-                // If no live data, try DB
-                if (markets.length === 0) {
-                    let url = `${API_BASE}/markets?limit=${limit}`;
-                    if (outcome) url += `&outcome=${outcome}`;
-                    const response = await fetch(url);
-                    if (response.ok) {
-                        markets = await response.json();
-                    }
+                try {
+                    // Parallel fetch: try both live and DB simultaneously
+                    const [liveResult, dbResult] = await parallelFetch([
+                        cachedFetch(`/live/markets?limit=${limit}`, {}, params).catch(() => []),
+                        (async () => {
+                            let url = `/markets?limit=${limit}`;
+                            if (outcome) url += `&outcome=${outcome}`;
+                            return cachedFetch(url, {}, params).catch(() => []);
+                        })()
+                    ]);
+                    
+                    // Use live data if available, otherwise use DB
+                    markets = (liveResult && liveResult.length > 0) ? liveResult : (dbResult || []);
+                } catch (e) {
+                    console.warn('Market fetch error:', e);
                 }
                 
                 if (markets.length === 0) {
@@ -1488,21 +1612,20 @@
             container.innerHTML = html;
         }
 
-        // Load Predictions - Auto-loads from database
+        // Load Predictions - OPTIMIZED with caching
         async function loadPredictions(refresh = false) {
             const container = document.getElementById('predictions-content');
             if (!refresh) showLoading('predictions-content');
 
             try {
-                const limit = document.getElementById('predictions-limit').value || 50;
+                // OPTIMIZED: Reduce default limit from 50 to 20
+                const limit = document.getElementById('predictions-limit').value || 20;
                 const marketId = document.getElementById('predictions-market-id').value;
-                let url = `${API_BASE}/predictions?limit=${limit}`;
+                let url = `/predictions?limit=${limit}`;
                 if (marketId) url += `&market_id=${marketId}`;
 
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const predictions = await response.json();
+                const params = { limit, market_id: marketId };
+                const predictions = await cachedFetch(url, { forceRefresh: refresh }, params);
                 
                 if (predictions.length === 0) {
                     container.innerHTML = '<div class="empty-state"><p>No predictions found yet. The system automatically generates predictions - check back soon!</p></div>';
@@ -1561,23 +1684,22 @@
             container.innerHTML = html;
         }
 
-        // Load Signals - Auto-loads from database
+        // Load Signals - OPTIMIZED with caching
         async function loadSignals(refresh = false) {
             const container = document.getElementById('signals-content');
             if (!refresh) showLoading('signals-content');
 
             try {
-                const limit = document.getElementById('signals-limit').value || 50;
+                // OPTIMIZED: Reduce default limit from 50 to 20
+                const limit = document.getElementById('signals-limit').value || 20;
                 const marketId = document.getElementById('signals-market-id').value;
                 const executed = document.getElementById('signals-executed').value;
-                let url = `${API_BASE}/signals?limit=${limit}`;
+                let url = `/signals?limit=${limit}`;
                 if (marketId) url += `&market_id=${marketId}`;
                 if (executed) url += `&executed=${executed}`;
 
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const signals = await response.json();
+                const params = { limit, market_id: marketId, executed };
+                const signals = await cachedFetch(url, { forceRefresh: refresh }, params);
                 
                 if (signals.length === 0) {
                     container.innerHTML = '<div class="empty-state"><p>No signals found yet. Signals are automatically created from predictions - check back soon!</p></div>';
@@ -1640,23 +1762,22 @@
             container.innerHTML = html;
         }
 
-        // Load Trades - Auto-loads from database
+        // Load Trades - OPTIMIZED with caching
         async function loadTrades(refresh = false) {
             const container = document.getElementById('trades-content');
             if (!refresh) showLoading('trades-content');
 
             try {
-                const limit = document.getElementById('trades-limit').value || 50;
+                // OPTIMIZED: Reduce default limit from 50 to 20
+                const limit = document.getElementById('trades-limit').value || 20;
                 const marketId = document.getElementById('trades-market-id').value;
                 const status = document.getElementById('trades-status').value;
-                let url = `${API_BASE}/trades?limit=${limit}`;
+                let url = `/trades?limit=${limit}`;
                 if (marketId) url += `&market_id=${marketId}`;
                 if (status) url += `&status=${status}`;
 
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const trades = await response.json();
+                const params = { limit, market_id: marketId, status };
+                const trades = await cachedFetch(url, { forceRefresh: refresh }, params);
                 
                 if (trades.length === 0) {
                     container.innerHTML = '<div class="empty-state"><p>No trades found yet. Trades are automatically created from signals - check back soon!</p></div>';
@@ -1721,20 +1842,19 @@
             container.innerHTML = html;
         }
 
-        // Load Portfolio - Auto-loads from database
+        // Load Portfolio - OPTIMIZED with caching (5 min cache)
         async function loadPortfolio(refresh = false) {
             const container = document.getElementById('portfolio-content');
             if (!refresh) showLoading('portfolio-content');
 
             try {
-                const response = await fetch(`${API_BASE}/portfolio/latest`);
-                if (response.status === 404) {
+                const portfolio = await cachedFetch('/portfolio/latest', { forceRefresh: refresh });
+                // Handle missing portfolio gracefully
+                if (!portfolio) {
                     container.innerHTML = '<div class="empty-state"><p>No portfolio snapshot found yet. Portfolio is automatically updated when trades are executed - check back soon!</p></div>';
                     return;
                 }
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 
-                const portfolio = await response.json();
                 displayPortfolio(portfolio, container);
                 updateLastUpdated('portfolio');
             } catch (error) {
@@ -1801,17 +1921,16 @@
             container.innerHTML = html;
         }
 
-        // Load Analytics Dashboard
+        // Load Analytics Dashboard - OPTIMIZED with caching
         async function loadAnalytics(refresh = false) {
             const container = document.getElementById('analytics-content');
             if (!refresh) showLoading('analytics-content');
 
             try {
                 const paperTrading = document.getElementById('analytics-paper-trading')?.checked || false;
-                const response = await fetch(`${API_BASE}/analytics/dashboard-summary?paper_trading=${paperTrading}`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const analytics = await response.json();
+                const url = `/analytics/dashboard-summary?paper_trading=${paperTrading}`;
+                const params = { paper_trading: paperTrading };
+                const analytics = await cachedFetch(url, { forceRefresh: refresh }, params);
                 displayAnalytics(analytics, container);
                 updateLastUpdated('analytics');
             } catch (error) {
@@ -1873,16 +1992,13 @@
             container.innerHTML = html;
         }
 
-        // Load Alerts
+        // Load Alerts - OPTIMIZED with caching
         async function loadAlerts(refresh = false) {
             const container = document.getElementById('alerts-content');
             if (!refresh) showLoading('alerts-content');
 
             try {
-                const response = await fetch(`${API_BASE}/alerts`);
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                
-                const alerts = await response.json();
+                const alerts = await cachedFetch('/alerts', { forceRefresh: refresh });
                 displayAlerts(alerts, container);
                 updateLastUpdated('alerts');
             } catch (error) {
@@ -2159,12 +2275,10 @@
             }
         }
 
-        // Load Dashboard Stats
+        // Load Dashboard Stats - OPTIMIZED with caching
         async function loadDashboardStats() {
             try {
-                const response = await fetch('/dashboard/stats');
-                if (!response.ok) throw new Error('Failed to load stats');
-                const data = await response.json();
+                const data = await cachedFetch('/dashboard/stats');
                 
                 // Update quick stats
                 document.getElementById('stat-portfolio-value').textContent = `$${data.portfolio_value.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -2192,12 +2306,10 @@
             }
         }
 
-        // Load Recent Activity
+        // Load Recent Activity - OPTIMIZED with caching
         async function loadActivity() {
             try {
-                const response = await fetch('/dashboard/activity?limit=20');
-                if (!response.ok) throw new Error('Failed to load activity');
-                const data = await response.json();
+                const data = await cachedFetch('/dashboard/activity?limit=20', {}, { limit: 20 });
                 
                 const activityList = document.getElementById('activityList');
                 if (!activityList) return;
@@ -2252,12 +2364,10 @@
             return `${days} day${days > 1 ? 's' : ''} ago`;
         }
 
-        // Load Trading Settings
+        // Load Trading Settings - OPTIMIZED with caching (long cache)
         async function loadTradingSettings() {
             try {
-                const response = await fetch('/dashboard/settings');
-                if (!response.ok) throw new Error('Failed to load settings');
-                const data = await response.json();
+                const data = await cachedFetch('/dashboard/settings');
                 
                 // Update UI
                 document.getElementById('minEdge').value = (data.min_edge * 100).toFixed(0);

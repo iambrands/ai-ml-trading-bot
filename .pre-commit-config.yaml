@@ -1,0 +1,14 @@
+# Pre-commit hooks for PredictEdge
+# Install: pip install pre-commit && pre-commit install
+
+repos:
+  - repo: local
+    hooks:
+      - id: performance-check
+        name: Performance Check
+        entry: python3 scripts/check_performance.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [commit]
+

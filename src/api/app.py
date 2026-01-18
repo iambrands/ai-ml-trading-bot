@@ -433,10 +433,42 @@ async def get_markets(
         result = await db.execute(query)
         markets = result.scalars().all()
         
-        # Get latest prediction for each market to get prices
+        # OPTIMIZED: Get latest predictions for all markets in a single query (no N+1)
         market_responses = []
+        market_ids = [m.market_id for m in markets]
         
-        # Try to fetch live prices for markets without predictions
+        # Get latest prediction for each market using window function approach (single query)
+        from sqlalchemy import func, distinct
+        from sqlalchemy.sql import literal
+        
+        if market_ids:
+            # Use a subquery to get the latest prediction time per market
+            latest_pred_times = (
+                select(
+                    Prediction.market_id,
+                    func.max(Prediction.prediction_time).label('max_time')
+                )
+                .where(Prediction.market_id.in_(market_ids))
+                .group_by(Prediction.market_id)
+                .subquery()
+            )
+            
+            # Join to get the actual prediction rows
+            predictions_query = (
+                select(Prediction)
+                .join(
+                    latest_pred_times,
+                    (Prediction.market_id == latest_pred_times.c.market_id) &
+                    (Prediction.prediction_time == latest_pred_times.c.max_time)
+                )
+            )
+            
+            pred_result = await db.execute(predictions_query)
+            predictions_dict = {p.market_id: p for p in pred_result.scalars().all()}
+        else:
+            predictions_dict = {}
+        
+        # Try to fetch live prices for markets without predictions (optional, non-blocking)
         live_markets_map = {}
         try:
             async with PolymarketDataSource() as polymarket:
@@ -445,14 +477,9 @@ async def get_markets(
         except Exception as e:
             logger.debug("Failed to fetch live markets for price fallback", error=str(e))
         
+        # Build responses (no per-market queries needed)
         for market in markets:
-            # Get latest prediction for this market
-            pred_query = select(Prediction).where(
-                Prediction.market_id == market.market_id
-            ).order_by(desc(Prediction.prediction_time)).limit(1)
-            
-            pred_result = await db.execute(pred_query)
-            latest_pred = pred_result.scalar_one_or_none()
+            latest_pred = predictions_dict.get(market.market_id)
             
             # Get prices from prediction or live market data
             yes_price = None
@@ -469,12 +496,13 @@ async def get_markets(
                     no_price = float(live_market.no_price)
             
             # Build response with prices
+            live_market = live_markets_map.get(market.market_id) if market.market_id in live_markets_map else None
             market_dict = {
                 "id": market.id,
                 "market_id": market.market_id,
                 "condition_id": market.condition_id,
                 "question": market.question,
-                "category": market.category or (live_markets_map.get(market.market_id).category if market.market_id in live_markets_map and live_markets_map.get(market.market_id) else None),
+                "category": market.category or (live_market.category if live_market else None),
                 "resolution_date": market.resolution_date,
                 "outcome": market.outcome,
                 "yes_price": yes_price,
