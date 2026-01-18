@@ -19,7 +19,8 @@ def cache_response(seconds: int = 60):
     Cache decorator for FastAPI async endpoints.
     
     Caches the response for the specified number of seconds.
-    Cache key is generated from function name and serialized args/kwargs.
+    Cache key is generated from function name and actual query parameters.
+    Dependency injection objects (like Depends) are excluded from cache key.
     
     Usage:
         @router.get("/dashboard/stats")
@@ -32,8 +33,17 @@ def cache_response(seconds: int = 60):
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Create cache key from function name and args
-            # Use hash to keep keys short
-            cache_key_data = f"{func.__name__}:{str(args)}:{str(kwargs)}"
+            # Exclude dependency injection objects (Depends) from cache key
+            # Only include actual query parameters (str, int, float, bool, None)
+            cache_kwargs = {}
+            for k, v in kwargs.items():
+                # Only include simple types (not objects like Depends)
+                if isinstance(v, (str, int, float, bool, type(None))):
+                    cache_kwargs[k] = v
+                # Skip dependency injection objects and complex types
+            
+            # Build cache key from function name and simple kwargs only
+            cache_key_data = f"{func.__name__}:{sorted(cache_kwargs.items())}"
             cache_key = hashlib.md5(cache_key_data.encode()).hexdigest()
             
             # Check cache
