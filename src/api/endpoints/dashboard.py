@@ -99,22 +99,32 @@ async def get_dashboard_stats(db: AsyncSession = Depends(get_db)) -> dict:
         portfolio_value = float(portfolio.total_value) if portfolio else 10000.0
         
         # Get previous portfolio snapshot for daily change
+        # OPTIMIZED: Use index-friendly query with specific columns
         portfolio_change = 0.0
         if portfolio:
-            prev_result = await db.execute(
-                select(PortfolioSnapshot)
-                .where(
-                    and_(
-                        PortfolioSnapshot.paper_trading == paper_trading,
-                        PortfolioSnapshot.snapshot_time < portfolio.snapshot_time
+            try:
+                prev_result = await db.execute(
+                    select(
+                        PortfolioSnapshot.id,
+                        PortfolioSnapshot.snapshot_time,
+                        PortfolioSnapshot.total_value
                     )
+                    .where(
+                        and_(
+                            PortfolioSnapshot.paper_trading == paper_trading,
+                            PortfolioSnapshot.snapshot_time < portfolio.snapshot_time
+                        )
+                    )
+                    .order_by(PortfolioSnapshot.snapshot_time.desc())
+                    .limit(1)
                 )
-                .order_by(PortfolioSnapshot.snapshot_time.desc())
-                .limit(1)
-            )
-            prev_portfolio = prev_result.scalar_one_or_none()
-            if prev_portfolio:
-                portfolio_change = float(portfolio.total_value) - float(prev_portfolio.total_value)
+                prev_portfolio = prev_result.first()
+                if prev_portfolio:
+                    portfolio_change = float(portfolio.total_value) - float(prev_portfolio.total_value)
+            except Exception as e:
+                logger.warning("Failed to get previous portfolio snapshot", error=str(e))
+                # Don't fail entire request if previous snapshot unavailable
+                portfolio_change = 0.0
         
         portfolio_change_pct = (portfolio_change / portfolio_value * 100) if portfolio_value > 0 else 0.0
         
@@ -212,25 +222,37 @@ async def get_recent_activity(
                 "status": trade.status
             })
         
-        for signal in signals:
-            # Get market question
-            market_result = await db.execute(
+        # OPTIMIZED: Batch fetch markets and predictions to avoid N+1 queries
+        signal_market_ids = [s.market_id for s in signals if s.market_id]
+        signal_prediction_ids = [s.prediction_id for s in signals if s.prediction_id]
+        
+        # Batch fetch markets
+        markets_dict = {}
+        if signal_market_ids:
+            markets_result = await db.execute(
                 select(Market)
-                .where(Market.market_id == signal.market_id)
-                .limit(1)
+                .where(Market.market_id.in_(signal_market_ids))
             )
-            market = market_result.scalar_one_or_none()
+            markets_dict = {m.market_id: m for m in markets_result.scalars().all()}
+        
+        # Batch fetch predictions
+        predictions_dict = {}
+        if signal_prediction_ids:
+            predictions_result = await db.execute(
+                select(Prediction)
+                .where(Prediction.id.in_(signal_prediction_ids))
+            )
+            predictions_dict = {p.id: p for p in predictions_result.scalars().all()}
+        
+        for signal in signals:
+            # Get market question from batch-fetched dict
+            market = markets_dict.get(signal.market_id)
             market_question = market.question if market else signal.market_id[:30]
             
-            # Get prediction for edge
+            # Get prediction for edge from batch-fetched dict
             edge = 0.0
             if signal.prediction_id:
-                pred_result = await db.execute(
-                    select(Prediction)
-                    .where(Prediction.id == signal.prediction_id)
-                    .limit(1)
-                )
-                prediction = pred_result.scalar_one_or_none()
+                prediction = predictions_dict.get(signal.prediction_id)
                 edge = float(prediction.edge) if prediction and prediction.edge else 0.0
             
             activities.append({

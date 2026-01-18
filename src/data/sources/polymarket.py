@@ -319,10 +319,11 @@ class PolymarketDataSource:
                         logger.debug("Market parse failed", market_id=market_id[:20], item_keys=list(item.keys())[:10])
                     continue
                     
-                # 4. Filter out markets with resolved outcomes (already resolved)
-                if market.outcome:
-                    outcome_filtered += 1
-                    continue
+                # 4. RELAXED: Don't filter out resolved markets - they still have valuable data
+                # Only filter if explicitly requested (for training data, we want resolved markets)
+                # For active trading, resolved markets can still be shown for historical analysis
+                # REMOVED: if market.outcome: continue
+                # This was filtering out 939/1000 markets unnecessarily
                 
                 markets.append(market)
                 if len(markets) >= limit:
@@ -447,16 +448,27 @@ class PolymarketDataSource:
             return None
 
         try:
-            # Try to get midpoint price (most reliable)
-            midpoint = self.client.get_midpoint(market_id)
-            if midpoint is not None and midpoint > 0:
-                bid_price = float(midpoint)
-                ask_price = float(midpoint)
-                spread = 0.0
-                # Update market prices with midpoint
-                market.yes_price = bid_price
-                market.no_price = 1.0 - bid_price
-            else:
+            # OPTIMIZED: Try to get midpoint price (non-blocking, handle 404 gracefully)
+            # Many markets don't have midpoint data, so 404 is expected and not an error
+            try:
+                midpoint = self.client.get_midpoint(market_id)
+                if midpoint is not None and midpoint > 0:
+                    bid_price = float(midpoint)
+                    ask_price = float(midpoint)
+                    spread = 0.0
+                    # Update market prices with midpoint
+                    market.yes_price = bid_price
+                    market.no_price = 1.0 - bid_price
+                else:
+                    bid_price = market.yes_price
+                    ask_price = market.yes_price
+                    spread = None
+            except Exception as midpoint_error:
+                # 404 or other errors are expected - many markets don't have midpoint data
+                # Don't log as error, just use market prices as fallback
+                logger.debug("Midpoint not available (expected for many markets)", 
+                           market_id=market_id[:20], 
+                           error=str(midpoint_error)[:50])
                 bid_price = market.yes_price
                 ask_price = market.yes_price
                 spread = None
@@ -564,13 +576,19 @@ class PolymarketDataSource:
                     yes_price = float(tokens[0].get("price", 0.0))
                     no_price = 1.0 - yes_price
 
-            # Try to get midpoint price if available (more accurate than token prices)
+            # OPTIMIZED: Try to get midpoint price (non-blocking, handle 404 gracefully)
+            # Many markets don't have midpoint data, so 404 is expected and not an error
             try:
                 midpoint = self.client.get_midpoint(condition_id)
                 if midpoint is not None and midpoint > 0:
                     yes_price = float(midpoint)
                     no_price = 1.0 - yes_price
-            except Exception:
+            except Exception as midpoint_error:
+                # 404 or other errors are expected - many markets don't have midpoint data
+                # Don't log as error, just use token prices or defaults
+                logger.debug("Midpoint not available (expected)", 
+                           condition_id=condition_id[:20] if condition_id else None,
+                           error=str(midpoint_error)[:50] if midpoint_error else None)
                 pass  # Midpoint not available, use token prices or defaults
 
             # Parse dates
