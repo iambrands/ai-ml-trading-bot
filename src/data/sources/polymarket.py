@@ -296,13 +296,13 @@ class PolymarketDataSource:
                         # Use UTC if timezone-naive
                         if end_date.tzinfo is None:
                             end_date = end_date.replace(tzinfo=timezone.utc)
-                        # Filter out markets that ended more than 1 day ago
-                        # (Allow some buffer for recently resolved markets)
+                        # RELAXED: Only filter markets that ended >30 days ago (not just 1 day)
+                        # This allows recently resolved markets to be shown
                         now = datetime.now(timezone.utc)
-                        if end_date < (now - timedelta(days=1)):
+                        if end_date < (now - timedelta(days=30)):
                             strict_filtered += 1
                             if strict_filtered <= 5:
-                                logger.debug("Market filtered - ended", 
+                                logger.debug("Market filtered - ended long ago", 
                                            market_id=market_id[:20],
                                            end_date=end_date_str,
                                            days_ago=(now - end_date).days)
