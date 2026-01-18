@@ -1,8 +1,9 @@
 """Polymarket data source using py-clob-client and Gamma API."""
 
 from datetime import datetime, timezone, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict
 import aiohttp
+import asyncio
 
 from py_clob_client.client import ClobClient
 from py_clob_client.constants import POLYGON
@@ -68,6 +69,88 @@ class PolymarketDataSource:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
         pass
+    
+    async def _get_midpoints_batch(
+        self, 
+        token_ids: List[str],
+        batch_size: int = 20
+    ) -> dict:
+        """
+        Fetch midpoints for multiple tokens with batching and error handling.
+        
+        Uses aiohttp for async concurrent requests instead of individual py-clob-client calls.
+        
+        Args:
+            token_ids: List of token IDs to fetch
+            batch_size: Number of concurrent requests (default 20)
+            
+        Returns:
+            Dict mapping token_id -> midpoint (or None if 404/error)
+        """
+        if not token_ids:
+            return {}
+        
+        results = {}
+        
+        # Process in batches to avoid overwhelming API
+        for i in range(0, len(token_ids), batch_size):
+            batch = token_ids[i:i + batch_size]
+            
+            # Fetch batch concurrently using aiohttp
+            async def fetch_single_midpoint(token_id: str) -> tuple:
+                """Fetch single midpoint with error handling"""
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        url = f"{self.api_url}/midpoint"
+                        params = {"token_id": token_id}
+                        async with session.get(
+                            url,
+                            params=params,
+                            timeout=aiohttp.ClientTimeout(total=5),
+                        ) as response:
+                            if response.status == 404:
+                                # This is normal - not all markets have midpoint data
+                                return (token_id, None)
+                            
+                            if response.status == 200:
+                                data = await response.json()
+                                midpoint = data.get('mid') or data.get('midpoint')
+                                if midpoint is not None:
+                                    return (token_id, float(midpoint))
+                            
+                            # Other status codes - log but don't fail
+                            return (token_id, None)
+                            
+                except asyncio.TimeoutError:
+                    logger.debug("Midpoint request timeout (expected)", token_id=token_id[:20])
+                    return (token_id, None)
+                except Exception as e:
+                    # Errors are expected for many markets - don't log as error
+                    logger.debug("Midpoint not available (expected)", 
+                               token_id=token_id[:20],
+                               error=str(e)[:50])
+                    return (token_id, None)
+            
+            # Fetch batch concurrently
+            batch_tasks = [fetch_single_midpoint(token_id) for token_id in batch]
+            batch_results = await asyncio.gather(*batch_tasks, return_exceptions=True)
+            
+            # Process results
+            for result in batch_results:
+                if isinstance(result, Exception):
+                    continue
+                if isinstance(result, tuple) and len(result) == 2:
+                    token_id, midpoint = result
+                    results[token_id] = midpoint
+        
+        success_count = sum(1 for v in results.values() if v is not None)
+        if success_count > 0:
+            logger.debug(
+                f"Fetched midpoints batch: {success_count}/{len(token_ids)} successful "
+                f"({(success_count/len(token_ids)*100):.1f}%)"
+            )
+        
+        return results
     
     async def _fetch_gamma_markets(self, limit: int = 100) -> List[dict]:
         """
@@ -448,10 +531,12 @@ class PolymarketDataSource:
             return None
 
         try:
-            # OPTIMIZED: Try to get midpoint price (non-blocking, handle 404 gracefully)
+            # OPTIMIZED: Try to get midpoint price using async HTTP (non-blocking, handle 404 gracefully)
             # Many markets don't have midpoint data, so 404 is expected and not an error
+            # Use async HTTP instead of synchronous py-clob-client for better performance
             try:
-                midpoint = self.client.get_midpoint(market_id)
+                midpoints = await self._get_midpoints_batch([market_id], batch_size=1)
+                midpoint = midpoints.get(market_id)
                 if midpoint is not None and midpoint > 0:
                     bid_price = float(midpoint)
                     ask_price = float(midpoint)
@@ -460,9 +545,23 @@ class PolymarketDataSource:
                     market.yes_price = bid_price
                     market.no_price = 1.0 - bid_price
                 else:
-                    bid_price = market.yes_price
-                    ask_price = market.yes_price
-                    spread = None
+                    # Fallback to synchronous client if async fails (backwards compatibility)
+                    try:
+                        midpoint = self.client.get_midpoint(market_id)
+                        if midpoint is not None and midpoint > 0:
+                            bid_price = float(midpoint)
+                            ask_price = float(midpoint)
+                            spread = 0.0
+                            market.yes_price = bid_price
+                            market.no_price = 1.0 - bid_price
+                        else:
+                            bid_price = market.yes_price
+                            ask_price = market.yes_price
+                            spread = None
+                    except Exception:
+                        bid_price = market.yes_price
+                        ask_price = market.yes_price
+                        spread = None
             except Exception as midpoint_error:
                 # 404 or other errors are expected - many markets don't have midpoint data
                 # Don't log as error, just use market prices as fallback
