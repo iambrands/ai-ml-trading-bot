@@ -966,6 +966,7 @@
             <a class="nav-item" onclick="showTab('analytics'); closeSidebar();">📈 Analytics</a>
             <a class="nav-item" onclick="showTab('alerts'); closeSidebar();">🔔 Alerts</a>
             <a class="nav-item" onclick="showTab('whales'); closeSidebar();">🐋 Whale Tracker</a>
+            <a class="nav-item" onclick="showTab('calendar'); closeSidebar();">📅 Economic Calendar</a>
             <a class="nav-item" onclick="showTab('settings'); closeSidebar();">⚙️ Settings</a>
             <a class="nav-item" onclick="showTab('help'); closeSidebar();">❓ Help & FAQ</a>
         </div>
@@ -2050,6 +2051,9 @@
                 case 'whales':
                     loadWhales();
                     break;
+                case 'calendar':
+                    loadCalendar();
+                    break;
             }
         }
 
@@ -2988,6 +2992,230 @@
             }
         }
 
+        // Economic Calendar Functions
+        let currentCalendarFilter = 'all';
+
+        function setCalendarFilter(filter) {
+            currentCalendarFilter = filter;
+            
+            // Update button styles
+            document.querySelectorAll('[id^="calendar-filter-"]').forEach(btn => {
+                btn.style.background = '#F8F9FA';
+                btn.style.color = '#6B7280';
+                btn.style.border = '1px solid #F1F3F5';
+            });
+            
+            const activeBtn = document.getElementById(`calendar-filter-${filter}`);
+            if (activeBtn) {
+                activeBtn.style.background = '#0066FF';
+                activeBtn.style.color = 'white';
+                activeBtn.style.border = 'none';
+            }
+            
+            // Reload calendar with filter
+            loadCalendar();
+        }
+
+        async function loadCalendar(refresh = false) {
+            const container = document.getElementById('calendar-content');
+            if (!refresh) showLoading('calendar-content');
+            
+            try {
+                const filterParam = currentCalendarFilter === 'all' ? '' : `?event_types=${currentCalendarFilter}`;
+                const data = await cachedFetch(`/calendar/upcoming${filterParam}`, { forceRefresh: refresh });
+                displayCalendar(data, container);
+                updateLastUpdated('calendar');
+            } catch (error) {
+                showError('calendar-content', error.message);
+            }
+        }
+
+        function displayCalendar(events, container) {
+            if (!events || events.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No economic events found. Calendar events will appear here once initialized.</p></div>';
+                return;
+            }
+
+            let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+            
+            events.forEach((event, index) => {
+                const importanceColors = {
+                    'HIGH': { bg: '#fee2e2', text: '#991b1b', border: '#fca5a5' },
+                    'MEDIUM': { bg: '#fef3c7', text: '#92400e', border: '#fcd34d' },
+                    'LOW': { bg: '#d1fae5', text: '#065f46', border: '#6ee7b7' }
+                };
+                const color = importanceColors[event.importance] || importanceColors.MEDIUM;
+                
+                const typeIcons = {
+                    'FOMC': '🏦',
+                    'CPI': '📈',
+                    'NFP': '👥',
+                    'GDP': '💰',
+                    'RETAIL': '🛒',
+                    'HOUSING': '🏠'
+                };
+                const icon = typeIcons[event.event_type] || '📅';
+                
+                const daysText = event.days_until === 0 ? 'Today' : 
+                                event.days_until === 1 ? 'Tomorrow' :
+                                `${Math.floor(event.days_until)} days away`;
+                
+                const eventDate = new Date(event.event_date);
+                
+                html += `
+                    <div class="market-card" style="margin-bottom: 16px; cursor: pointer;" onclick="loadEventMarkets(${event.id})">
+                        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                            <!-- Event Icon -->
+                            <div style="font-size: 3em; flex-shrink: 0;">
+                                ${icon}
+                            </div>
+                            
+                            <!-- Event Details -->
+                            <div style="flex: 1; min-width: 300px;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                                    <span style="padding: 4px 12px; background: ${color.bg}; color: ${color.text}; border: 1px solid ${color.border}; border-radius: 12px; font-size: 0.85em; font-weight: 700;">
+                                        ${event.importance}
+                                    </span>
+                                    <span style="padding: 4px 12px; background: #dbeafe; color: #1e40af; border-radius: 12px; font-size: 0.85em; font-weight: 600;">
+                                        ${event.event_type}
+                                    </span>
+                                    <span style="font-size: 0.85em; color: #6B7280;">
+                                        ${daysText}
+                                    </span>
+                                </div>
+                                
+                                <h3 style="font-size: 1.1em; font-weight: 700; color: #1A1A1A; margin-bottom: 8px;">
+                                    ${event.event_name}
+                                </h3>
+                                
+                                <div style="display: flex; align-items: center; gap: 16px; font-size: 0.9em; color: #6B7280; flex-wrap: wrap;">
+                                    <div>
+                                        📅 ${eventDate.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </div>
+                                    <div>
+                                        🕐 ${eventDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                </div>
+                                
+                                ${event.description ? `<div style="margin-top: 8px; font-size: 0.85em; color: #6B7280;">${event.description}</div>` : ''}
+                            </div>
+                            
+                            <!-- Related Markets Count -->
+                            <div style="text-align: center; min-width: 100px; flex-shrink: 0;">
+                                <div style="font-size: 2em; font-weight: 700; color: #0066FF;">
+                                    ${event.related_markets_count || 0}
+                                </div>
+                                <div style="font-size: 0.85em; color: #6B7280;">
+                                    Related Markets
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        async function loadEventMarkets(eventId) {
+            try {
+                const data = await cachedFetch(`/calendar/event/${eventId}/markets`);
+                showEventDetailsModal(data);
+            } catch (error) {
+                console.error('Failed to load event markets:', error);
+                alert('Failed to load event details: ' + error.message);
+            }
+        }
+
+        function showEventDetailsModal(data) {
+            const event = data.event;
+            const markets = data.related_markets || [];
+            
+            let marketsHtml = '';
+            if (markets.length === 0) {
+                marketsHtml = '<div class="empty-state"><p>No related markets found for this event.</p></div>';
+            } else {
+                marketsHtml = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+                markets.forEach(market => {
+                    marketsHtml += `
+                        <div style="padding: 12px; background: #F8F9FA; border-radius: 8px; border-left: 3px solid #0066FF;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; gap: 12px; flex-wrap: wrap;">
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; color: #1A1A1A; margin-bottom: 4px; font-size: 0.95em;">
+                                        ${market.question}
+                                    </div>
+                                    <div style="font-size: 0.85em; color: #6B7280;">
+                                        Relevance: ${(market.relevance * 100).toFixed(0)}%
+                                    </div>
+                                    ${market.impact_prediction ? `<div style="font-size: 0.8em; color: #6B7280; margin-top: 4px; font-style: italic;">${market.impact_prediction}</div>` : ''}
+                                </div>
+                                <div style="text-align: right; min-width: 80px;">
+                                    <div style="font-weight: 700; color: #0066FF; font-size: 1.1em;">
+                                        ${(market.price * 100).toFixed(1)}%
+                                    </div>
+                                    <div style="font-size: 0.75em; color: #6B7280;">
+                                        Probability
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                marketsHtml += '</div>';
+            }
+            
+            const modalHtml = `
+                <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 1000;"
+                     onclick="closeEventModal(event)">
+                    <div style="background: white; border-radius: 12px; padding: 24px; max-width: 800px; width: 100%; max-height: 80vh; overflow-y: auto;"
+                         onclick="event.stopPropagation()">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                            <div>
+                                <h2 style="font-size: 1.5em; font-weight: 700; color: #1A1A1A; margin-bottom: 8px;">
+                                    ${event.name}
+                                </h2>
+                                <div style="font-size: 0.9em; color: #6B7280;">
+                                    📅 ${new Date(event.date).toLocaleString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                            </div>
+                            <button onclick="closeEventModal(event)" 
+                                    style="background: #F8F9FA; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 1.2em; color: #6B7280;">
+                                ✕
+                            </button>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <h3 style="font-size: 1.1em; font-weight: 600; color: #1A1A1A; margin-bottom: 12px;">
+                                Related Markets (${markets.length})
+                            </h3>
+                            ${marketsHtml}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('event-details-modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to page
+            const modal = document.createElement('div');
+            modal.id = 'event-details-modal';
+            modal.innerHTML = modalHtml;
+            document.body.appendChild(modal);
+        }
+
+        function closeEventModal(event) {
+            event.stopPropagation();
+            const modal = document.getElementById('event-details-modal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
         // Smooth scroll for anchor links in Help & FAQ
         // Wait for DOM to be fully loaded
         if (document.readyState === 'loading') {
@@ -3458,6 +3686,13 @@
                     loadWhales(true);
                 }
             }, 60000); // 60 seconds
+            
+            // Refresh calendar every hour (events don't change frequently)
+            setInterval(() => {
+                if (document.getElementById('calendar').classList.contains('active')) {
+                    loadCalendar(true);
+                }
+            }, 3600000); // 1 hour
             
             // Refresh dashboard every 30 seconds
             setInterval(() => {

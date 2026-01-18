@@ -138,6 +138,12 @@ try:
 except ImportError:
     logger.warning("Whale tracking endpoints not available")
 
+try:
+    from .endpoints import calendar as calendar_endpoints
+    app.include_router(calendar_endpoints.router)
+except ImportError:
+    logger.warning("Economic calendar endpoints not available")
+
 
 # Pydantic models for API responses
 class MarketResponse(BaseModel):

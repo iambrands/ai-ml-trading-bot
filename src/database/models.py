@@ -268,3 +268,92 @@ class WhaleAlert(Base):
     whale = relationship("WhaleWallet", back_populates="alerts")
     trade = relationship("WhaleTrade", back_populates="alerts")
 
+
+class EconomicEvent(Base):
+    """Economic calendar event model."""
+
+    __tablename__ = "economic_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    event_type = Column(String(50), nullable=False, index=True)  # FOMC, CPI, NFP, GDP
+    event_name = Column(String(200), nullable=False)
+    event_date = Column(DateTime, nullable=False, index=True)
+    release_time = Column(String(10), nullable=True)
+    country = Column(String(50), default="US", nullable=False)
+    importance = Column(String(20), default="HIGH", nullable=False, index=True)  # HIGH, MEDIUM, LOW
+    previous_value = Column(Numeric(10, 4), nullable=True)
+    forecast_value = Column(Numeric(10, 4), nullable=True)
+    actual_value = Column(Numeric(10, 4), nullable=True)
+    currency = Column(String(10), default="USD", nullable=False)
+    source = Column(String(100), default="Federal Reserve", nullable=False)
+    description = Column(Text, nullable=True)
+    external_url = Column(String(500), nullable=True)
+    is_completed = Column(Boolean, default=False, nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    market_relationships = relationship("MarketEvent", back_populates="event", cascade="all, delete-orphan")
+    alerts = relationship("EventAlert", back_populates="event", cascade="all, delete-orphan")
+    impact_history = relationship("EventMarketImpact", back_populates="event", cascade="all, delete-orphan")
+
+
+class MarketEvent(Base):
+    """Market-event relationship model."""
+
+    __tablename__ = "market_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    market_id = Column(String(100), nullable=False, index=True)
+    event_id = Column(Integer, ForeignKey("economic_events.id", ondelete="CASCADE"), nullable=False, index=True)
+    relevance_score = Column(Numeric(3, 2), default=0.5, nullable=False, index=True)
+    impact_prediction = Column(Text, nullable=True)
+    price_before = Column(Numeric(10, 8), nullable=True)
+    price_after = Column(Numeric(10, 8), nullable=True)
+    measured_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    # Relationships
+    event = relationship("EconomicEvent", back_populates="market_relationships")
+
+    __table_args__ = (UniqueConstraint("market_id", "event_id", name="uq_market_event"),)
+
+
+class EventAlert(Base):
+    """User event alert model."""
+
+    __tablename__ = "event_alerts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, default=1, nullable=False, index=True)
+    event_id = Column(Integer, ForeignKey("economic_events.id", ondelete="CASCADE"), nullable=False, index=True)
+    alert_time = Column(DateTime, nullable=False, index=True)
+    hours_before = Column(Integer, default=24, nullable=False)
+    notification_sent = Column(Boolean, default=False, nullable=False)
+    notification_sent_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    # Relationships
+    event = relationship("EconomicEvent", back_populates="alerts")
+
+
+class EventMarketImpact(Base):
+    """Historical event market impact tracking."""
+
+    __tablename__ = "event_market_impact"
+
+    id = Column(Integer, primary_key=True, index=True)
+    event_id = Column(Integer, ForeignKey("economic_events.id", ondelete="CASCADE"), nullable=False, index=True)
+    market_id = Column(String(100), nullable=True, index=True)
+    price_before = Column(Numeric(10, 8), nullable=True)
+    price_after = Column(Numeric(10, 8), nullable=True)
+    price_change_pct = Column(Numeric(10, 4), nullable=True)
+    volume_before = Column(Numeric(20, 2), nullable=True)
+    volume_after = Column(Numeric(20, 2), nullable=True)
+    volume_change_pct = Column(Numeric(10, 4), nullable=True)
+    measured_at = Column(DateTime, nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    # Relationships
+    event = relationship("EconomicEvent", back_populates="impact_history")
+
