@@ -9,6 +9,8 @@ Falls back to in-memory cache if Redis is unavailable.
 import json
 import time
 import hashlib
+from datetime import datetime, date
+from decimal import Decimal
 from functools import wraps
 from typing import Any, Callable, Optional
 
@@ -22,6 +24,81 @@ from ..config.settings import get_settings
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+class CacheJSONEncoder(json.JSONEncoder):
+    """Custom JSON encoder for cache that handles datetime, Decimal, and other non-serializable types."""
+    
+    def default(self, obj):
+        """Convert non-serializable objects to JSON-serializable format."""
+        if isinstance(obj, (datetime, date)):
+            return obj.isoformat()
+        if isinstance(obj, Decimal):
+            return float(obj)
+        if hasattr(obj, '__dict__'):
+            return obj.__dict__
+        # Try to convert to string as last resort
+        try:
+            return str(obj)
+        except Exception:
+            return super().default(obj)
+
+
+def serialize_for_cache(data: Any) -> str:
+    """Serialize data for Redis cache with custom encoder that handles datetime and Decimal."""
+    try:
+        return json.dumps(data, cls=CacheJSONEncoder, default=str)
+    except (TypeError, ValueError) as e:
+        # Log which field caused the issue
+        logger.error(f"Cache serialization error: {e}")
+        logger.error(f"Data type: {type(data)}")
+        if isinstance(data, dict):
+            for key, value in data.items():
+                logger.error(f"  {key}: {type(value)} = {value}")
+        elif isinstance(data, (list, tuple)):
+            for i, item in enumerate(data[:5]):  # First 5 items
+                logger.error(f"  [{i}]: {type(item)} = {item}")
+        # Re-raise to prevent silent failures
+        raise
+
+
+def deserialize_from_cache(data: str) -> Any:
+    """Deserialize data from Redis cache."""
+    try:
+        return json.loads(data)
+    except (json.JSONDecodeError, TypeError) as e:
+        logger.error(f"Cache deserialization error: {e}")
+        raise
+
+
+def make_json_serializable(obj: Any) -> Any:
+    """
+    Recursively convert object to JSON-serializable format.
+    Handles datetime, Decimal, and custom objects.
+    """
+    if obj is None or isinstance(obj, (bool, int, float, str)):
+        return obj
+    
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    
+    if isinstance(obj, Decimal):
+        return float(obj)
+    
+    if isinstance(obj, dict):
+        return {k: make_json_serializable(v) for k, v in obj.items()}
+    
+    if isinstance(obj, (list, tuple)):
+        return [make_json_serializable(item) for item in obj]
+    
+    if hasattr(obj, '__dict__'):
+        return make_json_serializable(obj.__dict__)
+    
+    # Last resort: convert to string
+    try:
+        return str(obj)
+    except Exception:
+        return None
 
 # Fallback in-memory cache (if Redis unavailable)
 _memory_cache: dict[str, tuple[Any, float]] = {}
@@ -110,19 +187,43 @@ def cache_response(seconds: int = 60):
                     cached_json = redis_client.get(cache_key)
                     if cached_json:
                         # Cache hit - return cached data
-                        cached_data = json.loads(cached_json)
-                        logger.debug(f"Cache HIT (Redis) for {func.__name__}")
-                        return cached_data
+                        try:
+                            cached_data = deserialize_from_cache(cached_json)
+                            logger.debug(f"Cache HIT (Redis) for {func.__name__}")
+                            return cached_data
+                        except Exception as e:
+                            logger.warning(f"Cache deserialization failed, treating as miss", error=str(e))
+                            # Fall through to cache miss
                     
                     # Cache miss - call function
-                    logger.debug(f"Cache MISS (Redis) for {func.__name__} - fetching fresh data")
+                    logger.info(f"🔄 Cache MISS (Redis): {func.__name__}")
                     result = await func(*args, **kwargs)
                     
-                    # Store in Redis with TTL
+                    # Store in Redis with TTL using custom serialization
                     try:
-                        result_json = json.dumps(result, default=str)  # default=str handles datetime objects
+                        logger.debug(f"📦 Caching result for {func.__name__}")
+                        logger.debug(f"   Result type: {type(result)}")
+                        if isinstance(result, dict):
+                            logger.debug(f"   Keys: {list(result.keys())}")
+                            for key, value in list(result.items())[:5]:  # First 5 keys
+                                logger.debug(f"   {key}: {type(value).__name__}")
+                        
+                        # Force conversion to JSON-serializable format
+                        safe_result = make_json_serializable(result)
+                        
+                        # Serialize with custom encoder
+                        result_json = serialize_for_cache(safe_result)
+                        
+                        # Store in Redis
                         redis_client.setex(cache_key, seconds, result_json)
-                        logger.debug(f"Cached result (Redis) for {func.__name__} (TTL: {seconds}s)")
+                        logger.info(f"✅ Successfully cached {func.__name__} for {seconds}s")
+                    except (TypeError, ValueError) as e:
+                        logger.error(f"❌ Serialization failed for {func.__name__}: {e}")
+                        logger.error(f"   Result type: {type(result)}")
+                        if isinstance(result, dict):
+                            for key, value in result.items():
+                                logger.error(f"   {key}: {type(value).__name__} = {value}")
+                        # Don't cache, but return the result
                     except Exception as e:
                         logger.warning(f"Failed to store in Redis cache", error=str(e))
                     
