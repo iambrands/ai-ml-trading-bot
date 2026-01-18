@@ -417,11 +417,12 @@ async def get_markets(
         
         from datetime import timedelta
         
-        # Filter out markets that ended more than 1 day ago (stale data)
-        cutoff_date = datetime.now(timezone.utc) - timedelta(days=1)
+        # RELAXED: Filter out markets that ended more than 30 days ago (not just 1 day)
+        # This allows recently resolved markets to be shown
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=30)
         
         query = select(Market).where(
-            # Only include markets that haven't ended yet, or ended recently (<1 day ago)
+            # Only include markets that haven't ended yet, or ended recently (<30 days ago)
             (Market.resolution_date.is_(None)) | (Market.resolution_date >= cutoff_date)
         )
         
