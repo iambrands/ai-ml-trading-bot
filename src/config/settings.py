@@ -57,6 +57,10 @@ class Settings(BaseSettings):
         return 5432
 
     # Redis
+    # Support both REDIS_URL (Railway) and individual connection parameters
+    redis_url_env: Optional[str] = Field(default=None, alias="REDIS_URL")
+    redis_public_url: Optional[str] = Field(default=None, alias="REDIS_PUBLIC_URL")
+    redis_password: Optional[str] = Field(default=None, alias="REDIS_PASSWORD")
     redis_host: str = Field(default="localhost")
     redis_port: int = Field(default=6379)
     redis_db: int = Field(default=0)
@@ -140,8 +144,26 @@ class Settings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
-        """Construct Redis connection URL."""
-        return f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
+        """Construct Redis connection URL.
+        
+        Supports both Railway's REDIS_URL and individual connection parameters.
+        Railway provides REDIS_URL which can be used directly.
+        Falls back to constructing from individual parameters if REDIS_URL not set.
+        """
+        # If REDIS_URL is provided (Railway), use it directly
+        if self.redis_url_env:
+            return self.redis_url_env
+        
+        # Otherwise construct from individual parameters
+        host = self.redis_host or "localhost"
+        port = self.redis_port or 6379
+        db = self.redis_db or 0
+        
+        # Include password if provided
+        if self.redis_password:
+            return f"redis://:{self.redis_password}@{host}:{port}/{db}"
+        
+        return f"redis://{host}:{port}/{db}"
 
 
 @lru_cache()
