@@ -201,3 +201,70 @@ class AnalyticsCache(Base):
     expires_at = Column(DateTime, nullable=False, index=True)
     created_at = Column(DateTime, server_default=func.now(), nullable=False)
 
+
+class WhaleWallet(Base):
+    """Whale wallet model for tracking top traders."""
+
+    __tablename__ = "whale_wallets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    wallet_address = Column(String(42), unique=True, nullable=False, index=True)
+    nickname = Column(String(100), nullable=True)
+    total_volume = Column(Numeric(20, 2), default=0, nullable=False)
+    total_trades = Column(Integer, default=0, nullable=False)
+    win_rate = Column(Numeric(5, 4), default=0, nullable=False)
+    total_profit = Column(Numeric(20, 2), default=0, nullable=False)
+    rank = Column(Integer, nullable=True, index=True)
+    is_active = Column(Boolean, default=True, nullable=False, index=True)
+    first_seen_at = Column(DateTime, server_default=func.now(), nullable=False)
+    last_activity_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    trades = relationship("WhaleTrade", back_populates="whale", cascade="all, delete-orphan")
+    alerts = relationship("WhaleAlert", back_populates="whale", cascade="all, delete-orphan")
+
+
+class WhaleTrade(Base):
+    """Whale trade record."""
+
+    __tablename__ = "whale_trades"
+
+    id = Column(Integer, primary_key=True, index=True)
+    whale_id = Column(Integer, ForeignKey("whale_wallets.id", ondelete="CASCADE"), nullable=False, index=True)
+    wallet_address = Column(String(42), nullable=False, index=True)
+    market_id = Column(String(100), nullable=False, index=True)
+    market_question = Column(Text, nullable=True)
+    trade_type = Column(String(10), nullable=False)  # BUY/SELL
+    outcome = Column(String(10), nullable=False)  # YES/NO
+    amount = Column(Numeric(20, 2), nullable=False)
+    price = Column(Numeric(10, 8), nullable=False)
+    trade_value = Column(Numeric(20, 2), nullable=False, index=True)
+    transaction_hash = Column(String(66), nullable=True)
+    block_number = Column(Integer, nullable=True)
+    trade_time = Column(DateTime, nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    # Relationships
+    whale = relationship("WhaleWallet", back_populates="trades")
+    alerts = relationship("WhaleAlert", back_populates="trade", cascade="all, delete-orphan")
+
+
+class WhaleAlert(Base):
+    """Whale alert for users."""
+
+    __tablename__ = "whale_alerts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, default=1, nullable=False, index=True)
+    whale_id = Column(Integer, ForeignKey("whale_wallets.id", ondelete="CASCADE"), nullable=False, index=True)
+    trade_id = Column(Integer, ForeignKey("whale_trades.id", ondelete="CASCADE"), nullable=False, index=True)
+    alert_type = Column(String(50), default="large_trade", nullable=False)
+    is_read = Column(Boolean, default=False, nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+
+    # Relationships
+    whale = relationship("WhaleWallet", back_populates="alerts")
+    trade = relationship("WhaleTrade", back_populates="alerts")
+

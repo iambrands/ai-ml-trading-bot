@@ -132,6 +132,12 @@ try:
 except ImportError:
     logger.warning("Dashboard endpoints not available")
 
+try:
+    from .endpoints import whales as whales_endpoints
+    app.include_router(whales_endpoints.router)
+except ImportError:
+    logger.warning("Whale tracking endpoints not available")
+
 
 # Pydantic models for API responses
 class MarketResponse(BaseModel):

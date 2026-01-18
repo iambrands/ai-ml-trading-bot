@@ -965,6 +965,7 @@
             <a class="nav-item" onclick="showTab('portfolio'); closeSidebar();">💰 Portfolio</a>
             <a class="nav-item" onclick="showTab('analytics'); closeSidebar();">📈 Analytics</a>
             <a class="nav-item" onclick="showTab('alerts'); closeSidebar();">🔔 Alerts</a>
+            <a class="nav-item" onclick="showTab('whales'); closeSidebar();">🐋 Whale Tracker</a>
             <a class="nav-item" onclick="showTab('settings'); closeSidebar();">⚙️ Settings</a>
             <a class="nav-item" onclick="showTab('help'); closeSidebar();">❓ Help & FAQ</a>
         </div>
@@ -1207,6 +1208,39 @@
                     <span id="alerts-last-updated" style="color: #6B7280; margin-left: 15px; font-size: 0.9em;"></span>
                 </div>
                 <div id="alerts-content"></div>
+            </div>
+
+            <!-- Whale Tracker Tab -->
+            <div id="whales" class="tab-content">
+                <h2 style="color: #1A1A1A; margin-bottom: 24px; font-size: 2em;">🐋 Whale Tracker</h2>
+                <div style="background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%); border-left: 4px solid #0066FF; padding: 16px; margin-bottom: 24px; border-radius: 8px; color: #1e40af;">
+                    <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 60 seconds to show the latest whale activity. Monitors top 500 Polymarket traders in real-time.
+                </div>
+                
+                <!-- Tab Buttons -->
+                <div style="display: flex; gap: 10px; margin-bottom: 24px;">
+                    <button id="whales-tab-leaderboard" onclick="switchWhaleTab('leaderboard')" 
+                            style="padding: 12px 24px; background: #0066FF; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        Leaderboard
+                    </button>
+                    <button id="whales-tab-activity" onclick="switchWhaleTab('activity')" 
+                            style="padding: 12px 24px; background: #F8F9FA; color: #6B7280; border: 1px solid #F1F3F5; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        Recent Activity
+                    </button>
+                    <button id="whales-tab-alerts" onclick="switchWhaleTab('alerts')" 
+                            style="padding: 12px 24px; background: #F8F9FA; color: #6B7280; border: 1px solid #F1F3F5; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        Alerts
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadWhales(true)" style="margin-left: auto;">
+                        🔄 Refresh Now
+                    </button>
+                    <span id="whales-last-updated" style="color: #6B7280; margin-left: 15px; font-size: 0.9em; align-self: center;"></span>
+                </div>
+                
+                <!-- Content Areas -->
+                <div id="whales-leaderboard-content"></div>
+                <div id="whales-activity-content" style="display: none;"></div>
+                <div id="whales-alerts-content" style="display: none;"></div>
             </div>
 
             <!-- Settings Tab -->
@@ -2013,6 +2047,9 @@
                 case 'alerts':
                     loadAlerts();
                     break;
+                case 'whales':
+                    loadWhales();
+                    break;
             }
         }
 
@@ -2701,6 +2738,256 @@
             }
         }
 
+        // Whale Tracker Functions
+        let currentWhaleTab = 'leaderboard';
+
+        function switchWhaleTab(tab) {
+            currentWhaleTab = tab;
+            
+            // Update button styles
+            document.querySelectorAll('[id^="whales-tab-"]').forEach(btn => {
+                btn.style.background = '#F8F9FA';
+                btn.style.color = '#6B7280';
+                btn.style.border = '1px solid #F1F3F5';
+            });
+            
+            const activeBtn = document.getElementById(`whales-tab-${tab}`);
+            if (activeBtn) {
+                activeBtn.style.background = '#0066FF';
+                activeBtn.style.color = 'white';
+                activeBtn.style.border = 'none';
+            }
+            
+            // Show/hide content
+            document.getElementById('whales-leaderboard-content').style.display = tab === 'leaderboard' ? 'block' : 'none';
+            document.getElementById('whales-activity-content').style.display = tab === 'activity' ? 'block' : 'none';
+            document.getElementById('whales-alerts-content').style.display = tab === 'alerts' ? 'block' : 'none';
+            
+            // Load data for active tab
+            loadWhales();
+        }
+
+        async function loadWhales(refresh = false) {
+            const tab = currentWhaleTab;
+            
+            if (tab === 'leaderboard') {
+                const container = document.getElementById('whales-leaderboard-content');
+                if (!refresh) showLoading('whales-leaderboard-content');
+                
+                try {
+                    const data = await cachedFetch('/whales/leaderboard?limit=50', { forceRefresh: refresh });
+                    displayWhaleLeaderboard(data, container);
+                    updateLastUpdated('whales');
+                } catch (error) {
+                    showError('whales-leaderboard-content', error.message);
+                }
+            } else if (tab === 'activity') {
+                const container = document.getElementById('whales-activity-content');
+                if (!refresh) showLoading('whales-activity-content');
+                
+                try {
+                    const data = await cachedFetch('/whales/recent-activity?hours=24&min_value=1000', { forceRefresh: refresh });
+                    displayWhaleActivity(data, container);
+                    updateLastUpdated('whales');
+                } catch (error) {
+                    showError('whales-activity-content', error.message);
+                }
+            } else if (tab === 'alerts') {
+                const container = document.getElementById('whales-alerts-content');
+                if (!refresh) showLoading('whales-alerts-content');
+                
+                try {
+                    const data = await cachedFetch('/whales/alerts?unread_only=true', { forceRefresh: refresh });
+                    displayWhaleAlerts(data, container);
+                    updateLastUpdated('whales');
+                } catch (error) {
+                    showError('whales-alerts-content', error.message);
+                }
+            }
+        }
+
+        function displayWhaleLeaderboard(whales, container) {
+            if (!whales || whales.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No whale data available yet. The system is discovering and indexing top traders...</p></div>';
+                return;
+            }
+
+            let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+            
+            whales.forEach((whale, index) => {
+                const rankEmoji = whale.rank === 1 ? '🥇' : whale.rank === 2 ? '🥈' : whale.rank === 3 ? '🥉' : '';
+                const hoursText = whale.hours_since_trade < 1 ? 'Active now' : `${Math.floor(whale.hours_since_trade)}h ago`;
+                
+                html += `
+                    <div class="market-card" style="margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+                            <!-- Rank Badge -->
+                            <div style="width: 60px; text-align: center; flex-shrink: 0;">
+                                ${rankEmoji ? `<span style="font-size: 2em;">${rankEmoji}</span>` : `<div style="font-size: 1.5em; font-weight: 700; color: #0066FF;">#${whale.rank}</div>`}
+                            </div>
+                            
+                            <!-- Whale Info -->
+                            <div style="flex: 1; min-width: 200px;">
+                                <div style="font-weight: 700; color: #1A1A1A; margin-bottom: 4px; font-size: 1.1em;">
+                                    ${whale.nickname}
+                                </div>
+                                <div style="font-size: 0.85em; color: #6B7280; font-family: monospace;">
+                                    ${whale.wallet_address.slice(0, 10)}...${whale.wallet_address.slice(-8)}
+                                </div>
+                            </div>
+                            
+                            <!-- Stats Grid -->
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; flex: 2; min-width: 400px;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.75em; color: #6B7280; margin-bottom: 4px;">Volume</div>
+                                    <div style="font-weight: 700; color: #1A1A1A;">$${(whale.total_volume / 1000).toFixed(0)}K</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.75em; color: #6B7280; margin-bottom: 4px;">Trades</div>
+                                    <div style="font-weight: 700; color: #1A1A1A;">${whale.total_trades}</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.75em; color: #6B7280; margin-bottom: 4px;">Win Rate</div>
+                                    <div style="font-weight: 700; color: #10B981;">${whale.win_rate.toFixed(1)}%</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.75em; color: #6B7280; margin-bottom: 4px;">P&L</div>
+                                    <div style="font-weight: 700; color: ${whale.total_profit >= 0 ? '#10B981' : '#EF4444'};">
+                                        ${whale.total_profit >= 0 ? '+' : ''}$${whale.total_profit.toFixed(0)}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Last Activity -->
+                            <div style="text-align: right; min-width: 100px; flex-shrink: 0;">
+                                <div style="font-size: 0.85em; color: #6B7280;">
+                                    ${hoursText}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function displayWhaleActivity(trades, container) {
+            if (!trades || trades.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No recent whale activity found. Large trades will appear here when detected.</p></div>';
+                return;
+            }
+
+            let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+            
+            trades.forEach((trade, index) => {
+                const actionColor = trade.action.includes('BUY') ? '#10B981' : '#EF4444';
+                const actionBg = trade.action.includes('BUY') ? '#d1fae5' : '#fee2e2';
+                const actionText = trade.action.includes('BUY') ? '#065f46' : '#991b1b';
+                const hoursText = trade.hours_ago < 1 ? 'Just now' : `${Math.floor(trade.hours_ago)}h ago`;
+                
+                html += `
+                    <div class="market-card" style="margin-bottom: 16px;">
+                        <div style="display: flex; align-items: start; gap: 16px;">
+                            <!-- Indicator Bar -->
+                            <div style="width: 4px; height: 100%; background: ${actionColor}; border-radius: 2px; min-height: 60px; flex-shrink: 0;"></div>
+                            
+                            <div style="flex: 1;">
+                                <!-- Header -->
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                        <span style="padding: 4px 12px; background: #dbeafe; color: #1e40af; border-radius: 12px; font-size: 0.85em; font-weight: 600;">
+                                            ${trade.whale_nickname}
+                                        </span>
+                                        <span style="padding: 4px 12px; background: ${actionBg}; color: ${actionText}; border-radius: 12px; font-size: 0.85em; font-weight: 600;">
+                                            ${trade.action}
+                                        </span>
+                                        <span style="font-size: 0.85em; color: #6B7280;">
+                                            ${hoursText}
+                                        </span>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-weight: 700; color: #1A1A1A; font-size: 1.1em;">
+                                            $${trade.value.toLocaleString()}
+                                        </div>
+                                        <div style="font-size: 0.85em; color: #6B7280;">
+                                            @${(trade.price * 100).toFixed(1)}%
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Market -->
+                                <div style="font-weight: 600; color: #1A1A1A; font-size: 0.95em;">
+                                    ${trade.market}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function displayWhaleAlerts(data, container) {
+            const alerts = data.alerts || [];
+            
+            if (alerts.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No whale alerts yet. You\'ll be notified when whales make large trades.</p></div>';
+                return;
+            }
+
+            let html = `
+                <div style="margin-bottom: 16px; padding: 12px; background: #E6F0FF; border-left: 4px solid #0066FF; border-radius: 8px;">
+                    <strong>${data.unread_count || 0} unread alerts</strong>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+            `;
+            
+            alerts.forEach(alert => {
+                html += `
+                    <div class="market-card" style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 12px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                                    <span style="padding: 4px 12px; background: #dbeafe; color: #1e40af; border-radius: 12px; font-size: 0.85em; font-weight: 600;">
+                                        ${alert.whale_nickname}
+                                    </span>
+                                    <span style="padding: 4px 12px; background: #fef3c7; color: #92400e; border-radius: 12px; font-size: 0.85em; font-weight: 600;">
+                                        Large Trade
+                                    </span>
+                                    <span style="font-size: 0.85em; color: #6B7280;">
+                                        ${new Date(alert.time).toLocaleString()}
+                                    </span>
+                                </div>
+                                <div style="font-weight: 600; color: #1A1A1A; margin-bottom: 4px;">
+                                    ${alert.market}
+                                </div>
+                                <div style="font-size: 0.9em; color: #6B7280;">
+                                    ${alert.action} - $${alert.value.toLocaleString()}
+                                </div>
+                            </div>
+                            ${!alert.is_read ? `<button class="btn btn-secondary" onclick="markWhaleAlertRead(${alert.id})" style="padding: 8px 16px; font-size: 0.85em;">Mark Read</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        async function markWhaleAlertRead(alertId) {
+            try {
+                await fetch(`${API_BASE}/whales/alerts/${alertId}/read`, { method: 'POST' });
+                loadWhales(true); // Refresh
+            } catch (error) {
+                console.error('Failed to mark alert as read:', error);
+            }
+        }
+
         // Smooth scroll for anchor links in Help & FAQ
         // Wait for DOM to be fully loaded
         if (document.readyState === 'loading') {
@@ -3164,6 +3451,13 @@
                     loadAlerts(true);
                 }
             }, REFRESH_INTERVAL);
+            
+            // Refresh whales every 60 seconds (less frequent due to subgraph rate limits)
+            setInterval(() => {
+                if (document.getElementById('whales').classList.contains('active')) {
+                    loadWhales(true);
+                }
+            }, 60000); // 60 seconds
             
             // Refresh dashboard every 30 seconds
             setInterval(() => {
