@@ -323,6 +323,8 @@ class EconomicCalendar:
         """Get upcoming economic events within next N days"""
         cutoff_date = now_naive_utc() + timedelta(days=days)
         
+        from ...database.models import MarketEvent
+        
         query = select(
             EconomicEvent.id,
             EconomicEvent.event_type,
