@@ -13,10 +13,10 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(to bottom, #0f172a 0%, #1e293b 100%); /* slate-900 to slate-800 */
+            background: #F8F9FA; /* Clean white/gray background */
             min-height: 100vh;
             padding: 0;
-            color: #f8fafc; /* slate-50 */
+            color: #1A1A1A; /* Black/gray text */
         }
 
         .container {
@@ -27,13 +27,13 @@
 
         /* Hero Section */
         .hero-section {
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+            background: linear-gradient(135deg, #003D99 0%, #0066FF 50%, #338EFF 100%);
             border-radius: 20px;
             padding: 60px 40px;
             margin-bottom: -80px;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 102, 255, 0.3);
         }
 
         .hero-section::before {
@@ -132,22 +132,22 @@
         }
 
         .header {
-            background: #1e293b; /* slate-800 */
+            background: #FFFFFF; /* White background */
             border-radius: 12px;
             padding: 30px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            border: 1px solid #334155; /* slate-700 */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #F1F3F5; /* Light gray border */
         }
 
         .header h1 {
-            color: #3b82f6; /* blue-500 */
+            color: #0066FF; /* Professional blue */
             font-size: 2.5em;
             margin-bottom: 10px;
         }
 
         .header p {
-            color: #94a3b8; /* slate-400 */
+            color: #6B7280; /* Gray text */
             font-size: 1.1em;
         }
 
@@ -159,12 +159,14 @@
         }
 
         .status-item {
-            background: #334155;
+            background: #F8F9FA;
             padding: 12px 20px;
             border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 10px;
+            border: 1px solid #F1F3F5;
+            color: #1A1A1A;
         }
 
         .status-indicator {
@@ -188,35 +190,36 @@
         }
 
         .tab {
-            background: #1e293b; /* slate-800 */
+            background: #FFFFFF;
             border: none;
             padding: 15px 30px;
             border-radius: 8px 8px 0 0;
             cursor: pointer;
             font-size: 1em;
             font-weight: 600;
-            color: #94a3b8; /* slate-400 */
+            color: #6B7280; /* Gray text */
             transition: all 0.3s;
+            border-bottom: 2px solid transparent;
         }
 
         .tab:hover {
-            background: #334155; /* slate-700 */
-            color: #f8fafc; /* slate-50 */
+            background: #F8F9FA;
+            color: #1A1A1A; /* Dark gray on hover */
         }
 
         .tab.active {
-            background: #1e293b; /* slate-800 */
-            color: #3b82f6; /* blue-500 */
-            border-bottom: 3px solid #3b82f6;
+            background: #FFFFFF;
+            color: #0066FF; /* Professional blue */
+            border-bottom: 3px solid #0066FF;
         }
 
         .content {
-            background: #1e293b; /* slate-800 */
+            background: #FFFFFF; /* White background */
             border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             min-height: 500px;
-            border: 1px solid #334155; /* slate-700 */
+            border: 1px solid #F1F3F5; /* Light gray border */
         }
 
         .tab-content {
@@ -235,7 +238,7 @@
         }
 
         .btn {
-            background: #3b82f6; /* blue-500 */
+            background: #0066FF; /* Professional blue */
             color: white;
             border: none;
             padding: 12px 24px;
@@ -247,9 +250,9 @@
         }
 
         .btn:hover {
-            background: #2563eb; /* blue-600 */
+            background: #003D99; /* Dark blue on hover */
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 102, 255, 0.3);
         }
 
         .btn-secondary {
@@ -262,7 +265,7 @@
 
         input, select {
             padding: 12px;
-            border: 1px solid #334155;
+            border: 1px solid #F8F9FA;
             border-radius: 8px;
             font-size: 1em;
             transition: border-color 0.3s;
@@ -270,7 +273,7 @@
 
         input:focus, select:focus {
             outline: none;
-            border-color: #3b82f6; /* blue-500 */
+            border-color: #0066FF; /* Professional blue */
         }
 
         .table-container {
@@ -281,26 +284,26 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            background: #1e293b; /* slate-800 */
+            background: #FFFFFF; /* White background */
         }
 
         th, td {
             padding: 15px;
             text-align: left;
-            border-bottom: 1px solid #334155; /* slate-700 */
-            color: #f8fafc; /* slate-50 */
+            border-bottom: 1px solid #F1F3F5; /* Light gray border */
+            color: #1A1A1A; /* Black text */
         }
 
         th {
-            background: #334155; /* slate-700 */
+            background: #F8F9FA; /* Light gray header */
             font-weight: 600;
-            color: #3b82f6; /* blue-500 */
+            color: #0066FF; /* Professional blue */
             position: sticky;
             top: 0;
         }
 
         tr:hover {
-            background: #334155; /* slate-700 */
+            background: #F8F9FA; /* Light gray on hover */
         }
 
         /* Quick Stats Widget */
@@ -332,7 +335,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: var(--card-gradient, linear-gradient(90deg, #3b82f6, #8b5cf6));
+            background: var(--card-gradient, linear-gradient(90deg, #0066FF, #8b5cf6));
         }
 
         .stat-card:hover {
@@ -341,7 +344,7 @@
         }
 
         .stat-card.portfolio {
-            --card-gradient: linear-gradient(90deg, #3b82f6, #2563eb);
+            --card-gradient: linear-gradient(90deg, #0066FF, #003D99);
         }
 
         .stat-card.positions {
@@ -353,16 +356,16 @@
         }
 
         .stat-card.winrate {
-            --card-gradient: linear-gradient(90deg, #8b5cf6, #7c3aed);
+            --card-gradient: linear-gradient(90deg, #0066FF, #003D99);
         }
 
         .stat-card.status {
-            --card-gradient: linear-gradient(90deg, #ec4899, #db2777);
+            --card-gradient: linear-gradient(90deg, #10b981, #059669);
         }
 
         .stat-card h3 {
             font-size: 0.85em;
-            color: #64748b;
+            color: #6B7280;
             margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -372,7 +375,7 @@
         .stat-card .value {
             font-size: 2.4em;
             font-weight: 800;
-            color: #0f172a;
+            color: #1A1A1A;
             display: block;
             margin-bottom: 8px;
             line-height: 1.1;
@@ -403,14 +406,15 @@
 
         /* Settings Panel */
         .settings-panel {
-            background: #334155;
+            background: #FFFFFF;
             border-radius: 12px;
             padding: 30px;
             margin-bottom: 20px;
+            border: 1px solid #F1F3F5;
         }
 
         .settings-panel h3 {
-            color: #3b82f6;
+            color: #0066FF;
             margin-bottom: 20px;
             font-size: 1.5em;
         }
@@ -418,14 +422,14 @@
         .setting {
             margin-bottom: 25px;
             padding: 15px;
-            background: #1e293b;
+            background: #F8F9FA;
             border-radius: 8px;
         }
 
         .setting label {
             display: block;
             font-weight: 600;
-            color: #f8fafc;
+            color: #1A1A1A;
             margin-bottom: 10px;
         }
 
@@ -446,22 +450,23 @@
         }
 
         .setting span {
-            color: #3b82f6;
+            color: #0066FF;
             font-weight: 600;
             margin-left: 10px;
         }
 
         /* Activity Feed */
         .activity-feed {
-            background: #334155;
+            background: #FFFFFF;
             border-radius: 12px;
             padding: 20px;
             max-height: 500px;
             overflow-y: auto;
+            border: 1px solid #F1F3F5;
         }
 
         .activity-feed h3 {
-            color: #3b82f6;
+            color: #0066FF;
             margin-bottom: 15px;
             font-size: 1.3em;
         }
@@ -472,11 +477,11 @@
         }
 
         .activity-feed li {
-            background: #1e293b;
+            background: #F8F9FA;
             padding: 15px;
             margin-bottom: 10px;
             border-radius: 8px;
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #0066FF;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -493,13 +498,13 @@
         }
 
         .activity-feed .time {
-            color: #94a3b8;
+            color: #6B7280;
             font-size: 0.85em;
         }
 
         .activity-feed .action {
             font-weight: 600;
-            color: #3b82f6;
+            color: #0066FF;
         }
 
         .activity-feed .market {
@@ -538,18 +543,18 @@
 
         .badge-info {
             background: #d1ecf1;
-            color: #3b82f6;
+            color: #0066FF;
         }
 
         .loading {
             text-align: center;
             padding: 40px;
-            color: #94a3b8;
+            color: #6B7280;
         }
 
         .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #3b82f6;
+            border-top: 4px solid #0066FF;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -578,7 +583,7 @@
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #0066FF 0%, #003D99 100%);
             color: white;
             padding: 25px;
             border-radius: 12px;
@@ -599,7 +604,7 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #64748b;
+            color: #6B7280;
         }
 
         .empty-state svg {
@@ -623,14 +628,14 @@
             padding: 24px;
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid #e2e8f0;
+            border: 1px solid #F1F3F5;
             cursor: pointer;
         }
 
         .market-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-            border-color: #3b82f6;
+            border-color: #0066FF;
         }
 
         .market-card-header {
@@ -642,7 +647,7 @@
 
         .market-category {
             font-size: 0.75em;
-            color: #3b82f6;
+            color: #0066FF;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -651,7 +656,7 @@
         .market-question {
             font-size: 1.1em;
             font-weight: 700;
-            color: #0f172a;
+            color: #1A1A1A;
             line-height: 1.4;
             margin-bottom: 20px;
         }
@@ -669,27 +674,27 @@
 
         .market-probability-label {
             font-size: 0.85em;
-            color: #64748b;
+            color: #6B7280;
             font-weight: 600;
         }
 
         .market-probability-value {
             font-size: 1.8em;
             font-weight: 800;
-            color: #3b82f6;
+            color: #0066FF;
         }
 
         .market-probability-bar {
             width: 100%;
             height: 10px;
-            background: #e2e8f0;
+            background: #F1F3F5;
             border-radius: 10px;
             overflow: hidden;
         }
 
         .market-probability-fill {
             height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            background: linear-gradient(90deg, #0066FF, #338EFF);
             border-radius: 10px;
             transition: width 0.5s ease;
         }
@@ -698,16 +703,16 @@
             display: flex;
             justify-content: space-between;
             font-size: 0.85em;
-            color: #64748b;
+            color: #6B7280;
             margin-bottom: 20px;
             padding-top: 16px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid #F1F3F5;
         }
 
         .market-action-btn {
             width: 100%;
             padding: 12px 24px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            background: linear-gradient(135deg, #0066FF, #003D99);
             color: white;
             border: none;
             border-radius: 10px;
@@ -719,7 +724,8 @@
 
         .market-action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 102, 255, 0.4);
+            background: linear-gradient(135deg, #338EFF, #0066FF);
         }
 
         /* Search and Filter Bar */
@@ -744,7 +750,7 @@
         .search-input {
             width: 100%;
             padding: 12px 16px 12px 44px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #F1F3F5;
             border-radius: 10px;
             font-size: 0.95em;
             transition: all 0.3s;
@@ -752,7 +758,7 @@
 
         .search-input:focus {
             outline: none;
-            border-color: #3b82f6;
+            border-color: #0066FF;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
@@ -761,14 +767,14 @@
             left: 14px;
             top: 50%;
             transform: translateY(-50%);
-            color: #94a3b8;
+            color: #6B7280;
             font-size: 1.2em;
         }
 
         .filter-btn {
             padding: 12px 24px;
             background: #f1f5f9;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #F1F3F5;
             border-radius: 10px;
             font-weight: 600;
             color: #475569;
@@ -780,7 +786,7 @@
         }
 
         .filter-btn:hover {
-            background: #e2e8f0;
+            background: #F1F3F5;
             border-color: #cbd5e1;
         }
 
@@ -839,7 +845,7 @@
             <div class="stat-card portfolio">
                 <h3>Portfolio Value</h3>
                 <span class="value" id="stat-portfolio-value">$0.00</span>
-                <span class="change" id="stat-portfolio-change" style="color: #64748b; font-size: 0.85em;">$0.00 (0%)</span>
+                <span class="change" id="stat-portfolio-change" style="color: #6B7280; font-size: 0.85em;">$0.00 (0%)</span>
             </div>
             <div class="stat-card positions">
                 <h3>Active Positions</h3>
@@ -880,7 +886,7 @@
             <!-- Dashboard Tab -->
             <div id="dashboard" class="tab-content active">
                 <h2>🏠 Dashboard</h2>
-                <div style="background: #1e3a5f; border-left: 4px solid #3b82f6; padding: 12px; margin-bottom: 20px; border-radius: 4px; color: #e0f2fe;">
+                <div style="background: #1e3a5f; border-left: 4px solid #0066FF; padding: 12px; margin-bottom: 20px; border-radius: 4px; color: #e0f2fe;">
                     <strong>✅ Auto-Refresh:</strong> Dashboard updates every 30 seconds with latest stats and activity.
                 </div>
                 <!-- Dashboard content will be loaded by JavaScript -->
@@ -890,7 +896,7 @@
                     <div class="activity-feed" style="margin-top: 30px;">
                         <h3>📊 Recent Activity</h3>
                         <ul id="activityList">
-                            <li style="text-align: center; color: #94a3b8; padding: 20px;">Loading activity...</li>
+                            <li style="text-align: center; color: #6B7280; padding: 20px;">Loading activity...</li>
                         </ul>
                     </div>
                     <div id="trading-settings-preview"></div>
@@ -899,8 +905,8 @@
 
             <!-- Markets Tab -->
             <div id="markets" class="tab-content">
-                <h2 style="color: #0f172a; margin-bottom: 24px; font-size: 2em;">🔥 Trending Markets</h2>
-                <div style="background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%); border-left: 4px solid #3b82f6; padding: 16px; margin-bottom: 24px; border-radius: 8px; color: #1e40af;">
+                <h2 style="color: #1A1A1A; margin-bottom: 24px; font-size: 2em;">🔥 Trending Markets</h2>
+                <div style="background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%); border-left: 4px solid #0066FF; padding: 16px; margin-bottom: 24px; border-radius: 8px; color: #1e40af;">
                     <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show the latest data. Markets are fetched live from Polymarket API.
                 </div>
                 
@@ -919,13 +925,13 @@
                         <span>Show:</span>
                         <input type="number" id="markets-limit" value="20" min="10" max="100" step="10" placeholder="20" 
                                title="Controls how many markets appear on the page. Range: 10-100."
-                               style="width: 70px; padding: 8px; border: 2px solid #e2e8f0; border-radius: 8px;">
+                               style="width: 70px; padding: 8px; border: 2px solid #F1F3F5; border-radius: 8px;">
                     </label>
                     <button class="filter-btn" onclick="loadMarkets(true)">
                         <span>🔄</span>
                         <span>Refresh</span>
                     </button>
-                    <span id="markets-last-updated" style="color: #94a3b8; font-size: 0.85em;"></span>
+                    <span id="markets-last-updated" style="color: #6B7280; font-size: 0.85em;"></span>
                 </div>
                 
                 <div id="markets-content"></div>
@@ -939,15 +945,15 @@
                 </div>
                 <div class="controls">
                     <input type="text" id="predictions-market-id" placeholder="Market ID (optional)" style="flex: 1;">
-                    <label style="display: flex; align-items: center; gap: 10px; color: #94a3b8;">
+                    <label style="display: flex; align-items: center; gap: 10px; color: #6B7280;">
                         <span>Show:</span>
                         <input type="number" id="predictions-limit" value="50" min="10" max="1000" step="10" placeholder="50" 
                                title="Controls how many predictions appear on the page. Range: 10-1000. Default: 50. Higher = more data but slower loading."
-                               style="width: 80px; padding: 8px; border: 1px solid #334155; border-radius: 4px;">
-                        <span><span style="color: #64748b; font-size: 0.9em;" title="Range: 10-1000 predictions. Default: 50. Hover over the input for details.">(10-1000)</span></span>
+                               style="width: 80px; padding: 8px; border: 1px solid #F8F9FA; border-radius: 4px;">
+                        <span><span style="color: #6B7280; font-size: 0.9em;" title="Range: 10-1000 predictions. Default: 50. Hover over the input for details.">(10-1000)</span></span>
                     </label>
                     <button class="btn btn-secondary" onclick="loadPredictions(true)">🔄 Refresh Now</button>
-                    <span id="predictions-last-updated" style="color: #94a3b8; margin-left: 15px; font-size: 0.9em;"></span>
+                    <span id="predictions-last-updated" style="color: #6B7280; margin-left: 15px; font-size: 0.9em;"></span>
                 </div>
                 <div id="predictions-content"></div>
             </div>
@@ -965,15 +971,15 @@
                         <option value="true">Executed</option>
                         <option value="false">Not Executed</option>
                     </select>
-                    <label style="display: flex; align-items: center; gap: 10px; color: #94a3b8;">
+                    <label style="display: flex; align-items: center; gap: 10px; color: #6B7280;">
                         <span>Show:</span>
                         <input type="number" id="signals-limit" value="50" min="10" max="1000" step="10" placeholder="50" 
                                title="Controls how many signals appear on the page. Range: 10-1000. Default: 50. Higher = more data but slower loading."
-                               style="width: 80px; padding: 8px; border: 1px solid #334155; border-radius: 4px;">
-                        <span><span style="color: #64748b; font-size: 0.9em;" title="Range: 10-1000 signals. Default: 50. Hover over the input for details.">(10-1000)</span></span>
+                               style="width: 80px; padding: 8px; border: 1px solid #F8F9FA; border-radius: 4px;">
+                        <span><span style="color: #6B7280; font-size: 0.9em;" title="Range: 10-1000 signals. Default: 50. Hover over the input for details.">(10-1000)</span></span>
                     </label>
                     <button class="btn btn-secondary" onclick="loadSignals(true)">🔄 Refresh Now</button>
-                    <span id="signals-last-updated" style="color: #94a3b8; margin-left: 15px; font-size: 0.9em;"></span>
+                    <span id="signals-last-updated" style="color: #6B7280; margin-left: 15px; font-size: 0.9em;"></span>
                 </div>
                 <div id="signals-content"></div>
             </div>
@@ -992,15 +998,15 @@
                         <option value="CLOSED">Closed</option>
                         <option value="CANCELLED">Cancelled</option>
                     </select>
-                    <label style="display: flex; align-items: center; gap: 10px; color: #94a3b8;">
+                    <label style="display: flex; align-items: center; gap: 10px; color: #6B7280;">
                         <span>Show:</span>
                         <input type="number" id="trades-limit" value="50" min="10" max="1000" step="10" placeholder="50" 
                                title="Controls how many trades appear on the page. Range: 10-1000. Default: 50. Higher = more data but slower loading."
-                               style="width: 80px; padding: 8px; border: 1px solid #334155; border-radius: 4px;">
-                        <span><span style="color: #64748b; font-size: 0.9em;" title="Range: 10-1000 trades. Default: 50. Hover over the input for details.">(10-1000)</span></span>
+                               style="width: 80px; padding: 8px; border: 1px solid #F8F9FA; border-radius: 4px;">
+                        <span><span style="color: #6B7280; font-size: 0.9em;" title="Range: 10-1000 trades. Default: 50. Hover over the input for details.">(10-1000)</span></span>
                     </label>
                     <button class="btn btn-secondary" onclick="loadTrades(true)">🔄 Refresh Now</button>
-                    <span id="trades-last-updated" style="color: #94a3b8; margin-left: 15px; font-size: 0.9em;"></span>
+                    <span id="trades-last-updated" style="color: #6B7280; margin-left: 15px; font-size: 0.9em;"></span>
                 </div>
                 <div id="trades-content"></div>
             </div>
@@ -1013,7 +1019,7 @@
                 </div>
                 <div class="controls">
                     <button class="btn btn-secondary" onclick="loadPortfolio(true)">🔄 Refresh Now</button>
-                    <span id="portfolio-last-updated" style="color: #94a3b8; margin-left: 15px; font-size: 0.9em;"></span>
+                    <span id="portfolio-last-updated" style="color: #6B7280; margin-left: 15px; font-size: 0.9em;"></span>
                 </div>
                 <div id="portfolio-content"></div>
             </div>
@@ -1025,11 +1031,11 @@
                     <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every 30 seconds to show the latest analytics. Analytics are calculated from your predictions, signals, and trades.
                 </div>
                 <div class="controls">
-                    <label style="display: flex; align-items: center; gap: 10px; color: #94a3b8;">
+                    <label style="display: flex; align-items: center; gap: 10px; color: #6B7280;">
                         <input type="checkbox" id="analytics-paper-trading" checked> Include Paper Trading
                     </label>
                     <button class="btn btn-secondary" onclick="loadAnalytics(true)">🔄 Refresh Now</button>
-                    <span id="analytics-last-updated" style="color: #94a3b8; margin-left: 15px; font-size: 0.9em;"></span>
+                    <span id="analytics-last-updated" style="color: #6B7280; margin-left: 15px; font-size: 0.9em;"></span>
                 </div>
                 <div id="analytics-content"></div>
             </div>
@@ -1043,7 +1049,7 @@
                 <div class="controls">
                     <button class="btn" onclick="showCreateAlertForm()">➕ Create New Alert</button>
                     <button class="btn btn-secondary" onclick="loadAlerts(true)">🔄 Refresh Now</button>
-                    <span id="alerts-last-updated" style="color: #94a3b8; margin-left: 15px; font-size: 0.9em;"></span>
+                    <span id="alerts-last-updated" style="color: #6B7280; margin-left: 15px; font-size: 0.9em;"></span>
                 </div>
                 <div id="alerts-content"></div>
             </div>
@@ -1087,27 +1093,27 @@
                     </div>
                     
                     <button class="btn" onclick="saveSettings()" style="width: 100%; margin-top: 20px;">Save Settings</button>
-                    <p id="settings-status" style="margin-top: 15px; color: #94a3b8;"></p>
+                    <p id="settings-status" style="margin-top: 15px; color: #6B7280;"></p>
                 </div>
                 
                 <!-- Wallet Connection -->
-                <div style="background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #3b82f6; margin-bottom: 20px;">🔗 Wallet Connection</h3>
+                <div style="background: #FFFFFF; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0066FF; margin-bottom: 20px;">🔗 Wallet Connection</h3>
                     <div id="wallet-info" style="margin-bottom: 20px;">
-                        <p id="wallet-status-text" style="color: #94a3b8;">Not connected</p>
+                        <p id="wallet-status-text" style="color: #6B7280;">Not connected</p>
                     </div>
-                    <button class="btn" onclick="connectWallet()" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">Connect Wallet</button>
+                    <button class="btn" onclick="connectWallet()" style="background: linear-gradient(135deg, #0066FF 0%, #003D99 100%);">Connect Wallet</button>
                 </div>
 
                 <!-- Trading Mode Toggle -->
-                <div style="background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 4px solid #3b82f6;">
-                    <h3 style="color: #3b82f6; margin-bottom: 20px;">🚀 Trading Mode</h3>
+                <div style="background: #FFFFFF; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 4px solid #0066FF;">
+                    <h3 style="color: #0066FF; margin-bottom: 20px;">🚀 Trading Mode</h3>
                     <div style="margin-bottom: 20px;">
                         <label style="display: flex; align-items: center; gap: 15px; cursor: pointer;">
                             <input type="checkbox" id="live-mode" onchange="toggleLiveMode()" style="width: 24px; height: 24px; cursor: pointer;">
                             <div>
-                                <strong style="color: #f8fafc;">Live Mode (Real Trading)</strong>
-                                <p style="color: #94a3b8; font-size: 0.9em; margin-top: 5px;">When enabled, connects to real MetaMask and processes real deposits/trades. When disabled, uses simulated funds for testing.</p>
+                                <strong style="color: #1A1A1A;">Live Mode (Real Trading)</strong>
+                                <p style="color: #6B7280; font-size: 0.9em; margin-top: 5px;">When enabled, connects to real MetaMask and processes real deposits/trades. When disabled, uses simulated funds for testing.</p>
                             </div>
                         </label>
                     </div>
@@ -1117,83 +1123,83 @@
                 </div>
 
                 <!-- Account Funding -->
-                <div style="background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #3b82f6; margin-bottom: 20px;">💰 Account Funding</h3>
+                <div style="background: #FFFFFF; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0066FF; margin-bottom: 20px;">💰 Account Funding</h3>
                     <div id="funding-mode-info" style="margin-bottom: 20px; padding: 15px; background: #1e3a5f; border-left: 4px solid #2196F3; border-radius: 8px;">
-                        <p style="margin: 0; color: #3b82f6;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>
+                        <p style="margin: 0; color: #0066FF;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>
                     </div>
                     <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-weight: 600;">Deposit Amount (USD)</label>
-                        <input type="number" id="deposit-amount" placeholder="100" min="10" step="10" style="width: 200px; padding: 10px; border: 1px solid #334155; border-radius: 4px; font-size: 1em;">
+                        <label style="display: block; margin-bottom: 10px; color: #6B7280; font-weight: 600;">Deposit Amount (USD)</label>
+                        <input type="number" id="deposit-amount" placeholder="100" min="10" step="10" style="width: 200px; padding: 10px; border: 1px solid #F8F9FA; border-radius: 4px; font-size: 1em;">
                     </div>
                     <button class="btn" onclick="depositFunds()" id="deposit-btn" style="background: #10b981;">Deposit Funds (Simulated)</button>
-                    <p id="deposit-status" style="margin-top: 15px; color: #94a3b8;"></p>
+                    <p id="deposit-status" style="margin-top: 15px; color: #6B7280;"></p>
                 </div>
 
                 <!-- Trading Preferences -->
-                <div style="background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #3b82f6; margin-bottom: 20px;">📊 Trading Preferences</h3>
+                <div style="background: #FFFFFF; padding: 30px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0066FF; margin-bottom: 20px;">📊 Trading Preferences</h3>
                     
                     <div style="margin-bottom: 25px;">
-                        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-weight: 600;">Trading Mode</label>
-                        <select id="trading-mode" style="width: 100%; padding: 10px; border: 1px solid #334155; border-radius: 4px; font-size: 1em;">
+                        <label style="display: block; margin-bottom: 10px; color: #6B7280; font-weight: 600;">Trading Mode</label>
+                        <select id="trading-mode" style="width: 100%; padding: 10px; border: 1px solid #F8F9FA; border-radius: 4px; font-size: 1em;">
                             <option value="auto">Auto-Trade (Recommended)</option>
                             <option value="manual">Manual Review</option>
                         </select>
-                        <p style="margin-top: 5px; color: #64748b; font-size: 0.9em;">Auto-trade executes signals automatically. Manual requires approval for each trade.</p>
+                        <p style="margin-top: 5px; color: #6B7280; font-size: 0.9em;">Auto-trade executes signals automatically. Manual requires approval for each trade.</p>
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-weight: 600;">Risk Level</label>
-                        <select id="risk-level" style="width: 100%; padding: 10px; border: 1px solid #334155; border-radius: 4px; font-size: 1em;">
+                        <label style="display: block; margin-bottom: 10px; color: #6B7280; font-weight: 600;">Risk Level</label>
+                        <select id="risk-level" style="width: 100%; padding: 10px; border: 1px solid #F8F9FA; border-radius: 4px; font-size: 1em;">
                             <option value="conservative">Conservative</option>
                             <option value="moderate" selected>Moderate (Recommended)</option>
                             <option value="aggressive">Aggressive</option>
                         </select>
-                        <p style="margin-top: 5px; color: #64748b; font-size: 0.9em;">Conservative = smaller positions, only STRONG signals. Aggressive = larger positions, all signals.</p>
+                        <p style="margin-top: 5px; color: #6B7280; font-size: 0.9em;">Conservative = smaller positions, only STRONG signals. Aggressive = larger positions, all signals.</p>
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-weight: 600;">Max Position Size (USD)</label>
-                        <input type="number" id="max-position" placeholder="200" min="10" step="10" style="width: 100%; padding: 10px; border: 1px solid #334155; border-radius: 4px; font-size: 1em;">
-                        <p style="margin-top: 5px; color: #64748b; font-size: 0.9em;">Maximum amount to bet on a single trade. Recommended: 1-2% of total capital.</p>
+                        <label style="display: block; margin-bottom: 10px; color: #6B7280; font-weight: 600;">Max Position Size (USD)</label>
+                        <input type="number" id="max-position" placeholder="200" min="10" step="10" style="width: 100%; padding: 10px; border: 1px solid #F8F9FA; border-radius: 4px; font-size: 1em;">
+                        <p style="margin-top: 5px; color: #6B7280; font-size: 0.9em;">Maximum amount to bet on a single trade. Recommended: 1-2% of total capital.</p>
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-weight: 600;">Min Edge Threshold (%)</label>
-                        <input type="number" id="min-edge" placeholder="10" min="5" max="30" step="1" style="width: 100%; padding: 10px; border: 1px solid #334155; border-radius: 4px; font-size: 1em;">
-                        <p style="margin-top: 5px; color: #64748b; font-size: 0.9em;">Minimum edge required to create a signal. Higher = fewer but better opportunities.</p>
+                        <label style="display: block; margin-bottom: 10px; color: #6B7280; font-weight: 600;">Min Edge Threshold (%)</label>
+                        <input type="number" id="min-edge" placeholder="10" min="5" max="30" step="1" style="width: 100%; padding: 10px; border: 1px solid #F8F9FA; border-radius: 4px; font-size: 1em;">
+                        <p style="margin-top: 5px; color: #6B7280; font-size: 0.9em;">Minimum edge required to create a signal. Higher = fewer but better opportunities.</p>
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <label style="display: block; margin-bottom: 10px; color: #94a3b8; font-weight: 600;">Min Confidence (%)</label>
-                        <input type="number" id="min-confidence" placeholder="60" min="40" max="90" step="5" style="width: 100%; padding: 10px; border: 1px solid #334155; border-radius: 4px; font-size: 1em;">
-                        <p style="margin-top: 5px; color: #64748b; font-size: 0.9em;">Minimum confidence level required. Higher = more certain predictions only.</p>
+                        <label style="display: block; margin-bottom: 10px; color: #6B7280; font-weight: 600;">Min Confidence (%)</label>
+                        <input type="number" id="min-confidence" placeholder="60" min="40" max="90" step="5" style="width: 100%; padding: 10px; border: 1px solid #F8F9FA; border-radius: 4px; font-size: 1em;">
+                        <p style="margin-top: 5px; color: #6B7280; font-size: 0.9em;">Minimum confidence level required. Higher = more certain predictions only.</p>
                     </div>
 
-                    <button class="btn" onclick="savePreferences()" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); width: 100%;">Save Preferences</button>
-                    <p id="preferences-status" style="margin-top: 15px; color: #94a3b8;"></p>
+                    <button class="btn" onclick="savePreferences()" style="background: linear-gradient(135deg, #0066FF 0%, #003D99 100%); width: 100%;">Save Preferences</button>
+                    <p id="preferences-status" style="margin-top: 15px; color: #6B7280;"></p>
                 </div>
 
                 <!-- Account Info -->
-                <div style="background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #3b82f6; margin-bottom: 20px;">ℹ️ Account Information</h3>
-                    <div style="color: #94a3b8;">
+                <div style="background: #FFFFFF; padding: 30px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0066FF; margin-bottom: 20px;">ℹ️ Account Information</h3>
+                    <div style="color: #6B7280;">
                         <p><strong>Data Source:</strong> <span id="data-source">Real-time from Polymarket API</span></p>
                         <p style="margin-top: 10px;"><strong>Current Mode:</strong> <span id="current-mode-display">Test Mode (Simulated)</span></p>
-                        <div style="margin-top: 15px; padding: 15px; background: #334155; border-radius: 8px;">
+                        <div style="margin-top: 15px; padding: 15px; background: #F8F9FA; border-radius: 8px;">
                             <p style="margin-bottom: 10px;"><strong>✅ Real Data:</strong></p>
-                            <ul style="margin-left: 20px; color: #94a3b8;">
+                            <ul style="margin-left: 20px; color: #6B7280;">
                                 <li>Markets from Polymarket API</li>
                                 <li>AI predictions from trained models</li>
                                 <li>Trading signals based on real edge calculations</li>
                             </ul>
                             <p style="margin-top: 15px; margin-bottom: 10px;"><strong id="simulation-label">⚠️ Simulated (Test Mode):</strong></p>
-                            <ul style="margin-left: 20px; color: #94a3b8;">
+                            <ul style="margin-left: 20px; color: #6B7280;">
                                 <li id="simulation-item-1">Fund deposits (simulated for testing)</li>
                                 <li id="simulation-item-2">Trade execution (simulated for testing)</li>
                             </ul>
-                            <p style="margin-top: 15px; color: #3b82f6;"><strong>💡 Tip:</strong> Use Test Mode to simulate $100 deposits and see how the system works. Enable Live Mode when ready for real trading!</p>
+                            <p style="margin-top: 15px; color: #0066FF;"><strong>💡 Tip:</strong> Use Test Mode to simulate $100 deposits and see how the system works. Enable Live Mode when ready for real trading!</p>
                         </div>
                     </div>
                 </div>
@@ -1202,28 +1208,28 @@
             <!-- Help & FAQ Tab -->
             <div id="help" class="tab-content">
                 <h2>❓ Help & FAQ</h2>
-                <p style="color: #94a3b8; margin-bottom: 30px;">Complete guide to understanding and using the Polymarket AI Trading Bot</p>
+                <p style="color: #6B7280; margin-bottom: 30px;">Complete guide to understanding and using the Polymarket AI Trading Bot</p>
                 
                 <!-- Quick Navigation -->
-                <div style="background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #3b82f6; margin-bottom: 15px;">📑 Quick Navigation</h3>
+                <div style="background: #FFFFFF; padding: 20px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0066FF; margin-bottom: 15px;">📑 Quick Navigation</h3>
                     <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                        <a href="#getting-started" style="padding: 10px 20px; background: #334155; border-radius: 8px; text-decoration: none; color: #3b82f6; font-weight: 600;">Getting Started</a>
-                        <a href="#page-guide" style="padding: 10px 20px; background: #334155; border-radius: 8px; text-decoration: none; color: #3b82f6; font-weight: 600;">Page Guide</a>
-                        <a href="#key-concepts" style="padding: 10px 20px; background: #334155; border-radius: 8px; text-decoration: none; color: #3b82f6; font-weight: 600;">Key Concepts</a>
-                        <a href="#faq" style="padding: 10px 20px; background: #334155; border-radius: 8px; text-decoration: none; color: #3b82f6; font-weight: 600;">FAQ</a>
-                        <a href="#troubleshooting" style="padding: 10px 20px; background: #334155; border-radius: 8px; text-decoration: none; color: #3b82f6; font-weight: 600;">Troubleshooting</a>
+                        <a href="#getting-started" style="padding: 10px 20px; background: #F8F9FA; border-radius: 8px; text-decoration: none; color: #0066FF; font-weight: 600;">Getting Started</a>
+                        <a href="#page-guide" style="padding: 10px 20px; background: #F8F9FA; border-radius: 8px; text-decoration: none; color: #0066FF; font-weight: 600;">Page Guide</a>
+                        <a href="#key-concepts" style="padding: 10px 20px; background: #F8F9FA; border-radius: 8px; text-decoration: none; color: #0066FF; font-weight: 600;">Key Concepts</a>
+                        <a href="#faq" style="padding: 10px 20px; background: #F8F9FA; border-radius: 8px; text-decoration: none; color: #0066FF; font-weight: 600;">FAQ</a>
+                        <a href="#troubleshooting" style="padding: 10px 20px; background: #F8F9FA; border-radius: 8px; text-decoration: none; color: #0066FF; font-weight: 600;">Troubleshooting</a>
                     </div>
                 </div>
 
                 <!-- Getting Started -->
-                <div id="getting-started" style="background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #3b82f6; margin-bottom: 20px; font-size: 1.8em;">🚀 Getting Started</h3>
+                <div id="getting-started" style="background: #FFFFFF; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0066FF; margin-bottom: 20px; font-size: 1.8em;">🚀 Getting Started</h3>
                     
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Step 1: Connect Your Wallet</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;">On the landing page or Settings tab, click "Connect Wallet" and approve the connection in MetaMask.</p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.3em;">Step 1: Connect Your Wallet</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;">On the landing page or Settings tab, click "Connect Wallet" and approve the connection in MetaMask.</p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li>Your wallet address will be displayed</li>
                             <li>No funds are transferred during connection</li>
                             <li>You can disconnect anytime</li>
@@ -1231,8 +1237,8 @@
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Step 2: Choose Your Mode</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;">Go to Settings tab and choose:</p>
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.3em;">Step 2: Choose Your Mode</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;">Go to Settings tab and choose:</p>
                         <div style="background: #1e3a5f; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
                             <strong>Test Mode (Recommended for First Time):</strong>
                             <ul style="margin-top: 10px; margin-left: 20px;">
@@ -1252,9 +1258,9 @@
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Step 3: Fund Your Account</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;">In Settings tab, enter deposit amount and click "Deposit Funds":</p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.3em;">Step 3: Fund Your Account</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;">In Settings tab, enter deposit amount and click "Deposit Funds":</p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li><strong>Test Mode:</strong> Simulated deposit (instant, no real transfer)</li>
                             <li><strong>Live Mode:</strong> Real MetaMask transaction (confirm in wallet)</li>
                             <li>Start with $100 to test the system</li>
@@ -1262,22 +1268,22 @@
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Step 4: Set Your Preferences</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;">Configure your trading settings in Settings tab:</p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.3em;">Step 4: Set Your Preferences</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;">Configure your trading settings in Settings tab:</p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li><strong>Trading Mode:</strong> Auto-trade (recommended) or Manual review</li>
                             <li><strong>Risk Level:</strong> Conservative, Moderate, or Aggressive</li>
                             <li><strong>Max Position Size:</strong> Maximum $ per trade (recommend 1-2% of capital)</li>
                             <li><strong>Min Edge:</strong> Minimum opportunity % (default: 10%)</li>
                             <li><strong>Min Confidence:</strong> Minimum certainty % (default: 60%)</li>
                         </ul>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-top: 10px;">Click "Save Preferences" when done.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-top: 10px;">Click "Save Preferences" when done.</p>
                     </div>
 
                     <div>
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Step 5: Monitor Your Dashboard</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;">The system runs automatically. Check these tabs regularly:</p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.3em;">Step 5: Monitor Your Dashboard</h4>
+                        <p style="color: #6B7280; line-height: 1.8;">The system runs automatically. Check these tabs regularly:</p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li><strong>Predictions:</strong> See AI model predictions</li>
                             <li><strong>Signals:</strong> View trading opportunities</li>
                             <li><strong>Trades:</strong> Monitor your positions</li>
@@ -1287,77 +1293,77 @@
                 </div>
 
                 <!-- Page Guide -->
-                <div id="page-guide" style="background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #3b82f6; margin-bottom: 20px; font-size: 1.8em;">📊 Page-by-Page Guide</h3>
+                <div id="page-guide" style="background: #FFFFFF; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0066FF; margin-bottom: 20px; font-size: 1.8em;">📊 Page-by-Page Guide</h3>
                     
                     <div style="margin-bottom: 30px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 15px; font-size: 1.3em;">📊 Markets Tab</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> All available prediction markets from Polymarket</p>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 15px; font-size: 1.3em;">📊 Markets Tab</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> All available prediction markets from Polymarket</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li>Data loads automatically when you open the tab</li>
                             <li>Data refreshes every 30 seconds automatically</li>
                             <li>Browse markets to find interesting questions</li>
                             <li>Use "Refresh Now" button for manual refresh if needed</li>
                         </ul>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-100 markets</span> (Default: 50) - Controls how many markets appear on the page. Higher = more data but slower loading.</p>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>Key fields:</strong> Question, YES/NO prices, Outcome (Active/Resolved/Closed), Resolution Date</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-100 markets</span> (Default: 50) - Controls how many markets appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>Key fields:</strong> Question, YES/NO prices, Outcome (Active/Resolved/Closed), Resolution Date</p>
                     </div>
 
                     <div style="margin-bottom: 30px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 15px; font-size: 1.3em;">🔮 Predictions Tab</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> AI model predictions for markets</p>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 15px; font-size: 1.3em;">🔮 Predictions Tab</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> AI model predictions for markets</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li>Data loads automatically when you open the tab</li>
                             <li>Data refreshes every 30 seconds automatically</li>
                             <li>Look for predictions with <strong>high edge</strong> (>10%) = opportunity</li>
                             <li>Look for predictions with <strong>high confidence</strong> (>60%) = model is sure</li>
                         </ul>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 predictions</span> (Default: 50) - Controls how many predictions appear on the page. Higher = more data but slower loading.</p>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Understanding the data:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 predictions</span> (Default: 50) - Controls how many predictions appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Understanding the data:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li><strong>Model Probability:</strong> What the AI thinks (0-100%)</li>
                             <li><strong>Market Price:</strong> Current market price</li>
                             <li><strong>Edge:</strong> Difference (positive = opportunity)</li>
                             <li><strong>Confidence:</strong> How sure the model is</li>
                         </ul>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>What happens next:</strong> Predictions with edge >5% automatically generate signals</p>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>What happens next:</strong> Predictions with edge >5% automatically generate signals</p>
                     </div>
 
                     <div style="margin-bottom: 30px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 15px; font-size: 1.3em;">📡 Signals Tab</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> Trading signals generated from predictions</p>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 15px; font-size: 1.3em;">📡 Signals Tab</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> Trading signals generated from predictions</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li>Data loads automatically when you open the tab</li>
                             <li>Data refreshes every 30 seconds automatically</li>
                             <li>Focus on <strong>STRONG signals</strong> (best opportunities)</li>
                             <li>Signals are automatically created from predictions</li>
                         </ul>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 signals</span> (Default: 50) - Controls how many signals appear on the page. Higher = more data but slower loading.</p>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Signal Strength:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 signals</span> (Default: 50) - Controls how many signals appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Signal Strength:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li><strong>STRONG:</strong> >15% edge (best opportunities)</li>
                             <li><strong>MEDIUM:</strong> 10-15% edge (good opportunities)</li>
                             <li><strong>WEAK:</strong> 5-10% edge (small opportunities)</li>
                         </ul>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>What happens next:</strong> Signals automatically become trades if auto-trading is enabled</p>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>What happens next:</strong> Signals automatically become trades if auto-trading is enabled</p>
                     </div>
 
                     <div style="margin-bottom: 30px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 15px; font-size: 1.3em;">💼 Trades Tab</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> All executed trades</p>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 15px; font-size: 1.3em;">💼 Trades Tab</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> All executed trades</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li>Data loads automatically when you open the tab</li>
                             <li>Data refreshes every 30 seconds automatically</li>
                             <li>Monitor <strong>OPEN trades</strong> for active positions</li>
                             <li>Review <strong>P&L</strong> on closed trades</li>
                         </ul>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 trades</span> (Default: 50) - Controls how many trades appear on the page. Higher = more data but slower loading.</p>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Understanding the data:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">10-1000 trades</span> (Default: 50) - Controls how many trades appear on the page. Higher = more data but slower loading.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Understanding the data:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li><strong>Side:</strong> YES or NO position</li>
                             <li><strong>Entry Price:</strong> Price when trade opened</li>
                             <li><strong>Size:</strong> Position size in USD</li>
@@ -1367,17 +1373,17 @@
                     </div>
 
                     <div style="margin-bottom: 30px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 15px; font-size: 1.3em;">💰 Portfolio Tab</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> Overall portfolio performance</p>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 15px; font-size: 1.3em;">💰 Portfolio Tab</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> Overall portfolio performance</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>How to use:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li>Data loads automatically when you open the tab</li>
                             <li>Data refreshes every 30 seconds automatically</li>
                             <li>Monitor your portfolio performance in real-time</li>
                         </ul>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Shows latest snapshot</span> - Portfolio displays the most recent snapshot automatically.</p>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Key Metrics:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Display Limit:</strong> <span style="background: #1e3a5f; padding: 4px 8px; border-radius: 4px; font-weight: 600;">Shows latest snapshot</span> - Portfolio displays the most recent snapshot automatically.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Key Metrics:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 10px;">
                             <li><strong>Total Value:</strong> Entire portfolio (cash + positions + P&L)</li>
                             <li><strong>Cash:</strong> Money available for new trades</li>
                             <li><strong>Positions Value:</strong> Current value of open positions</li>
@@ -1389,10 +1395,10 @@
                     </div>
 
                     <div>
-                        <h4 style="color: #f8fafc; margin-bottom: 15px; font-size: 1.3em;">⚙️ Settings Tab</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> Account configuration and preferences</p>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Sections:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 15px; font-size: 1.3em;">⚙️ Settings Tab</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>What it shows:</strong> Account configuration and preferences</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Sections:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li><strong>Wallet Connection:</strong> Connect/disconnect MetaMask</li>
                             <li><strong>Trading Mode:</strong> Toggle between Test Mode and Live Mode</li>
                             <li><strong>Account Funding:</strong> Deposit funds (simulated or real)</li>
@@ -1403,61 +1409,61 @@
                 </div>
 
                 <!-- Key Concepts -->
-                <div id="key-concepts" style="background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #3b82f6; margin-bottom: 20px; font-size: 1.8em;">🎯 Key Concepts</h3>
+                <div id="key-concepts" style="background: #FFFFFF; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0066FF; margin-bottom: 20px; font-size: 1.8em;">🎯 Key Concepts</h3>
                     
-                    <div style="margin-bottom: 25px; padding: 20px; background: #334155; border-left: 4px solid #3b82f6; border-radius: 8px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 15px; font-size: 1.2em;">📊 Display Limits by Tab</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 15px;">Each tab has a limit control that determines how many items appear on the page. This helps balance performance with visibility.</p>
+                    <div style="margin-bottom: 25px; padding: 20px; background: #F8F9FA; border-left: 4px solid #0066FF; border-radius: 8px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 15px; font-size: 1.2em;">📊 Display Limits by Tab</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 15px;">Each tab has a limit control that determines how many items appear on the page. This helps balance performance with visibility.</p>
                         <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
                             <thead>
-                                <tr style="background: #3b82f6; color: white;">
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #334155;">Tab</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #334155;">Range</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #334155;">Default</th>
-                                    <th style="padding: 12px; text-align: left; border: 1px solid #334155;">Notes</th>
+                                <tr style="background: #0066FF; color: white;">
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #F8F9FA;">Tab</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #F8F9FA;">Range</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #F8F9FA;">Default</th>
+                                    <th style="padding: 12px; text-align: left; border: 1px solid #F8F9FA;">Notes</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr style="border: 1px solid #334155;">
-                                    <td style="padding: 12px; border: 1px solid #334155;"><strong>Markets</strong></td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">10-100</td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">50</td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">Limited by live API</td>
+                                <tr style="border: 1px solid #F8F9FA;">
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;"><strong>Markets</strong></td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">10-100</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">50</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">Limited by live API</td>
                                 </tr>
-                                <tr style="border: 1px solid #334155; background: #334155;">
-                                    <td style="padding: 12px; border: 1px solid #334155;"><strong>Predictions</strong></td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">10-1000</td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">50</td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">Database limit</td>
+                                <tr style="border: 1px solid #F8F9FA; background: #F8F9FA;">
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;"><strong>Predictions</strong></td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">10-1000</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">50</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">Database limit</td>
                                 </tr>
-                                <tr style="border: 1px solid #334155;">
-                                    <td style="padding: 12px; border: 1px solid #334155;"><strong>Signals</strong></td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">10-1000</td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">50</td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">Database limit</td>
+                                <tr style="border: 1px solid #F8F9FA;">
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;"><strong>Signals</strong></td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">10-1000</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">50</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">Database limit</td>
                                 </tr>
-                                <tr style="border: 1px solid #334155; background: #334155;">
-                                    <td style="padding: 12px; border: 1px solid #334155;"><strong>Trades</strong></td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">10-1000</td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">50</td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">Database limit</td>
+                                <tr style="border: 1px solid #F8F9FA; background: #F8F9FA;">
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;"><strong>Trades</strong></td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">10-1000</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">50</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">Database limit</td>
                                 </tr>
                                 <tr>
-                                    <td style="padding: 12px; border: 1px solid #334155;"><strong>Portfolio</strong></td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">Latest only</td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">N/A</td>
-                                    <td style="padding: 12px; border: 1px solid #334155;">Shows most recent snapshot</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;"><strong>Portfolio</strong></td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">Latest only</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">N/A</td>
+                                    <td style="padding: 12px; border: 1px solid #F8F9FA;">Shows most recent snapshot</td>
                                 </tr>
                             </tbody>
                         </table>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-top: 15px; font-size: 0.9em;"><strong>💡 Tip:</strong> Hover over the limit input on any tab to see a tooltip explaining the range. Higher limits show more data but may load slower.</p>
+                        <p style="color: #6B7280; line-height: 1.8; margin-top: 15px; font-size: 0.9em;"><strong>💡 Tip:</strong> Hover over the limit input on any tab to see a tooltip explaining the range. Higher limits show more data but may load slower.</p>
                     </div>
                     
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">What is "Edge"?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;">Edge is the difference between what the AI thinks and what the market thinks:</p>
-                        <div style="background: #334155; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.3em;">What is "Edge"?</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;">Edge is the difference between what the AI thinks and what the market thinks:</p>
+                        <div style="background: #F8F9FA; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
                             <p style="margin: 0;"><strong>Example:</strong></p>
                             <ul style="margin-top: 10px; margin-left: 20px;">
                                 <li>Market says: 40% chance</li>
@@ -1465,7 +1471,7 @@
                                 <li><strong>Edge: +30%</strong> (big opportunity!)</li>
                             </ul>
                         </div>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li><strong>Positive edge:</strong> AI thinks market is undervalued (opportunity)</li>
                             <li><strong>Negative edge:</strong> AI thinks market is overvalued</li>
                             <li><strong>Higher edge = Better opportunity</strong></li>
@@ -1473,9 +1479,9 @@
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">What is "Confidence"?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;">Confidence is how sure the AI model is in its prediction:</p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.3em;">What is "Confidence"?</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;">Confidence is how sure the AI model is in its prediction:</p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li><strong>High confidence</strong> (>60%): Model is very sure</li>
                             <li><strong>Low confidence</strong> (<40%): Model is uncertain</li>
                             <li><strong>Use with edge:</strong> High edge + high confidence = best trades</li>
@@ -1483,9 +1489,9 @@
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Signal Strength</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;">Signals are categorized by edge size:</p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.3em;">Signal Strength</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;">Signals are categorized by edge size:</p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li><strong>STRONG:</strong> >15% edge (best opportunities, consider trading)</li>
                             <li><strong>MEDIUM:</strong> 10-15% edge (good opportunities, review carefully)</li>
                             <li><strong>WEAK:</strong> 5-10% edge (small edge, may not be worth it)</li>
@@ -1493,16 +1499,16 @@
                     </div>
 
                     <div>
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.3em;">Test Mode vs Live Mode</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Test Mode (Default):</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-bottom: 15px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.3em;">Test Mode vs Live Mode</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Test Mode (Default):</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-bottom: 15px;">
                             <li>✅ Real market data and predictions</li>
                             <li>⚠️ Simulated deposits (test with $100)</li>
                             <li>⚠️ Simulated trade execution</li>
                             <li>Perfect for learning and testing</li>
                         </ul>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Live Mode:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Live Mode:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li>✅ Real market data and predictions</li>
                             <li>✅ Real MetaMask deposits</li>
                             <li>✅ Real Polymarket trades</li>
@@ -1512,43 +1518,43 @@
                 </div>
 
                 <!-- FAQ -->
-                <div id="faq" style="background: #1e293b; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #3b82f6; margin-bottom: 20px; font-size: 1.8em;">❓ Frequently Asked Questions</h3>
+                <div id="faq" style="background: #FFFFFF; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0066FF; margin-bottom: 20px; font-size: 1.8em;">❓ Frequently Asked Questions</h3>
                     
                     <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Q: Is the data real or simulated?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>A:</strong> All market data, predictions, and signals are <strong>100% real</strong> from Polymarket API and trained AI models. Only deposits and trades are simulated in Test Mode. In Live Mode, everything is real.</p>
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Q: Is the data real or simulated?</h4>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>A:</strong> All market data, predictions, and signals are <strong>100% real</strong> from Polymarket API and trained AI models. Only deposits and trades are simulated in Test Mode. In Live Mode, everything is real.</p>
                     </div>
 
                     <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Q: How do I test with $100?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>A:</strong> Go to Settings tab, make sure Test Mode is active (Live Mode OFF), enter $100 in deposit field, click "Deposit Funds (Simulated)". The system will simulate the deposit and you can test all features without risking real money.</p>
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Q: How do I test with $100?</h4>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>A:</strong> Go to Settings tab, make sure Test Mode is active (Live Mode OFF), enter $100 in deposit field, click "Deposit Funds (Simulated)". The system will simulate the deposit and you can test all features without risking real money.</p>
                     </div>
 
                     <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Q: When should I switch to Live Mode?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>A:</strong> Switch to Live Mode when you're comfortable with how the system works and ready to trade with real funds. Make sure you understand the risks and have tested thoroughly in Test Mode first.</p>
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Q: When should I switch to Live Mode?</h4>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>A:</strong> Switch to Live Mode when you're comfortable with how the system works and ready to trade with real funds. Make sure you understand the risks and have tested thoroughly in Test Mode first.</p>
                     </div>
 
                     <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Q: How often does the system analyze markets?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>A:</strong> The system runs automatically in the background, typically analyzing markets every hour or daily (configurable). You don't need to do anything - it works 24/7.</p>
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Q: How often does the system analyze markets?</h4>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>A:</strong> The system runs automatically in the background, typically analyzing markets every hour or daily (configurable). You don't need to do anything - it works 24/7.</p>
                     </div>
 
                     <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Q: What's the difference between predictions and signals?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>A:</strong> <strong>Predictions</strong> are AI model probability estimates for each market. <strong>Signals</strong> are trading recommendations created from predictions that have significant edge (>5%). Signals tell you when and what to trade.</p>
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Q: What's the difference between predictions and signals?</h4>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>A:</strong> <strong>Predictions</strong> are AI model probability estimates for each market. <strong>Signals</strong> are trading recommendations created from predictions that have significant edge (>5%). Signals tell you when and what to trade.</p>
                     </div>
 
                     <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Q: How do trades get created?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>A:</strong> If auto-trading is enabled, trades are automatically created from signals. If manual review is enabled, you review signals in the Signals tab and execute them manually.</p>
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Q: How do trades get created?</h4>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>A:</strong> If auto-trading is enabled, trades are automatically created from signals. If manual review is enabled, you review signals in the Signals tab and execute them manually.</p>
                     </div>
 
                     <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Q: What if I don't see any data?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>A:</strong> Data loads automatically when you open each tab. If you don't see data:</p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-top: 10px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Q: What if I don't see any data?</h4>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>A:</strong> Data loads automatically when you open each tab. If you don't see data:</p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-top: 10px;">
                             <li>Make sure you've connected your wallet and funded your account</li>
                             <li>Wait a few minutes for the system to analyze markets</li>
                             <li>Data refreshes automatically every 30 seconds</li>
@@ -1557,19 +1563,19 @@
                     </div>
 
                     <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Q: Can I change my preferences later?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>A:</strong> Yes! Go to Settings tab anytime, adjust your preferences, and click "Save Preferences". Changes take effect immediately for new signals and trades.</p>
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Q: Can I change my preferences later?</h4>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>A:</strong> Yes! Go to Settings tab anytime, adjust your preferences, and click "Save Preferences". Changes take effect immediately for new signals and trades.</p>
                     </div>
 
                     <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Q: Is my money safe?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>A:</strong> In Test Mode, no real money is involved. In Live Mode, your funds are held in your MetaMask wallet or the trading account. Always start with small amounts and never invest more than you can afford to lose. Trading involves risk.</p>
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Q: Is my money safe?</h4>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>A:</strong> In Test Mode, no real money is involved. In Live Mode, your funds are held in your MetaMask wallet or the trading account. Always start with small amounts and never invest more than you can afford to lose. Trading involves risk.</p>
                     </div>
 
                     <div>
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Q: How do I know if the system is working?</h4>
-                        <p style="color: #94a3b8; line-height: 1.8;"><strong>A:</strong> Check these indicators:</p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px; margin-top: 10px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Q: How do I know if the system is working?</h4>
+                        <p style="color: #6B7280; line-height: 1.8;"><strong>A:</strong> Check these indicators:</p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px; margin-top: 10px;">
                             <li>Predictions tab shows predictions with edges</li>
                             <li>Signals tab shows signals (if edge > threshold)</li>
                             <li>Trades tab shows trades (if auto-trading enabled)</li>
@@ -1579,13 +1585,13 @@
                 </div>
 
                 <!-- Troubleshooting -->
-                <div id="troubleshooting" style="background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <h3 style="color: #3b82f6; margin-bottom: 20px; font-size: 1.8em;">🔧 Troubleshooting</h3>
+                <div id="troubleshooting" style="background: #FFFFFF; padding: 30px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <h3 style="color: #0066FF; margin-bottom: 20px; font-size: 1.8em;">🔧 Troubleshooting</h3>
                     
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Problem: Can't connect wallet</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Problem: Can't connect wallet</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li>Make sure MetaMask is installed in your browser</li>
                             <li>Refresh the page and try again</li>
                             <li>Check that MetaMask is unlocked</li>
@@ -1594,9 +1600,9 @@
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Problem: No data showing in tabs</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Problem: No data showing in tabs</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li>Data loads automatically - just wait a moment when opening a tab</li>
                             <li>Wait a few minutes for system to analyze markets</li>
                             <li>Make sure you've funded your account (even simulated)</li>
@@ -1607,9 +1613,9 @@
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Problem: No signals being generated</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Problem: No signals being generated</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li>Check your Min Edge Threshold in Settings (lower it if too high)</li>
                             <li>Check your Min Confidence in Settings (lower it if too high)</li>
                             <li>Wait for more markets to be analyzed</li>
@@ -1618,9 +1624,9 @@
                     </div>
 
                     <div style="margin-bottom: 25px;">
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Problem: Deposit not working</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Problem: Deposit not working</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li>In Test Mode: Should work instantly (simulated)</li>
                             <li>In Live Mode: Check MetaMask popup and confirm transaction</li>
                             <li>Make sure wallet is connected</li>
@@ -1629,9 +1635,9 @@
                     </div>
 
                     <div>
-                        <h4 style="color: #f8fafc; margin-bottom: 10px; font-size: 1.2em;">Problem: Trades not executing</h4>
-                        <p style="color: #94a3b8; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
-                        <ul style="color: #94a3b8; line-height: 1.8; margin-left: 20px;">
+                        <h4 style="color: #1A1A1A; margin-bottom: 10px; font-size: 1.2em;">Problem: Trades not executing</h4>
+                        <p style="color: #6B7280; line-height: 1.8; margin-bottom: 10px;"><strong>Solutions:</strong></p>
+                        <ul style="color: #6B7280; line-height: 1.8; margin-left: 20px;">
                             <li>Check that auto-trading is enabled in Settings</li>
                             <li>Make sure you have sufficient funds in account</li>
                             <li>Check that signals are being generated</li>
@@ -1641,11 +1647,11 @@
                 </div>
 
                 <!-- Contact/Support -->
-                <div style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); padding: 30px; border-radius: 12px; color: white; margin-top: 30px;">
+                <div style="background: linear-gradient(135deg, #0066FF 0%, #003D99 100%); padding: 30px; border-radius: 12px; color: white; margin-top: 30px;">
                     <h3 style="margin-bottom: 15px; font-size: 1.8em;">💬 Need More Help?</h3>
                     <p style="margin-bottom: 20px; opacity: 0.95;">If you can't find the answer you're looking for, check the documentation or contact support.</p>
                     <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                        <a href="/static/index.html" style="padding: 12px 24px; background: #1e293b; color: #3b82f6; border-radius: 8px; text-decoration: none; font-weight: 600;">Back to Dashboard</a>
+                        <a href="/static/index.html" style="padding: 12px 24px; background: #FFFFFF; color: #0066FF; border-radius: 8px; text-decoration: none; font-weight: 600;">Back to Dashboard</a>
                         <a href="#getting-started" style="padding: 12px 24px; background: rgba(255,255,255,0.2); color: white; border-radius: 8px; text-decoration: none; font-weight: 600;">Start Over</a>
                     </div>
                 </div>
@@ -1929,7 +1935,7 @@
 
             let html = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 16px 20px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <div style="font-size: 1.1em; font-weight: 700; color: #0f172a;">
+                    <div style="font-size: 1.1em; font-weight: 700; color: #1A1A1A;">
                         📊 ${markets.length} ${markets.length === 1 ? 'Market' : 'Markets'} Found
                     </div>
                     ${isLive ? '<div style="padding: 8px 16px; background: linear-gradient(135deg, #10b981, #059669); color: white; border-radius: 8px; font-weight: 600; font-size: 0.9em;">⚡ Live Data</div>' : ''}
@@ -2298,7 +2304,7 @@
             const html = `
                 ${isDemo ? '<div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #20c997 100%); margin-bottom: 20px;"><h3>Data Source</h3><div class="value" style="font-size: 1.2em;">Demo Portfolio</div></div>' : ''}
                 <div class="stats-grid">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #0066FF 0%, #003D99 100%);">
                         <h3>Total Value</h3>
                         <div class="value" style="font-size: 2em;">$${portfolio.total_value.toFixed(2)}</div>
                     </div>
@@ -2327,11 +2333,11 @@
                         <div class="value ${realizedPnlClass}">${portfolio.realized_pnl ? `$${portfolio.realized_pnl.toFixed(2)}` : '$0.00'}</div>
                     </div>
                 </div>
-                <div style="margin-top: 30px; padding: 20px; background: #334155; border-radius: 8px;">
+                <div style="margin-top: 30px; padding: 20px; background: #F8F9FA; border-radius: 8px;">
                     <h3 style="margin-top: 0;">Portfolio Breakdown</h3>
                     <p><strong>Total Value:</strong> Cash ($${portfolio.cash.toFixed(2)}) + Positions ($${portfolio.positions_value.toFixed(2)}) + Unrealized P&L ($${portfolio.unrealized_pnl ? portfolio.unrealized_pnl.toFixed(2) : '0.00'})</p>
                     <p><strong>Total P&L:</strong> Realized ($${portfolio.realized_pnl ? portfolio.realized_pnl.toFixed(2) : '0.00'}) + Unrealized ($${portfolio.unrealized_pnl ? portfolio.unrealized_pnl.toFixed(2) : '0.00'}) = <strong>$${((portfolio.realized_pnl || 0) + (portfolio.unrealized_pnl || 0)).toFixed(2)}</strong></p>
-                    <p style="margin-bottom: 0; color: #94a3b8;">
+                    <p style="margin-bottom: 0; color: #6B7280;">
                         <strong>Last updated:</strong> ${new Date(portfolio.snapshot_time).toLocaleString()}
                     </p>
                 </div>
@@ -2360,7 +2366,7 @@
         function displayAnalytics(analytics, container) {
             const html = `
                 <div class="stats-grid">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #0066FF 0%, #003D99 100%);">
                         <h3>Total Predictions</h3>
                         <div class="value" style="font-size: 2em;">${analytics.total_predictions || 0}</div>
                     </div>
@@ -2397,12 +2403,12 @@
                         </div>
                     </div>
                 </div>
-                <div style="margin-top: 30px; padding: 20px; background: #334155; border-radius: 8px;">
+                <div style="margin-top: 30px; padding: 20px; background: #F8F9FA; border-radius: 8px;">
                     <h3 style="margin-top: 0;">Performance Metrics</h3>
                     <p><strong>Prediction Accuracy:</strong> ${analytics.prediction_accuracy ? (analytics.prediction_accuracy * 100).toFixed(1) + '%' : 'N/A'}</p>
                     <p><strong>Signal-to-Trade Conversion:</strong> ${analytics.signal_to_trade_conversion ? (analytics.signal_to_trade_conversion * 100).toFixed(1) + '%' : 'N/A'}</p>
                     <p><strong>Average Confidence:</strong> ${analytics.average_confidence ? (analytics.average_confidence * 100).toFixed(1) + '%' : 'N/A'}</p>
-                    <p style="margin-bottom: 0; color: #94a3b8;">
+                    <p style="margin-bottom: 0; color: #6B7280;">
                         <strong>Data Source:</strong> ${document.getElementById('analytics-paper-trading')?.checked ? 'Paper Trading' : 'Real Trading'}
                     </p>
                 </div>
@@ -2459,7 +2465,7 @@
         function showCreateAlertForm() {
             const container = document.getElementById('alerts-content');
             container.innerHTML = `
-                <div style="background: #1e293b; padding: 30px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <div style="background: #FFFFFF; padding: 30px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <h3>Create New Alert</h3>
                     <form onsubmit="createAlert(event)">
                         <div style="margin-bottom: 20px;">
@@ -2623,7 +2629,7 @@
                 modeStatus.innerHTML = '<strong>⚠️ Test Mode Active:</strong> Deposits and trades are simulated. Perfect for testing with $100!';
                 modeStatus.style.background = '#1e3a5f';
                 modeStatus.style.color = '#f59e0b';
-                fundingInfo.innerHTML = '<p style="margin: 0; color: #3b82f6;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>';
+                fundingInfo.innerHTML = '<p style="margin: 0; color: #0066FF;"><strong>Test Mode:</strong> Simulate deposits to test the system. Start with $100 to see how it works!</p>';
                 fundingInfo.style.background = '#1e3a5f';
                 fundingInfo.style.borderLeftColor = '#2196F3';
                 depositBtn.textContent = 'Deposit Funds (Simulated)';
@@ -2656,7 +2662,7 @@
             if (liveMode) {
                 // Real deposit flow
                 statusEl.textContent = 'Connecting to MetaMask...';
-                statusEl.style.color = '#3b82f6';
+                statusEl.style.color = '#0066FF';
                 
                 try {
                     // Request transaction from MetaMask
@@ -2681,7 +2687,7 @@
             } else {
                 // Simulated deposit flow
                 statusEl.textContent = 'Processing simulated deposit...';
-                statusEl.style.color = '#3b82f6';
+                statusEl.style.color = '#0066FF';
 
                 setTimeout(() => {
                     statusEl.textContent = `✅ Successfully simulated deposit of $${amount}! Your test account balance has been updated.`;
@@ -2790,7 +2796,7 @@
                         }
                     }).join('');
                 } else {
-                    activityList.innerHTML = '<li style="text-align: center; color: #94a3b8; padding: 20px;">No recent activity</li>';
+                    activityList.innerHTML = '<li style="text-align: center; color: #6B7280; padding: 20px;">No recent activity</li>';
                 }
             } catch (error) {
                 console.error('Failed to load activity:', error);
