@@ -182,35 +182,106 @@
             50% { opacity: 0.5; }
         }
 
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+        /* Left Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 260px;
+            background: #FFFFFF;
+            border-right: 1px solid #F1F3F5;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
         }
 
-        .tab {
-            background: #FFFFFF;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px 8px 0 0;
-            cursor: pointer;
-            font-size: 1em;
+        .sidebar.closed {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #F1F3F5;
+            background: linear-gradient(135deg, #003D99 0%, #0066FF 100%);
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .sidebar-nav {
+            padding: 10px 0;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 14px 20px;
+            color: #1A1A1A;
+            text-decoration: none;
+            font-size: 0.95em;
             font-weight: 600;
-            color: #6B7280; /* Gray text */
-            transition: all 0.3s;
-            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            cursor: pointer;
         }
 
-        .tab:hover {
+        .nav-item:hover {
             background: #F8F9FA;
-            color: #1A1A1A; /* Dark gray on hover */
+            color: #0066FF;
+            border-left-color: #0066FF;
         }
 
-        .tab.active {
-            background: #FFFFFF;
-            color: #0066FF; /* Professional blue */
-            border-bottom: 3px solid #0066FF;
+        .nav-item.active {
+            background: #E6F0FF;
+            color: #0066FF;
+            border-left-color: #0066FF;
+            font-weight: 700;
+        }
+
+        /* Hamburger Menu Button */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: #0066FF;
+            color: white;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.3em;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+        }
+
+        .menu-toggle:hover {
+            background: #003D99;
+            transform: scale(1.05);
+        }
+
+        /* Main Content Area (with sidebar) */
+        .main-wrapper {
+            display: flex;
+            margin-left: 260px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-wrapper.sidebar-closed {
+            margin-left: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            min-height: 100vh;
         }
 
         .content {
@@ -822,23 +893,88 @@
             border-color: #cbd5e1;
         }
 
+        /* Mobile Responsive Styles */
         @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .main-wrapper {
+                margin-left: 0;
+            }
+
             .markets-grid {
                 grid-template-columns: 1fr;
             }
+
             .markets-search-bar {
                 flex-direction: column;
             }
+
             .search-input-wrapper {
                 width: 100%;
+            }
+
+            .quick-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .hero-section {
+                padding: 40px 20px;
+                margin-bottom: -60px;
+            }
+
+            .header {
+                padding: 15px 20px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Hero Section -->
-        <div class="hero-section">
+    <!-- Hamburger Menu Button (Mobile) -->
+    <button class="menu-toggle" onclick="toggleSidebar()" id="menu-toggle">☰</button>
+
+    <!-- Left Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>PredictEdge</h2>
+            <p style="margin: 5px 0 0 0; font-size: 0.85em; opacity: 0.9;">Trading Dashboard</p>
+        </div>
+        <div class="sidebar-nav">
+            <a class="nav-item active" onclick="showTab('dashboard'); closeSidebar();">🏠 Dashboard</a>
+            <a class="nav-item" onclick="showTab('markets'); closeSidebar();">📊 Markets</a>
+            <a class="nav-item" onclick="showTab('predictions'); closeSidebar();">🔮 Predictions</a>
+            <a class="nav-item" onclick="showTab('signals'); closeSidebar();">📡 Signals</a>
+            <a class="nav-item" onclick="showTab('trades'); closeSidebar();">💼 Trades</a>
+            <a class="nav-item" onclick="showTab('portfolio'); closeSidebar();">💰 Portfolio</a>
+            <a class="nav-item" onclick="showTab('analytics'); closeSidebar();">📈 Analytics</a>
+            <a class="nav-item" onclick="showTab('alerts'); closeSidebar();">🔔 Alerts</a>
+            <a class="nav-item" onclick="showTab('settings'); closeSidebar();">⚙️ Settings</a>
+            <a class="nav-item" onclick="showTab('help'); closeSidebar();">❓ Help & FAQ</a>
+        </div>
+    </nav>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper" id="main-wrapper">
+        <div class="container">
+            <!-- Hero Section -->
+            <div class="hero-section">
             <div class="hero-content">
                 <h1 class="hero-title">PredictEdge</h1>
                 <p class="hero-subtitle">AI-Powered Prediction Market Intelligence</p>
@@ -895,19 +1031,6 @@
                 <h3>Bot Status</h3>
                 <span class="value running" id="stat-bot-status" style="color: #10b981; font-size: 1.5em;">● Running</span>
             </div>
-        </div>
-
-        <div class="tabs">
-            <button class="tab active" onclick="showTab('dashboard')">🏠 Dashboard</button>
-            <button class="tab" onclick="showTab('markets')">📊 Markets</button>
-            <button class="tab" onclick="showTab('predictions')">🔮 Predictions</button>
-            <button class="tab" onclick="showTab('signals')">📡 Signals</button>
-            <button class="tab" onclick="showTab('trades')">💼 Trades</button>
-            <button class="tab" onclick="showTab('portfolio')">💰 Portfolio</button>
-            <button class="tab" onclick="showTab('analytics')">📈 Analytics</button>
-            <button class="tab" onclick="showTab('alerts')">🔔 Alerts</button>
-            <button class="tab" onclick="showTab('settings')">⚙️ Settings</button>
-            <button class="tab" onclick="showTab('help')">❓ Help & FAQ</button>
         </div>
         
         <div style="background: #E6F0FF; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
@@ -1829,16 +1952,30 @@
         }
 
         // Tab switching with auto-load
+        // Sidebar toggle functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        function closeSidebar() {
+            // Close sidebar on mobile after navigation
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.remove('open');
+            }
+        }
+
         function showTab(tabName) {
-            // Remove active from all tabs
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            // Remove active from all nav items and content
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            // Set active tab button
-            const tabButtons = document.querySelectorAll('.tab');
-            tabButtons.forEach(btn => {
-                if (btn.getAttribute('onclick') === `showTab('${tabName}')`) {
-                    btn.classList.add('active');
+            // Set active nav item
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                if (item.getAttribute('onclick') && item.getAttribute('onclick').includes(`showTab('${tabName}')`)) {
+                    item.classList.add('active');
                 }
             });
             
