@@ -2054,8 +2054,13 @@
                 }
             });
             
-            // Set active content
-            document.getElementById(tabName).classList.add('active');
+            // Set active content (with null check)
+            const contentElement = document.getElementById(tabName);
+            if (!contentElement) {
+                console.error(`Tab content element not found: ${tabName}`);
+                return;
+            }
+            contentElement.classList.add('active');
             
             // Auto-load data when tab is switched
             switch(tabName) {
