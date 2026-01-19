@@ -171,7 +171,11 @@ async def get_calendar_stats(
     """Get calendar statistics"""
     try:
         from ...database.models import EconomicEvent, MarketEvent
-        from sqlalchemy import select, func
+        from sqlalchemy import select, func, case
+        from ..utils.datetime_utils import now_naive_utc
+        
+        # Use timezone-naive UTC datetime for comparison
+        now = now_naive_utc()
         
         # Count events by type
         type_stats_result = await db.execute(
@@ -179,7 +183,7 @@ async def get_calendar_stats(
                 EconomicEvent.event_type,
                 func.count(EconomicEvent.id).label('count'),
                 func.count(
-                    func.case((EconomicEvent.event_date > datetime.now(), 1))
+                    case((EconomicEvent.event_date > now, 1), else_=None)
                 ).label('upcoming')
             ).where(
                 EconomicEvent.is_completed == False
@@ -191,13 +195,13 @@ async def get_calendar_stats(
             type_stats.append({
                 "type": row.event_type,
                 "total": row.count,
-                "upcoming": row.upcoming
+                "upcoming": row.upcoming or 0
             })
         
         # Get next 3 events
         next_events_result = await db.execute(
             select(EconomicEvent).where(
-                EconomicEvent.event_date > datetime.now(),
+                EconomicEvent.event_date > now,
                 EconomicEvent.is_completed == False
             ).order_by(EconomicEvent.event_date.asc()).limit(3)
         )
