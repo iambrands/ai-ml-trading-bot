@@ -201,13 +201,16 @@ class WhaleTracker:
             try:
                 wallet_address = whale_data['id'].lower()
                 
-                # Calculate win rate if we have positions data
+                # Calculate win rate based on profit/volume
                 win_rate = Decimal('0.5')  # Default 50%
-                if 'positions' in whale_data and whale_data['positions']:
-                    # Simplified win rate calculation based on profit
-                    profit = Decimal(str(whale_data.get('realizedProfit', 0)))
-                    # Normalize to 0.5-0.9 range based on profit
-                    win_rate = min(Decimal('0.9'), Decimal('0.5') + (profit / Decimal('10000')))
+                profit = Decimal(str(whale_data.get('realizedProfit', 0)))
+                volume = Decimal(str(whale_data.get('volumeTraded', 0)))
+                
+                # Estimate win rate: higher profit/volume ratio = higher skill
+                if volume > 0:
+                    profit_ratio = profit / volume
+                    # Normalize to 0.45-0.75 range based on profit ratio
+                    win_rate = min(Decimal('0.75'), Decimal('0.45') + (profit_ratio * Decimal('3')))
                 
                 # Get or create whale wallet
                 result = await self.db.execute(
