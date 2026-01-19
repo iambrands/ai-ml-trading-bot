@@ -85,12 +85,25 @@ class WhaleTracker:
                 
                 data = await response.json()
                 
+                # Check for GraphQL errors
+                if 'errors' in data:
+                    error_messages = [err.get('message', str(err)) for err in data['errors']]
+                    logger.error(f"GraphQL errors from subgraph: {error_messages}")
+                    # Log full error details for debugging
+                    for err in data['errors']:
+                        logger.error(f"  Error details: {err}")
+                    logger.debug(f"Full error response: {data}")
+                    return []
+                
                 if 'data' in data and 'users' in data['data']:
                     whales = data['data']['users']
                     logger.info(f"✅ Discovered {len(whales)} whales")
                     return whales
                 else:
                     logger.warning(f"Unexpected response structure: {list(data.keys())}")
+                    if 'data' in data:
+                        logger.warning(f"Data keys: {list(data['data'].keys()) if isinstance(data['data'], dict) else 'not a dict'}")
+                    logger.debug(f"Full response: {data}")
                     return []
                     
         except Exception as e:
