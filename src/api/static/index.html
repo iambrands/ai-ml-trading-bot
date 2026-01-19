@@ -991,28 +991,28 @@
             </div>
         </div>
 
-        <!-- Header (Compact) -->
-        <div class="header" style="margin-top: 100px; padding: 20px 30px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                <div>
-                    <h1 style="font-size: 1.8em; margin: 0;">🤖 Trading Dashboard</h1>
-                    <p style="margin: 5px 0 0 0; font-size: 0.95em;">Real-time analysis, predictions, and signals</p>
-                </div>
-                <div class="status-bar" style="margin: 0;">
-                    <div class="status-item">
-                        <div class="status-indicator"></div>
-                        <span>API Connected</span>
-                    </div>
-                    <div class="status-item">
-                        <strong>Status:</strong> <span id="api-status">Checking...</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="content">
             <!-- Dashboard Tab -->
             <div id="dashboard" class="tab-content active">
+                <!-- Header (Compact) - ONLY on Dashboard -->
+                <div class="header" style="margin-top: 20px; margin-bottom: 24px; padding: 20px 30px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h1 style="font-size: 1.8em; margin: 0; color: #1A1A1A;">🤖 Trading Dashboard</h1>
+                            <p style="margin: 5px 0 0 0; font-size: 0.95em; color: #6B7280;">Real-time analysis, predictions, and signals</p>
+                        </div>
+                        <div class="status-bar" style="margin: 0;">
+                            <div class="status-item">
+                                <div class="status-indicator"></div>
+                                <span>API Connected</span>
+                            </div>
+                            <div class="status-item">
+                                <strong>Status:</strong> <span id="api-status">Checking...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <h2>🏠 Dashboard</h2>
                 
                 <!-- Quick Stats Widget - ONLY on Dashboard -->
@@ -2060,6 +2060,16 @@
                     item.classList.add('active');
                 }
             });
+            
+            // Show/hide hero section - ONLY on Dashboard
+            const heroSection = document.getElementById('hero-section');
+            if (heroSection) {
+                if (tabName === 'dashboard') {
+                    heroSection.style.display = 'block';
+                } else {
+                    heroSection.style.display = 'none';
+                }
+            }
             
             // Set active content (with null check)
             const contentElement = document.getElementById(tabName);
