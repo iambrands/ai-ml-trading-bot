@@ -2824,9 +2824,16 @@
                 
                 try {
                     const data = await cachedFetch('/whales/leaderboard?limit=50', { forceRefresh: refresh });
-                    displayWhaleLeaderboard(data, container);
+                    console.log('Whale leaderboard data:', data);
+                    if (Array.isArray(data)) {
+                        displayWhaleLeaderboard(data, container);
+                    } else {
+                        console.error('Invalid whale data format:', data);
+                        showError('whales-leaderboard-content', 'Invalid data format received');
+                    }
                     updateLastUpdated('whales');
                 } catch (error) {
+                    console.error('Failed to load whale leaderboard:', error);
                     showError('whales-leaderboard-content', error.message);
                 }
             } else if (tab === 'activity') {
