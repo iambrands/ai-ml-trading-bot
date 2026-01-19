@@ -1244,6 +1244,45 @@
                 <div id="whales-alerts-content" style="display: none;"></div>
             </div>
 
+            <!-- Economic Calendar Tab -->
+            <div id="calendar" class="tab-content">
+                <h2 style="color: #1A1A1A; margin-bottom: 24px; font-size: 2em;">📅 Economic Calendar</h2>
+                <div style="background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%); border-left: 4px solid #0066FF; padding: 16px; margin-bottom: 24px; border-radius: 8px; color: #1e40af;">
+                    <strong>✅ Auto-Refresh:</strong> This page automatically refreshes every hour to show upcoming economic events. Track FOMC, CPI, NFP, GDP releases and their impact on markets.
+                </div>
+                
+                <!-- Filter Buttons -->
+                <div style="display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <button id="calendar-filter-all" onclick="setCalendarFilter('all')" 
+                            style="padding: 12px 24px; background: #0066FF; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        All Events
+                    </button>
+                    <button id="calendar-filter-fomc" onclick="setCalendarFilter('FOMC')" 
+                            style="padding: 12px 24px; background: #F8F9FA; color: #6B7280; border: 1px solid #F1F3F5; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        FOMC
+                    </button>
+                    <button id="calendar-filter-cpi" onclick="setCalendarFilter('CPI')" 
+                            style="padding: 12px 24px; background: #F8F9FA; color: #6B7280; border: 1px solid #F1F3F5; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        CPI
+                    </button>
+                    <button id="calendar-filter-nfp" onclick="setCalendarFilter('NFP')" 
+                            style="padding: 12px 24px; background: #F8F9FA; color: #6B7280; border: 1px solid #F1F3F5; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        NFP
+                    </button>
+                    <button id="calendar-filter-gdp" onclick="setCalendarFilter('GDP')" 
+                            style="padding: 12px 24px; background: #F8F9FA; color: #6B7280; border: 1px solid #F1F3F5; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                        GDP
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadCalendar(true)" style="margin-left: auto;">
+                        🔄 Refresh Now
+                    </button>
+                    <span id="calendar-last-updated" style="color: #6B7280; margin-left: 15px; font-size: 0.9em; align-self: center;"></span>
+                </div>
+                
+                <!-- Calendar Content -->
+                <div id="calendar-content"></div>
+            </div>
+
             <!-- Settings Tab -->
             <div id="settings" class="tab-content">
                 <h2>⚙️ Settings & Preferences</h2>
