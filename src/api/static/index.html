@@ -3120,7 +3120,17 @@
             }
             
             if (!events || events.length === 0) {
-                container.innerHTML = '<div class="empty-state"><p>No economic events found. Calendar events will appear here once initialized.</p></div>';
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; background: white; border-radius: 12px; border: 1px solid #F1F3F5;">
+                        <div style="font-size: 3em; margin-bottom: 20px;">📅</div>
+                        <h3 style="color: #1A1A1A; margin-bottom: 12px; font-size: 1.5em;">No Economic Events Found</h3>
+                        <p style="color: #6B7280; margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                            The calendar may need to be initialized. Click the button below to initialize the 2026 economic calendar.
+                        </p>
+                        <button class="btn btn-primary" onclick="initializeCalendar()" style="margin-right: 12px;">🚀 Initialize Calendar</button>
+                        <button class="btn btn-secondary" onclick="loadCalendar(true)">🔄 Refresh</button>
+                    </div>
+                `;
                 return;
             }
 
