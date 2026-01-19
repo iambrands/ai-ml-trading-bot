@@ -196,8 +196,8 @@ def check_api_endpoints(base_url):
         ("GET", "/health", "Health check"),
         ("GET", "/whales/leaderboard?limit=5", "Whale leaderboard"),
         ("GET", "/whales/recent-activity?hours=24", "Whale activity"),
-        ("GET", "/api/calendar/upcoming?days=30", "Calendar upcoming"),
-        ("GET", "/api/calendar/stats", "Calendar stats"),
+        ("GET", "/calendar/upcoming?days=30", "Calendar upcoming"),
+        ("GET", "/calendar/stats", "Calendar stats"),
     ]
     
     results = {}
@@ -252,31 +252,27 @@ def check_frontend_paths(base_url):
         response = requests.get(base_url, timeout=10)
         html = response.text
         
-        # Check for wrong paths
-        wrong_paths = [
+        # Check for correct paths (FastAPI routers use /whales and /calendar directly)
+        expected_paths = [
+            "'/whales/leaderboard'",
+            '"/whales/leaderboard"',
             "'/calendar/upcoming'",
             '"/calendar/upcoming"',
-            "'/calendar/event/",
-            '"/calendar/event/',
-        ]
-        
-        correct_paths = [
-            "'/api/calendar/upcoming'",
-            '"/api/calendar/upcoming"',
-            "'/api/calendar/event/",
-            '"/api/calendar/event/',
         ]
         
         issues_found = []
-        for wrong in wrong_paths:
-            if wrong in html:
-                issues_found.append(wrong)
+        for path in expected_paths:
+            if path not in html:
+                # Check if it's using wrong /api/ prefix
+                api_path = path.replace("'/", "'/api/").replace('"/', '"/api/')
+                if api_path in html:
+                    issues_found.append(f"Wrong prefix: {api_path}")
         
         if issues_found:
             print_check(False, "Frontend using incorrect API paths")
             for issue in issues_found:
-                print_warning(f"  Found: {issue}")
-            print_info("  Should use: /api/calendar/* instead of /calendar/*")
+                print_warning(f"  {issue}")
+            print_info("  Should use: /whales/* and /calendar/* (no /api/ prefix)")
             print_info("  Fix in: src/api/static/index.html")
         else:
             print_check(True, "Frontend API paths look correct")
