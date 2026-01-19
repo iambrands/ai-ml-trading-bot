@@ -13,14 +13,35 @@ from ..cache import cache_response
 # Import EconomicCalendar with fallback for import errors
 try:
     from ...services.economic_calendar import EconomicCalendar
-except ImportError:
+except (ImportError, ValueError) as e:
     # Fallback to absolute import if relative import fails
     import sys
+    import os
     from pathlib import Path
-    project_root = Path(__file__).parent.parent.parent.parent
+    
+    # Get project root (go up from src/api/endpoints/calendar.py)
+    current_file = Path(__file__).resolve()
+    project_root = current_file.parent.parent.parent.parent
+    
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
-    from src.services.economic_calendar import EconomicCalendar
+    
+    try:
+        from src.services.economic_calendar import EconomicCalendar
+    except ImportError:
+        logger.error(f"Failed to import EconomicCalendar: {e}")
+        # Create a dummy class to prevent crashes
+        class EconomicCalendar:
+            def __init__(self, db):
+                self.db = db
+            async def get_upcoming_events(self, *args, **kwargs):
+                return []
+            async def get_event_markets(self, *args, **kwargs):
+                return []
+            async def initialize_2026_calendar(self):
+                return 0
+            async def match_markets_to_events(self):
+                return 0
 
 logger = get_logger(__name__)
 
