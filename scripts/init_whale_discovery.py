@@ -50,7 +50,7 @@ async def discover_whales_from_api():
     """
     try:
         # Import whale tracker
-        from src.services.whale_tracker import WhaleTracker
+        from services.whale_tracker import WhaleTracker
         
         # Create tracker (db not needed for discovery)
         tracker = WhaleTracker(None, None)
