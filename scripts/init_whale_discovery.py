@@ -92,8 +92,20 @@ async def index_whales_in_database(whales, db_url):
     print(f"💾 Indexing {len(whales)} whales in database...")
     
     try:
-        # Connect to database with asyncpg
-        conn = await asyncpg.connect(db_url, timeout=30)
+        # Parse DATABASE_URL for asyncpg
+        # asyncpg needs the connection string in a specific format
+        # Handle both postgresql:// and postgres:// URLs
+        if db_url.startswith('postgresql://') or db_url.startswith('postgres://'):
+            # asyncpg.connect() accepts the URL directly
+            # But we need to handle Railway internal URLs
+            if 'postgres.railway.internal' in db_url:
+                print_warning("Using Railway internal URL - ensure you're running via 'railway run'")
+                print_info("If this fails, use 'railway connect postgres' to create a tunnel")
+            
+            conn = await asyncpg.connect(db_url, timeout=30)
+        else:
+            print_error(f"Invalid DATABASE_URL format: {db_url[:50]}...")
+            return 0
         
         print_success("Connected to database")
         
