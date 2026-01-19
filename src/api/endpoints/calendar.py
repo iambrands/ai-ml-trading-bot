@@ -7,9 +7,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
 
 from ...database.connection import get_db
-from ...services.economic_calendar import EconomicCalendar
 from ...utils.logging import get_logger
 from ..cache import cache_response
+
+# Import EconomicCalendar with fallback for import errors
+try:
+    from ...services.economic_calendar import EconomicCalendar
+except ImportError:
+    # Fallback to absolute import if relative import fails
+    import sys
+    from pathlib import Path
+    project_root = Path(__file__).parent.parent.parent.parent
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+    from src.services.economic_calendar import EconomicCalendar
 
 logger = get_logger(__name__)
 
