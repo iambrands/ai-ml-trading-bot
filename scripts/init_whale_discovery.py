@@ -76,11 +76,11 @@ async def discover_whales_from_api():
 
 async def index_whales_in_database(whales, db_url):
     """
-    Index whales into database using asyncpg.
+    Index whales into database using SQLAlchemy async session.
     
     Args:
         whales: List of whale data dicts
-        db_url: PostgreSQL connection URL
+        db_url: PostgreSQL connection URL (not used directly, uses AsyncSessionLocal)
     
     Returns:
         Number of whales successfully indexed
@@ -92,92 +92,90 @@ async def index_whales_in_database(whales, db_url):
     print(f"💾 Indexing {len(whales)} whales in database...")
     
     try:
-        # Parse DATABASE_URL for asyncpg
-        # asyncpg needs the connection string in a specific format
-        # Handle both postgresql:// and postgres:// URLs
-        if db_url.startswith('postgresql://') or db_url.startswith('postgres://'):
-            # asyncpg.connect() accepts the URL directly
-            # But we need to handle Railway internal URLs
-            if 'postgres.railway.internal' in db_url:
-                print_warning("Using Railway internal URL - ensure you're running via 'railway run'")
-                print_info("If this fails, use 'railway connect postgres' to create a tunnel")
+        # Use SQLAlchemy async session (handles Railway URLs better)
+        from src.database.connection import AsyncSessionLocal
+        from src.database.models import WhaleWallet
+        from src.utils.datetime_utils import now_naive_utc
+        from sqlalchemy import select, update
+        
+        async with AsyncSessionLocal() as db:
+            print_success("Connected to database")
             
-            conn = await asyncpg.connect(db_url, timeout=30)
-        else:
-            print_error(f"Invalid DATABASE_URL format: {db_url[:50]}...")
-            return 0
-        
-        print_success("Connected to database")
-        
-        indexed_count = 0
-        
-        for rank, whale_data in enumerate(whales, start=1):
+            indexed_count = 0
+            
+            for rank, whale_data in enumerate(whales, start=1):
+                try:
+                    # Extract whale data
+                    wallet_address = whale_data['id'].lower()
+                    volume = float(whale_data.get('volumeTraded', 0))
+                    trades = int(whale_data.get('numTrades', 0))
+                    
+                    # Calculate derived metrics
+                    # Higher volume suggests higher skill (capped at 75%)
+                    win_rate = min(0.75, 0.45 + (volume / 1000000))
+                    
+                    # Assume 5% profit margin on volume
+                    profit = volume * 0.05
+                    
+                    # Check if whale exists
+                    result = await db.execute(
+                        select(WhaleWallet).where(WhaleWallet.wallet_address == wallet_address)
+                    )
+                    whale = result.scalar_one_or_none()
+                    
+                    if whale:
+                        # Update existing whale
+                        await db.execute(
+                            update(WhaleWallet)
+                            .where(WhaleWallet.id == whale.id)
+                            .values(
+                                total_volume=Decimal(str(volume)),
+                                total_trades=trades,
+                                total_profit=Decimal(str(profit)),
+                                win_rate=Decimal(str(win_rate)),
+                                rank=rank,
+                                is_active=True,
+                                last_activity_at=now_naive_utc(),
+                                updated_at=now_naive_utc()
+                            )
+                        )
+                    else:
+                        # Create new whale
+                        whale = WhaleWallet(
+                            wallet_address=wallet_address,
+                            nickname=f"Whale #{rank}",
+                            total_volume=Decimal(str(volume)),
+                            total_trades=trades,
+                            total_profit=Decimal(str(profit)),
+                            win_rate=Decimal(str(win_rate)),
+                            rank=rank,
+                            is_active=True,
+                            first_seen_at=now_naive_utc(),
+                            last_activity_at=now_naive_utc()
+                        )
+                        db.add(whale)
+                    
+                    indexed_count += 1
+                    
+                    # Progress indicator every 10 whales
+                    if indexed_count % 10 == 0:
+                        print(f"   Indexed {indexed_count}/{len(whales)} whales...")
+                    
+                except Exception as e:
+                    print_warning(f"Failed to index {wallet_address[:10]}...: {e}")
+                    continue
+            
+            # Commit all changes
             try:
-                # Extract whale data
-                wallet_address = whale_data['id'].lower()
-                volume = float(whale_data.get('volumeTraded', 0))
-                trades = int(whale_data.get('numTrades', 0))
-                
-                # Calculate derived metrics
-                # Higher volume suggests higher skill (capped at 75%)
-                win_rate = min(0.75, 0.45 + (volume / 1000000))
-                
-                # Assume 5% profit margin on volume
-                profit = volume * 0.05
-                
-                # Insert or update whale
-                await conn.execute("""
-                    INSERT INTO whale_wallets (
-                        wallet_address,
-                        total_volume,
-                        total_trades,
-                        total_profit,
-                        win_rate,
-                        rank,
-                        is_active,
-                        last_activity_at,
-                        created_at,
-                        updated_at
-                    ) VALUES ($1, $2, $3, $4, $5, $6, true, NOW(), NOW(), NOW())
-                    ON CONFLICT (wallet_address) 
-                    DO UPDATE SET
-                        total_volume = EXCLUDED.total_volume,
-                        total_trades = EXCLUDED.total_trades,
-                        total_profit = EXCLUDED.total_profit,
-                        win_rate = EXCLUDED.win_rate,
-                        rank = EXCLUDED.rank,
-                        is_active = true,
-                        last_activity_at = NOW(),
-                        updated_at = NOW()
-                """, 
-                    wallet_address,
-                    Decimal(str(volume)),
-                    trades,
-                    Decimal(str(profit)),
-                    Decimal(str(win_rate)),
-                    rank
-                )
-                
-                indexed_count += 1
-                
-                # Progress indicator every 10 whales
-                if indexed_count % 10 == 0:
-                    print(f"   Indexed {indexed_count}/{len(whales)} whales...")
-                
+                await db.commit()
+                print_success(f"Indexed {indexed_count} whales successfully")
             except Exception as e:
-                print_warning(f"Failed to index {wallet_address[:10]}...: {e}")
-                continue
-        
-        # Close connection
-        await conn.close()
-        
-        print_success(f"Indexed {indexed_count} whales successfully")
+                await db.rollback()
+                print_error(f"Failed to commit: {e}")
+                return 0
         
         return indexed_count
         
-    except asyncpg.PostgresError as e:
-        print_error(f"Database error: {e}")
-        return 0
     except Exception as e:
         print_error(f"Indexing failed: {e}")
         import traceback
