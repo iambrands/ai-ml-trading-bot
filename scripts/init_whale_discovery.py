@@ -96,10 +96,33 @@ async def index_whales_in_database(whales, db_url):
         from src.database.connection import AsyncSessionLocal
         from src.database.models import WhaleWallet
         from src.utils.datetime_utils import now_naive_utc
-        from sqlalchemy import select, update
+        from sqlalchemy import select, update, text
+        
+        # Check if we're using Railway internal URL (not resolvable locally)
+        if 'postgres.railway.internal' in db_url:
+            print_warning("⚠️  Using Railway internal URL")
+            print_info("   This URL only works from within Railway's network.")
+            print_info("   If running locally, use 'railway connect postgres' first to create a tunnel.")
+            print_info("   Or run this script directly on Railway (not via 'railway run').")
+            print("")
         
         async with AsyncSessionLocal() as db:
-            print_success("Connected to database")
+            # Test connection first
+            try:
+                await db.execute(text("SELECT 1"))
+                print_success("Connected to database")
+            except Exception as conn_error:
+                print_error(f"Failed to connect to database: {conn_error}")
+                if 'postgres.railway.internal' in db_url:
+                    print("")
+                    print("💡 SOLUTION: Create a database tunnel first:")
+                    print("   1. Run: railway connect postgres")
+                    print("   2. This will create a local tunnel")
+                    print("   3. Then run this script again")
+                    print("")
+                    print("   OR run directly on Railway:")
+                    print("   railway run python scripts/init_whale_discovery.py")
+                raise
             
             indexed_count = 0
             
