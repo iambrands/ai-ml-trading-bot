@@ -1010,42 +1010,49 @@
             </div>
         </div>
 
-        <!-- Quick Stats Widget -->
-        <div class="quick-stats" id="quick-stats">
-            <div class="stat-card portfolio">
-                <h3>Portfolio Value</h3>
-                <span class="value" id="stat-portfolio-value">$0.00</span>
-                <span class="change" id="stat-portfolio-change" style="color: #6B7280; font-size: 0.85em;">$0.00 (0%)</span>
-            </div>
-            <div class="stat-card positions">
-                <h3>Active Positions</h3>
-                <span class="value" id="stat-active-positions">0</span>
-            </div>
-            <div class="stat-card pnl">
-                <h3>Today's P&L</h3>
-                <span class="value" id="stat-today-pnl">$0.00</span>
-            </div>
-            <div class="stat-card winrate">
-                <h3>Win Rate</h3>
-                <span class="value" id="stat-win-rate">0%</span>
-            </div>
-            <div class="stat-card status">
-                <h3>Bot Status</h3>
-                <span class="value running" id="stat-bot-status" style="color: #10b981; font-size: 1.5em;">● Running</span>
-            </div>
-        </div>
-        
-        <div style="background: #E6F0FF; border-left: 4px solid #10b981; padding: 12px; margin-bottom: 20px; border-radius: 4px;">
-            <strong>✅ Auto-Refresh Active:</strong> All pages automatically refresh every 30 seconds to show the latest data. Predictions are generated every 5 minutes by the background service. No manual refresh needed - just wait and new data will appear!
-        </div>
-
         <div class="content">
             <!-- Dashboard Tab -->
             <div id="dashboard" class="tab-content active">
                 <h2>🏠 Dashboard</h2>
-                <div style="background: #E6F0FF; border-left: 4px solid #0066FF; padding: 12px; margin-bottom: 20px; border-radius: 4px; color: #e0f2fe;">
-                    <strong>✅ Auto-Refresh:</strong> Dashboard updates every 30 seconds with latest stats and activity.
+                
+                <!-- Quick Stats Widget - ONLY on Dashboard -->
+                <div class="quick-stats" id="quick-stats" style="margin-bottom: 24px;">
+                    <div class="stat-card portfolio">
+                        <h3>Portfolio Value</h3>
+                        <span class="value" id="stat-portfolio-value">$0.00</span>
+                        <span class="change" id="stat-portfolio-change" style="color: #6B7280; font-size: 0.85em;">$0.00 (0%)</span>
+                    </div>
+                    <div class="stat-card positions">
+                        <h3>Active Positions</h3>
+                        <span class="value" id="stat-active-positions">0</span>
+                    </div>
+                    <div class="stat-card pnl">
+                        <h3>Today's P&L</h3>
+                        <span class="value" id="stat-today-pnl">$0.00</span>
+                    </div>
+                    <div class="stat-card winrate">
+                        <h3>Win Rate</h3>
+                        <span class="value" id="stat-win-rate">0%</span>
+                    </div>
+                    <div class="stat-card status">
+                        <h3>Bot Status</h3>
+                        <span class="value running" id="stat-bot-status" style="color: #10b981; font-size: 1.5em;">● Running</span>
+                    </div>
                 </div>
+                
+                <!-- Auto-Refresh Info - ONLY on Dashboard, more user-friendly -->
+                <div style="background: linear-gradient(135deg, #E6F0FF 0%, #F0F9FF 100%); border-left: 4px solid #0066FF; padding: 16px; margin-bottom: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 102, 255, 0.1);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <span style="font-size: 1.5em;">🔄</span>
+                        <strong style="color: #003D99; font-size: 1.05em;">Auto-Refresh Active</strong>
+                    </div>
+                    <p style="color: #475569; margin: 0; line-height: 1.6; font-size: 0.95em;">
+                        Your dashboard updates automatically every <strong>30 seconds</strong> with the latest data. 
+                        Predictions are generated every <strong>5 minutes</strong> by our background service. 
+                        <span style="color: #0066FF; font-weight: 600;">No manual refresh needed!</span>
+                    </p>
+                </div>
+                
                 <!-- Dashboard content will be loaded by JavaScript -->
                 <div id="dashboard-content">
                     <div id="dashboard-stats"></div>
