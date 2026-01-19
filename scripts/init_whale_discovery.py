@@ -70,7 +70,9 @@ async def discover_and_index_whales():
         async with AsyncSessionLocal() as db:
             tracker = WhaleTracker(db, alchemy_api_key=alchemy_key)
             
-            print("🐋 Connecting to Polymarket subgraph...")
+            print("🐋 Connecting to Polymarket APIs...")
+            print("   Using Gamma API for market data")
+            print("   Using CLOB API for order books")
             print("   This may take 30-60 seconds...\n")
             
             # Discover whales
