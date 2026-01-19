@@ -16,6 +16,53 @@ logger = get_logger(__name__)
 router = APIRouter(prefix="/whales", tags=["whales"])
 
 
+@router.post("/initialize")
+async def initialize_whales(
+    db: AsyncSession = Depends(get_db)
+) -> dict:
+    """
+    Initialize whale tracker by discovering and indexing top whales.
+    This endpoint runs the full initialization process on Railway infrastructure.
+    No tunnel needed - just call this endpoint!
+    """
+    try:
+        tracker = WhaleTracker(db, None)
+        
+        # Discover whales from Polymarket APIs
+        logger.info("Starting whale discovery...")
+        whales = await tracker.discover_whales()
+        
+        if not whales:
+            await tracker.close()
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to discover whales from Polymarket APIs"
+            )
+        
+        logger.info(f"Discovered {len(whales)} whales, now indexing...")
+        
+        # Index whales using the tracker's method
+        indexed_count = await tracker.index_whales(whales)
+        
+        await tracker.close()
+        
+        return {
+            "success": True,
+            "discovered": len(whales),
+            "indexed": indexed_count,
+            "message": f"Successfully indexed {indexed_count} whales"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to initialize whales: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to initialize whales: {str(e)}"
+        )
+
+
 class WhaleResponse(BaseModel):
     """Whale leaderboard response model."""
     id: int
