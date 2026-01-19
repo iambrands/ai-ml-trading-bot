@@ -3625,19 +3625,6 @@
                 const portfolioChange = data.portfolio_change || 0;
                 const changePct = data.portfolio_change_pct || 0;
                 
-                // Update hero section
-                const heroValueEl = document.getElementById('hero-portfolio-value');
-                if (heroValueEl) {
-                    heroValueEl.textContent = `$${portfolioValue.toLocaleString()}`;
-                }
-                
-                const heroChangeEl = document.getElementById('hero-portfolio-change');
-                const heroChangeTextEl = document.getElementById('hero-portfolio-change-text');
-                if (heroChangeEl && heroChangeTextEl) {
-                    heroChangeTextEl.textContent = `${changePct >= 0 ? '+' : ''}$${Math.abs(portfolioChange).toFixed(2)} (${changePct >= 0 ? '+' : ''}${changePct.toFixed(2)}%)`;
-                    heroChangeEl.className = `hero-portfolio-change ${changePct >= 0 ? 'positive' : 'negative'}`;
-                }
-                
                 // Update quick stats
                 const statPortfolioValueEl = document.getElementById('stat-portfolio-value');
                 if (statPortfolioValueEl) {
