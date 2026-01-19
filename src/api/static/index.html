@@ -3095,6 +3095,11 @@
         }
 
         function displayCalendar(events, container) {
+            if (!container) {
+                console.error('Calendar container is null');
+                return;
+            }
+            
             if (!events || events.length === 0) {
                 container.innerHTML = '<div class="empty-state"><p>No economic events found. Calendar events will appear here once initialized.</p></div>';
                 return;
