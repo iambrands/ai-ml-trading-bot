@@ -3095,8 +3095,10 @@
             if (!refresh) showLoading('calendar-content');
             
             try {
-                const filterParam = currentCalendarFilter === 'all' ? '' : `?event_types=${currentCalendarFilter}`;
-                const data = await cachedFetch(`/calendar/upcoming${filterParam}`, { forceRefresh: refresh });
+                // Use 365 days to show all upcoming events (events start ~10 days away)
+                const daysParam = '?days=365';
+                const filterParam = currentCalendarFilter === 'all' ? '' : `&event_types=${currentCalendarFilter}`;
+                const data = await cachedFetch(`/calendar/upcoming${daysParam}${filterParam}`, { forceRefresh: refresh });
                 console.log('Calendar events data:', data);
                 if (Array.isArray(data)) {
                     displayCalendar(data, container);
