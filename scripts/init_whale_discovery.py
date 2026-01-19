@@ -102,8 +102,13 @@ async def index_whales_in_database(whales, db_url):
         if 'postgres.railway.internal' in db_url:
             print_warning("⚠️  Using Railway internal URL")
             print_info("   This URL only works from within Railway's network.")
-            print_info("   If running locally, use 'railway connect postgres' first to create a tunnel.")
-            print_info("   Or run this script directly on Railway (not via 'railway run').")
+            print_info("   📖 See WHALE_DISCOVERY_SETUP.md for detailed setup instructions")
+            print("")
+            print_info("   Quick fix:")
+            print_info("   1. Run: railway connect postgres")
+            print_info("   2. Type: \\q (to exit psql, keeps tunnel active)")
+            print_info("   3. In a NEW terminal, set DATABASE_URL to use localhost")
+            print_info("   4. Run this script again")
             print("")
         
         async with AsyncSessionLocal() as db:
@@ -115,13 +120,21 @@ async def index_whales_in_database(whales, db_url):
                 print_error(f"Failed to connect to database: {conn_error}")
                 if 'postgres.railway.internal' in db_url:
                     print("")
-                    print("💡 SOLUTION: Create a database tunnel first:")
-                    print("   1. Run: railway connect postgres")
-                    print("   2. This will create a local tunnel")
-                    print("   3. Then run this script again")
+                    print("💡 SOLUTION: Create a database tunnel")
                     print("")
-                    print("   OR run directly on Railway:")
-                    print("   railway run python scripts/init_whale_discovery.py")
+                    print("   Step 1: Open a terminal and run:")
+                    print("           railway connect postgres")
+                    print("")
+                    print("   Step 2: When psql opens, type: \\q")
+                    print("           (This exits psql but keeps the tunnel active)")
+                    print("")
+                    print("   Step 3: Open a NEW terminal window")
+                    print("           cd /Users/iabadvisors/ai-ml-trading-bot")
+                    print("           export DATABASE_URL='postgresql://postgres:PASSWORD@localhost:PORT/railway'")
+                    print("           python scripts/init_whale_discovery.py")
+                    print("")
+                    print("   📖 For detailed instructions, see: WHALE_DISCOVERY_SETUP.md")
+                    print("")
                 raise
             
             indexed_count = 0
