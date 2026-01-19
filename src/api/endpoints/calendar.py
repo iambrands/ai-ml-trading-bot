@@ -193,7 +193,7 @@ async def get_calendar_stats(
     try:
         from ...database.models import EconomicEvent, MarketEvent
         from sqlalchemy import select, func, case
-        from ..utils.datetime_utils import now_naive_utc
+        from ...utils.datetime_utils import now_naive_utc
         
         # Use timezone-naive UTC datetime for comparison
         now = now_naive_utc()
