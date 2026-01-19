@@ -2096,7 +2096,8 @@
                     loadWhales();
                     break;
                 case 'calendar':
-                    loadCalendar();
+                    // loadCalendar is async, but we don't need to await it
+                    loadCalendar().catch(err => console.error('Calendar load error:', err));
                     break;
             }
         }
@@ -3069,6 +3070,11 @@
 
         async function loadCalendar(refresh = false) {
             const container = document.getElementById('calendar-content');
+            if (!container) {
+                console.error('Calendar content container not found');
+                return;
+            }
+            
             if (!refresh) showLoading('calendar-content');
             
             try {
@@ -3084,7 +3090,7 @@
                 updateLastUpdated('calendar');
             } catch (error) {
                 console.error('Failed to load calendar:', error);
-                showError('calendar-content', error.message);
+                showError('calendar-content', error.message || 'Failed to load calendar events');
             }
         }
 
