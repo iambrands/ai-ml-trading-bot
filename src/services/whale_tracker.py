@@ -262,70 +262,25 @@ class WhaleTracker:
         return indexed_count
     
     async def monitor_whale_trades(self, whale_addresses: List[str]) -> List[Dict]:
-        """Monitor recent trades from whale wallets"""
+        """
+        Monitor recent trades from whale wallets.
+        Note: Polymarket APIs don't provide direct trade history by wallet.
+        This method would need to be implemented via blockchain indexing or
+        a different data source. For now, returns empty list.
+        """
         if not whale_addresses:
             return []
         
         logger.info(f"👀 Monitoring trades from {len(whale_addresses)} whales...")
+        logger.warning("⚠️  Trade monitoring not yet implemented with new APIs")
+        logger.info("   Would require blockchain indexing or alternative data source")
         
-        # Get trades from last 10 minutes
-        cutoff_timestamp = int((datetime.utcnow() - timedelta(minutes=10)).timestamp())
+        # TODO: Implement via:
+        # 1. Alchemy API for blockchain transaction monitoring
+        # 2. Polymarket webhook integration (if available)
+        # 3. Alternative data provider
         
-        # Format addresses for GraphQL array (limit to 100 for query size)
-        addresses = whale_addresses[:100]
-        addresses_str = '["' + '","'.join(addresses) + '"]'
-        
-        query = f"""
-        {{
-          trades(
-            first: 100,
-            orderBy: timestamp,
-            orderDirection: desc,
-            where: {{
-              user_in: {addresses_str},
-              timestamp_gt: {cutoff_timestamp}
-            }}
-          ) {{
-            id
-            user
-            market {{
-              id
-              question
-            }}
-            outcome
-            type
-            tokensTraded
-            tokensBought
-            tokensSold
-            collateralAmount
-            timestamp
-            transactionHash
-          }}
-        }}
-        """
-        
-        try:
-            session = await self._get_session()
-            async with session.post(
-                self.POLYMARKET_SUBGRAPH,
-                json={"query": query},
-                timeout=aiohttp.ClientTimeout(total=30)
-            ) as response:
-                if response.status != 200:
-                    return []
-                
-                data = await response.json()
-                
-                if 'data' in data and 'trades' in data['data']:
-                    trades = data['data']['trades']
-                    logger.info(f"📊 Found {len(trades)} recent whale trades")
-                    return trades
-                else:
-                    return []
-                    
-        except Exception as e:
-            logger.error(f"❌ Failed to monitor trades: {e}", exc_info=True)
-            return []
+        return []
     
     async def record_whale_trade(self, trade_data: Dict) -> Optional[int]:
         """Record a whale trade in database"""
