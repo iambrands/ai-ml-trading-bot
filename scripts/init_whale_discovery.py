@@ -8,13 +8,13 @@ Uses asyncpg for Railway compatibility.
 import os
 import sys
 import asyncio
-import asyncpg
 from pathlib import Path
 from datetime import datetime
 from decimal import Decimal
 
 # Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 def print_header(title):
     """Print formatted section header"""
