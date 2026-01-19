@@ -3067,9 +3067,16 @@
             try {
                 const filterParam = currentCalendarFilter === 'all' ? '' : `?event_types=${currentCalendarFilter}`;
                 const data = await cachedFetch(`/calendar/upcoming${filterParam}`, { forceRefresh: refresh });
-                displayCalendar(data, container);
+                console.log('Calendar events data:', data);
+                if (Array.isArray(data)) {
+                    displayCalendar(data, container);
+                } else {
+                    console.error('Invalid calendar data format:', data);
+                    showError('calendar-content', 'Invalid data format received');
+                }
                 updateLastUpdated('calendar');
             } catch (error) {
+                console.error('Failed to load calendar:', error);
                 showError('calendar-content', error.message);
             }
         }
@@ -3677,70 +3684,80 @@
         function startAutoRefresh() {
             // Refresh markets every 30 seconds
             setInterval(() => {
-                if (document.getElementById('markets').classList.contains('active')) {
+                const el = document.getElementById('markets');
+                if (el && el.classList.contains('active')) {
                     loadMarkets(true);
                 }
             }, REFRESH_INTERVAL);
             
             // Refresh predictions every 30 seconds
             setInterval(() => {
-                if (document.getElementById('predictions').classList.contains('active')) {
+                const el = document.getElementById('predictions');
+                if (el && el.classList.contains('active')) {
                     loadPredictions(true);
                 }
             }, REFRESH_INTERVAL);
             
             // Refresh signals every 30 seconds
             setInterval(() => {
-                if (document.getElementById('signals').classList.contains('active')) {
+                const el = document.getElementById('signals');
+                if (el && el.classList.contains('active')) {
                     loadSignals(true);
                 }
             }, REFRESH_INTERVAL);
             
             // Refresh trades every 30 seconds
             setInterval(() => {
-                if (document.getElementById('trades').classList.contains('active')) {
+                const el = document.getElementById('trades');
+                if (el && el.classList.contains('active')) {
                     loadTrades(true);
                 }
             }, REFRESH_INTERVAL);
             
             // Refresh portfolio every 30 seconds
             setInterval(() => {
-                if (document.getElementById('portfolio').classList.contains('active')) {
+                const el = document.getElementById('portfolio');
+                if (el && el.classList.contains('active')) {
                     loadPortfolio(true);
                 }
             }, REFRESH_INTERVAL);
             
             // Refresh analytics every 30 seconds
             setInterval(() => {
-                if (document.getElementById('analytics').classList.contains('active')) {
+                const el = document.getElementById('analytics');
+                if (el && el.classList.contains('active')) {
                     loadAnalytics(true);
                 }
             }, REFRESH_INTERVAL);
             
             // Refresh alerts every 30 seconds
             setInterval(() => {
-                if (document.getElementById('alerts').classList.contains('active')) {
+                const el = document.getElementById('alerts');
+                if (el && el.classList.contains('active')) {
                     loadAlerts(true);
                 }
             }, REFRESH_INTERVAL);
             
             // Refresh whales every 60 seconds (less frequent due to subgraph rate limits)
             setInterval(() => {
-                if (document.getElementById('whales').classList.contains('active')) {
+                const el = document.getElementById('whales');
+                if (el && el.classList.contains('active')) {
                     loadWhales(true);
                 }
             }, 60000); // 60 seconds
             
             // Refresh calendar every hour (events don't change frequently)
             setInterval(() => {
-                if (document.getElementById('calendar').classList.contains('active')) {
+                const el = document.getElementById('calendar');
+                if (el && el.classList.contains('active')) {
                     loadCalendar(true);
                 }
             }, 3600000); // 1 hour
             
             // Refresh dashboard every 30 seconds
             setInterval(() => {
-                if (document.getElementById('dashboard').classList.contains('active')) {
+                const el = document.getElementById('dashboard');
+                if (el && el.classList.contains('active')) {
                     loadDashboardStats();
                     loadActivity();
                 }
