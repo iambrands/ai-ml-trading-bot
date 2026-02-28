@@ -144,6 +144,91 @@ try:
 except ImportError:
     logger.warning("Economic calendar endpoints not available")
 
+# New feature routers
+try:
+    from .endpoints import copy_trading as copy_trading_endpoints
+    app.include_router(copy_trading_endpoints.router)
+except ImportError:
+    logger.warning("Copy trading endpoints not available")
+
+try:
+    from .endpoints import strategies as strategies_endpoints
+    app.include_router(strategies_endpoints.router)
+except ImportError:
+    logger.warning("Strategies endpoints not available")
+
+try:
+    from .endpoints import advanced_orders as advanced_orders_endpoints
+    app.include_router(advanced_orders_endpoints.router)
+except ImportError:
+    logger.warning("Advanced orders endpoints not available")
+
+try:
+    from .endpoints import price_history as price_history_endpoints
+    app.include_router(price_history_endpoints.router)
+except ImportError:
+    logger.warning("Price history endpoints not available")
+
+try:
+    from .endpoints import correlations as correlations_endpoints
+    app.include_router(correlations_endpoints.router)
+except ImportError:
+    logger.warning("Correlations endpoints not available")
+
+try:
+    from .endpoints import insider_detection as insider_detection_endpoints
+    app.include_router(insider_detection_endpoints.router)
+except ImportError:
+    logger.warning("Insider detection endpoints not available")
+
+try:
+    from .endpoints import ai_summaries as ai_summaries_endpoints
+    app.include_router(ai_summaries_endpoints.router)
+except ImportError:
+    logger.warning("AI summaries endpoints not available")
+
+try:
+    from .endpoints import leaderboard as leaderboard_endpoints
+    app.include_router(leaderboard_endpoints.router)
+except ImportError:
+    logger.warning("Leaderboard endpoints not available")
+
+try:
+    from .endpoints import watchlists as watchlists_endpoints
+    app.include_router(watchlists_endpoints.router)
+except ImportError:
+    logger.warning("Watchlist endpoints not available")
+
+try:
+    from .endpoints import trade_journal as trade_journal_endpoints
+    app.include_router(trade_journal_endpoints.router)
+except ImportError:
+    logger.warning("Trade journal endpoints not available")
+
+try:
+    from .endpoints import cross_platform as cross_platform_endpoints
+    app.include_router(cross_platform_endpoints.router)
+except ImportError:
+    logger.warning("Cross-platform endpoints not available")
+
+try:
+    from .endpoints import orderbook as orderbook_endpoints
+    app.include_router(orderbook_endpoints.router)
+except ImportError:
+    logger.warning("Orderbook endpoints not available")
+
+try:
+    from .endpoints import news_feed as news_feed_endpoints
+    app.include_router(news_feed_endpoints.router)
+except ImportError:
+    logger.warning("News feed endpoints not available")
+
+try:
+    from .endpoints import backtesting as backtesting_endpoints
+    app.include_router(backtesting_endpoints.router)
+except ImportError:
+    logger.warning("Backtesting endpoints not available")
+
 
 # Pydantic models for API responses
 class MarketResponse(BaseModel):
