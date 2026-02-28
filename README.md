@@ -27,6 +27,22 @@ This trading bot combines multiple data sources (news, social media, market data
 - **Live Market Data**: Real-time prices from Polymarket CLOB + Gamma API
 - **Performance Optimization**: Database indexes, connection pooling, query optimization
 
+### Top Platform Features ✅ (New)
+- **Copy Trading System**: Follow top wallets and auto-copy their trades with configurable position sizing
+- **Multi-Strategy Engine**: Run 6 strategies simultaneously (ML Ensemble, Trend Following, Mean Reversion, Momentum, Event-Driven, Arbitrage)
+- **Advanced Order Management**: Trailing stop-losses, take-profit, stop-loss, bracket orders, OCO orders
+- **Price History & Technical Analysis**: Full suite of indicators (SMA, EMA, RSI, MACD, Bollinger Bands, VWAP)
+- **Market Correlation Analysis**: Pearson correlation, correlation matrices, and cluster detection across markets
+- **Insider/Suspicious Activity Detection**: Automated scanning for large positions, pre-event spikes, wash trading, coordinated activity
+- **AI Market Summaries**: AI-powered market analysis with key factors, sentiment scoring, and trade recommendations
+- **Leaderboard & Rankings**: Multi-period trader rankings (daily/weekly/monthly/all-time) with composite scoring
+- **Watchlist System**: Custom watchlists with price alerts, notes, and target prices
+- **Trade Journal**: Detailed trade logging with tags, emotional state tracking, lessons learned, and self-ratings
+- **Cross-Platform Odds Comparison**: Compare odds across Polymarket, Kalshi, PredictIt, and Metaculus with arbitrage detection
+- **Live Order Book Depth Analysis**: Depth charts, spread tracking, bid/ask imbalance, and market microstructure analysis
+- **News Aggregation Feed**: Curated news with sentiment analysis, market linking, and trending topics
+- **Advanced Backtesting Engine**: Strategy testing with Sharpe ratio, Sortino ratio, max drawdown, Calmar ratio, and equity curves
+
 ### Deployment & Infrastructure ✅
 - **Production Deployment**: Deployed on Railway with auto-deploy from GitHub
 - **Automated Cron Jobs**: Predictions generated every 5 minutes automatically
@@ -37,20 +53,40 @@ This trading bot combines multiple data sources (news, social media, market data
 
 ```
 polymarket-ai-trader/
-├── src/                    # Main source code
-│   ├── data/              # Data sources and processing
-│   ├── features/          # Feature engineering
-│   ├── models/            # ML models and training
-│   ├── trading/           # Signal generation and execution
-│   ├── risk/              # Risk management
-│   ├── backtesting/       # Backtesting engine
-│   ├── api/               # FastAPI endpoints
-│   └── monitoring/        # Monitoring and metrics
-├── config/                # Configuration files
-├── data/                  # Data storage
-├── notebooks/             # Jupyter notebooks for exploration
-├── tests/                 # Test suite
-└── docker/                # Docker configuration
+├── src/
+│   ├── api/                    # FastAPI REST API (22+ endpoint modules)
+│   │   ├── endpoints/          # Feature endpoint modules
+│   │   │   ├── predictions.py, alerts.py, paper_trading.py
+│   │   │   ├── analytics.py, dashboard.py, arbitrage.py
+│   │   │   ├── whales.py, calendar.py, ai_analysis.py
+│   │   │   ├── copy_trading.py, strategies.py, advanced_orders.py
+│   │   │   ├── price_history.py, correlations.py, insider_detection.py
+│   │   │   ├── ai_summaries.py, leaderboard.py, watchlists.py
+│   │   │   ├── trade_journal.py, cross_platform.py
+│   │   │   ├── orderbook.py, news_feed.py, backtesting.py
+│   │   └── static/             # UI files
+│   ├── services/               # Business logic (20 service modules)
+│   │   ├── copy_trading_service.py, strategy_engine.py
+│   │   ├── advanced_orders_service.py, price_history_service.py
+│   │   ├── market_correlation_service.py, insider_detection_service.py
+│   │   ├── ai_summary_service.py, leaderboard_service.py
+│   │   ├── watchlist_service.py, trade_journal_service.py
+│   │   ├── cross_platform_service.py, orderbook_service.py
+│   │   ├── news_aggregation_service.py, backtesting_service.py
+│   │   └── analytics_service.py, alert_service.py, whale_tracker.py ...
+│   ├── data/                   # Data sources and processing
+│   ├── features/               # Feature engineering (100+ features)
+│   ├── models/                 # ML models (XGBoost, LightGBM, ensemble)
+│   ├── trading/                # Signal generation, execution, portfolio
+│   ├── risk/                   # Position limits, drawdown, circuit breakers
+│   ├── database/               # SQLAlchemy models (34+ tables), migrations
+│   ├── config/                 # Pydantic settings with env vars
+│   └── utils/                  # Logging, retry, datetime utilities
+├── config/                     # YAML configuration files
+├── data/models/                # Trained ML model files
+├── scripts/                    # Automation and setup scripts
+├── tests/                      # Test suite
+└── docker/                     # Docker configuration
 ```
 
 ## Quick Start
@@ -177,6 +213,83 @@ Key configuration files:
 - `config/model_params.yaml`: Model hyperparameters
 - `config/trading_params.yaml`: Trading parameters
 - `config/data_sources.yaml`: Data source settings
+
+## API Endpoints (90+)
+
+### Core Trading
+| Endpoint | Method | Description |
+|---|---|---|
+| `/health` | GET | System health check |
+| `/markets` | GET | List markets with prices |
+| `/predictions` | GET | ML model predictions |
+| `/signals` | GET | Trading signals |
+| `/trades` | GET | Trade records |
+| `/portfolio/latest` | GET | Latest portfolio snapshot |
+
+### Copy Trading (`/copy-trading`)
+| Endpoint | Method | Description |
+|---|---|---|
+| `/copy-trading/discover` | GET | Discover top traders to follow |
+| `/copy-trading/follow` | POST | Follow a wallet |
+| `/copy-trading/profiles` | GET | Get followed profiles |
+| `/copy-trading/trades` | GET | Copy trade history |
+| `/copy-trading/stats` | GET | Copy trading statistics |
+
+### Multi-Strategy Engine (`/strategies`)
+| Endpoint | Method | Description |
+|---|---|---|
+| `/strategies` | GET | All strategies with performance |
+| `/strategies/performance` | GET | Combined strategy performance |
+| `/strategies/{id}/toggle` | PUT | Enable/disable strategy |
+| `/strategies/{id}/run/trend-following` | POST | Run trend analysis |
+| `/strategies/{id}/run/mean-reversion` | POST | Run mean reversion |
+| `/strategies/{id}/run/momentum` | POST | Run momentum analysis |
+
+### Advanced Orders (`/orders`)
+| Endpoint | Method | Description |
+|---|---|---|
+| `/orders/trailing-stop` | POST | Create trailing stop-loss |
+| `/orders/take-profit` | POST | Create take-profit order |
+| `/orders/bracket` | POST | Create bracket order |
+| `/orders/oco` | POST | Create OCO order |
+| `/orders/active` | GET | Get active orders |
+| `/orders/check/{market_id}` | POST | Check & trigger orders |
+
+### Technical Analysis (`/price-history`)
+| Endpoint | Method | Description |
+|---|---|---|
+| `/price-history/{market_id}` | GET | Historical price data |
+| `/price-history/{market_id}/indicators` | GET | SMA, EMA, RSI, MACD, Bollinger, VWAP |
+
+### Market Intelligence
+| Endpoint | Method | Description |
+|---|---|---|
+| `/correlations/top` | GET | Strongest market correlations |
+| `/correlations/{market_id}` | GET | Correlated markets |
+| `/insider-detection/scan` | POST | Scan for suspicious activity |
+| `/insider-detection/risk/{market_id}` | GET | Market risk score |
+| `/ai-summaries/{market_id}/generate` | POST | Generate AI analysis |
+| `/cross-platform/arbitrage` | GET | Cross-platform arbitrage |
+| `/orderbook/{market_id}/depth` | GET | Order book depth chart |
+
+### Social & Community
+| Endpoint | Method | Description |
+|---|---|---|
+| `/leaderboard` | GET | Trader rankings |
+| `/leaderboard/profile/{wallet}` | GET | Trader profile detail |
+| `/watchlists` | GET/POST | Manage watchlists |
+| `/journal` | GET/POST | Trade journal entries |
+| `/journal/stats` | GET | Journal insights |
+| `/news/feed` | GET | Aggregated news feed |
+| `/news/sentiment` | GET | Sentiment overview |
+
+### Backtesting (`/backtesting`)
+| Endpoint | Method | Description |
+|---|---|---|
+| `/backtesting/run` | POST | Run a backtest |
+| `/backtesting/runs` | GET | Backtest history |
+| `/backtesting/runs/{id}` | GET | Detailed results |
+| `/backtesting/compare` | POST | Compare backtests |
 
 ## Performance Targets
 

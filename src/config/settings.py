@@ -94,6 +94,39 @@ class Settings(BaseSettings):
     max_drawdown: float = Field(default=0.15)
     stop_loss_pct: float = Field(default=0.50)
 
+    # Copy Trading
+    copy_trading_enabled: bool = Field(default=True)
+    copy_max_position_size: float = Field(default=1000.0)
+    copy_default_percentage: float = Field(default=100.0)
+    copy_min_trade_size: float = Field(default=10.0)
+
+    # Multi-Strategy Engine
+    multi_strategy_enabled: bool = Field(default=True)
+    max_active_strategies: int = Field(default=6)
+    strategy_rebalance_hours: int = Field(default=24)
+
+    # Advanced Orders
+    trailing_stop_default_pct: float = Field(default=0.05)
+    take_profit_default_pct: float = Field(default=0.15)
+    order_check_interval_seconds: int = Field(default=60)
+
+    # Technical Analysis
+    price_history_retention_days: int = Field(default=90)
+    ta_default_lookback_hours: int = Field(default=168)
+
+    # Insider Detection
+    insider_scan_interval_hours: int = Field(default=6)
+    insider_large_trade_threshold: float = Field(default=50000.0)
+    insider_alert_min_severity: str = Field(default="MEDIUM")
+
+    # Cross-Platform
+    cross_platform_comparison_enabled: bool = Field(default=True)
+    cross_platform_arb_min_profit_pct: float = Field(default=0.5)
+
+    # Backtesting
+    backtest_default_capital: float = Field(default=10000.0)
+    backtest_max_duration_days: int = Field(default=365)
+
     # Logging
     log_level: str = Field(default="INFO")
 
