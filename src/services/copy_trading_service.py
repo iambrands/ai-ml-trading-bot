@@ -263,7 +263,7 @@ class CopyTradingService:
             wallets = result.scalars().all()
 
             if not wallets:
-                return self._generate_discovery_data(limit)
+                return []
 
             traders = []
             for w in wallets:
@@ -288,26 +288,7 @@ class CopyTradingService:
             return traders
         except Exception as e:
             logger.error("Failed to discover top traders", error=str(e))
-            return self._generate_discovery_data(limit)
-
-    def _generate_discovery_data(self, limit: int) -> List[Dict]:
-        """Generate sample discovery data when no whale data exists."""
-        import random
-        traders = []
-        for i in range(min(limit, 10)):
-            addr = f"0x{''.join(random.choices('0123456789abcdef', k=40))}"
-            traders.append({
-                "wallet_address": addr,
-                "nickname": f"TopTrader_{i+1}",
-                "total_profit": round(random.uniform(5000, 500000), 2),
-                "win_rate": round(random.uniform(0.55, 0.82), 4),
-                "total_trades": random.randint(50, 2000),
-                "total_volume": round(random.uniform(100000, 5000000), 2),
-                "rank": i + 1,
-                "is_following": False,
-                "last_activity": datetime.now(timezone.utc).isoformat(),
-            })
-        return sorted(traders, key=lambda x: x["total_profit"], reverse=True)
+            return []
 
     def _profile_to_dict(self, profile: CopyTradingProfile) -> Dict:
         return {

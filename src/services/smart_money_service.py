@@ -98,12 +98,15 @@ class SmartMoneyService:
             scores = result.scalars().all()
 
             if not scores:
-                return self._generate_sample_scores(limit)
+                wallets = await self._discover_and_score_wallets(limit)
+                if wallets:
+                    return wallets
+                return []
 
             return [self._score_to_dict(s) for s in scores]
         except Exception as e:
             logger.error("Failed to get smart money", error=str(e))
-            return self._generate_sample_scores(limit)
+            return []
 
     async def grade_trade(self, wallet_address: str, market_id: str, trade_value: float, side: str) -> Dict:
         """Grade a single trade from A to D based on wallet history and trade characteristics."""
@@ -310,25 +313,26 @@ class SmartMoneyService:
         except Exception:
             return []
 
-    def _generate_sample_scores(self, limit: int) -> List[Dict]:
-        scores = []
-        for i in range(min(limit, 20)):
-            conviction = round(random.uniform(30, 98), 2)
-            grade = "D"
-            for g, threshold in self.GRADE_THRESHOLDS.items():
-                if conviction >= threshold:
-                    grade = g
-                    break
-            addr = f"0x{''.join(random.choices('0123456789abcdef', k=40))}"
-            scores.append({
-                "wallet_address": addr, "overall_grade": grade, "conviction_score": conviction,
-                "consistency_score": round(random.uniform(30, 95), 2), "timing_score": round(random.uniform(30, 95), 2),
-                "sizing_score": round(random.uniform(30, 95), 2), "edge_score": round(random.uniform(30, 95), 2),
-                "classification": random.choice(["WHALE", "SMART_MONEY", "RETAIL", "BOT"]),
-                "win_rate_30d": round(random.uniform(0.4, 0.85), 4), "roi_30d": round(random.uniform(-10, 50), 4),
-                "total_analyzed_trades": random.randint(20, 500),
-            })
-        return sorted(scores, key=lambda x: x["conviction_score"], reverse=True)
+    async def _discover_and_score_wallets(self, limit: int) -> List[Dict]:
+        """Discover and score wallets from existing whale data."""
+        try:
+            from ..database.models import WhaleWallet
+            result = await self.db.execute(
+                select(WhaleWallet)
+                .where(WhaleWallet.is_active == True, WhaleWallet.total_trades >= 5)
+                .order_by(desc(WhaleWallet.total_profit))
+                .limit(limit)
+            )
+            wallets = result.scalars().all()
+            scored = []
+            for w in wallets:
+                score = await self.score_wallet(w.wallet_address)
+                if score:
+                    scored.append(score)
+            return scored
+        except Exception as e:
+            logger.error("Failed to discover and score wallets", error=str(e))
+            return []
 
     def _score_to_dict(self, score: SmartMoneyScore) -> Dict:
         return {

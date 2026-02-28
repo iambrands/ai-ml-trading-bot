@@ -180,65 +180,46 @@ class BacktestingService:
             return False
 
     async def _execute_backtest(self, run: BacktestRun) -> Dict:
-        """Execute the backtesting simulation."""
+        """Execute backtesting using real price history when available, with simulation fallback."""
         capital = float(run.initial_capital)
         equity_curve = [{"date": run.start_date.isoformat(), "equity": capital}]
         trades = []
         pnl_list = []
 
-        num_days = (run.end_date - run.start_date).days
         params = run.strategy_params or {}
-
         min_edge = params.get("min_edge", 0.05)
-        win_prob = params.get("win_probability", 0.55)
-        avg_return = params.get("avg_return", 0.08)
-        trade_frequency = params.get("trade_frequency_per_day", 2)
+        position_pct = params.get("position_pct", 0.05)
+        take_profit = params.get("take_profit", 0.15)
+        stop_loss = params.get("stop_loss", 0.10)
+        strategy = run.strategy_name.upper().replace(" ", "_")
 
-        current_date = run.start_date
-        peak_equity = capital
+        price_data = await self._load_price_data(run.start_date, run.end_date)
 
-        for day in range(num_days):
-            current_date = run.start_date + timedelta(days=day)
-            num_trades = max(0, int(random.gauss(trade_frequency, 1)))
+        if price_data:
+            capital, trades, pnl_list, equity_curve = await self._backtest_with_real_data(
+                run, capital, price_data, params
+            )
+        else:
+            capital, trades, pnl_list, equity_curve = self._backtest_with_simulation(
+                run, capital, params
+            )
 
-            for _ in range(num_trades):
-                position_size = min(capital * 0.05, capital * random.uniform(0.02, 0.08))
-                if position_size < 10 or capital < 100:
-                    continue
+        for t in trades:
+            bt_trade = BacktestTrade(
+                backtest_id=run.id,
+                market_id=t.get("market_id", "unknown"),
+                side=t["side"],
+                entry_price=t.get("entry_price", 0.5),
+                exit_price=t.get("exit_price"),
+                size=t["size"],
+                pnl=t["pnl"],
+                entry_time=t["entry_time"],
+                exit_time=t.get("exit_time"),
+                signal_strength=t.get("signal_strength", "MEDIUM"),
+            )
+            self.db.add(bt_trade)
 
-                is_win = random.random() < win_prob
-                if is_win:
-                    pnl = position_size * random.uniform(0.02, avg_return * 2)
-                else:
-                    pnl = -position_size * random.uniform(0.02, avg_return * 1.5)
-
-                capital += pnl
-                pnl_list.append(pnl)
-                trades.append({
-                    "entry_time": current_date,
-                    "exit_time": current_date + timedelta(hours=random.randint(1, 72)),
-                    "pnl": pnl,
-                    "size": position_size,
-                    "side": random.choice(["YES", "NO"]),
-                })
-
-                bt_trade = BacktestTrade(
-                    backtest_id=run.id,
-                    market_id=f"backtest_market_{random.randint(1, 100)}",
-                    side=trades[-1]["side"],
-                    entry_price=random.uniform(0.2, 0.8),
-                    exit_price=random.uniform(0.2, 0.8),
-                    size=position_size,
-                    pnl=pnl,
-                    entry_time=trades[-1]["entry_time"],
-                    exit_time=trades[-1]["exit_time"],
-                    signal_strength=random.choice(["STRONG", "MEDIUM"]),
-                )
-                self.db.add(bt_trade)
-
-            equity_curve.append({"date": current_date.isoformat(), "equity": round(capital, 2)})
-            peak_equity = max(peak_equity, capital)
-
+        num_days = max(1, (run.end_date - run.start_date).days)
         total_return = (capital - float(run.initial_capital)) / float(run.initial_capital) * 100
         winning = [p for p in pnl_list if p > 0]
         losing = [p for p in pnl_list if p < 0]
@@ -291,6 +272,149 @@ class BacktestingService:
             "equity_curve": equity_curve[::max(1, len(equity_curve)//100)],
             "monthly_returns": None,
         }
+
+    async def _load_price_data(self, start_date: datetime, end_date: datetime) -> Dict[str, List]:
+        """Load real price history data from the database for backtesting."""
+        try:
+            from sqlalchemy import and_
+            result = await self.db.execute(
+                select(PriceHistory)
+                .where(and_(
+                    PriceHistory.timestamp >= start_date,
+                    PriceHistory.timestamp <= end_date,
+                ))
+                .order_by(PriceHistory.timestamp)
+                .limit(10000)
+            )
+            rows = result.scalars().all()
+            if not rows:
+                return {}
+
+            by_market: Dict[str, List] = {}
+            for row in rows:
+                mid = row.market_id
+                if mid not in by_market:
+                    by_market[mid] = []
+                by_market[mid].append({
+                    "timestamp": row.timestamp,
+                    "yes_price": float(row.yes_price),
+                    "no_price": float(row.no_price),
+                    "volume": float(row.volume),
+                })
+
+            markets_with_data = {k: v for k, v in by_market.items() if len(v) >= 5}
+            logger.info("Loaded price data for backtest", markets=len(markets_with_data), total_points=sum(len(v) for v in markets_with_data.values()))
+            return markets_with_data
+        except Exception as e:
+            logger.error("Failed to load price data", error=str(e))
+            return {}
+
+    async def _backtest_with_real_data(self, run, capital: float, price_data: Dict[str, List], params: Dict) -> tuple:
+        """Run backtest against real price history."""
+        trades = []
+        pnl_list = []
+        equity_curve = [{"date": run.start_date.isoformat(), "equity": capital}]
+
+        min_edge = params.get("min_edge", 0.05)
+        position_pct = params.get("position_pct", 0.05)
+        take_profit = params.get("take_profit", 0.15)
+        stop_loss = params.get("stop_loss", 0.10)
+
+        for market_id, prices in price_data.items():
+            if len(prices) < 10 or capital < 100:
+                continue
+
+            i = 10
+            while i < len(prices) - 1:
+                window = [p["yes_price"] for p in prices[i-10:i]]
+                current = prices[i]["yes_price"]
+                mean = sum(window) / len(window)
+                deviation = current - mean
+
+                if abs(deviation) < min_edge:
+                    i += 1
+                    continue
+
+                side = "NO" if deviation > min_edge else "YES"
+                entry_price = current
+                size = min(capital * position_pct, capital * 0.1)
+
+                for j in range(i + 1, min(i + 50, len(prices))):
+                    future_price = prices[j]["yes_price"]
+                    if side == "YES":
+                        pnl_pct = (future_price - entry_price) / max(entry_price, 0.01)
+                    else:
+                        pnl_pct = (entry_price - future_price) / max(entry_price, 0.01)
+
+                    if pnl_pct >= take_profit or pnl_pct <= -stop_loss or j == min(i + 49, len(prices) - 1):
+                        pnl = size * pnl_pct
+                        capital += pnl
+                        pnl_list.append(pnl)
+                        trades.append({
+                            "market_id": market_id,
+                            "side": side,
+                            "entry_price": entry_price,
+                            "exit_price": future_price,
+                            "size": size,
+                            "pnl": pnl,
+                            "entry_time": prices[i]["timestamp"],
+                            "exit_time": prices[j]["timestamp"],
+                            "signal_strength": "STRONG" if abs(deviation) > min_edge * 2 else "MEDIUM",
+                        })
+                        equity_curve.append({"date": prices[j]["timestamp"].isoformat(), "equity": round(capital, 2)})
+                        i = j + 1
+                        break
+                else:
+                    i += 1
+
+        return capital, trades, pnl_list, equity_curve
+
+    def _backtest_with_simulation(self, run, capital: float, params: Dict) -> tuple:
+        """Fallback simulation when no real price data is available."""
+        trades = []
+        pnl_list = []
+        equity_curve = [{"date": run.start_date.isoformat(), "equity": capital}]
+        num_days = (run.end_date - run.start_date).days
+
+        win_prob = params.get("win_probability", 0.55)
+        avg_return = params.get("avg_return", 0.08)
+        trade_freq = params.get("trade_frequency_per_day", 2)
+
+        for day in range(num_days):
+            current_date = run.start_date + timedelta(days=day)
+            num_trades = max(0, int(random.gauss(trade_freq, 1)))
+
+            for _ in range(num_trades):
+                size = min(capital * 0.05, capital * random.uniform(0.02, 0.08))
+                if size < 10 or capital < 100:
+                    continue
+
+                entry_price = random.uniform(0.2, 0.8)
+                if random.random() < win_prob:
+                    pnl = size * random.uniform(0.02, avg_return * 2)
+                    exit_price = entry_price + pnl / size
+                else:
+                    pnl = -size * random.uniform(0.02, avg_return * 1.5)
+                    exit_price = entry_price + pnl / size
+
+                capital += pnl
+                pnl_list.append(pnl)
+                side = random.choice(["YES", "NO"])
+                trades.append({
+                    "market_id": f"sim_market_{random.randint(1, 100)}",
+                    "side": side,
+                    "entry_price": round(max(0.01, min(0.99, entry_price)), 6),
+                    "exit_price": round(max(0.01, min(0.99, exit_price)), 6),
+                    "size": size,
+                    "pnl": pnl,
+                    "entry_time": current_date,
+                    "exit_time": current_date + timedelta(hours=random.randint(1, 72)),
+                    "signal_strength": random.choice(["STRONG", "MEDIUM"]),
+                })
+
+            equity_curve.append({"date": current_date.isoformat(), "equity": round(capital, 2)})
+
+        return capital, trades, pnl_list, equity_curve
 
     def _run_to_dict(self, run: BacktestRun) -> Dict:
         return {

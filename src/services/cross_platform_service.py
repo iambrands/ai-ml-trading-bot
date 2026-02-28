@@ -132,43 +132,72 @@ class CrossPlatformService:
             return {"total_comparisons": 0, "platforms_tracked": self.PLATFORMS}
 
     async def _fetch_cross_platform_odds(self, question: str) -> Dict:
-        """Fetch odds from other platforms. Returns estimated odds based on keyword matching."""
+        """Fetch odds from other platforms using their public APIs."""
+        import aiohttp
         platforms = {}
-        try:
-            question_lower = question.lower()
 
-            base_yes = random.uniform(0.30, 0.70)
+        kalshi_data = await self._fetch_kalshi_odds(question)
+        if kalshi_data:
+            platforms["kalshi"] = kalshi_data
 
-            if any(kw in question_lower for kw in ["president", "election", "vote"]):
-                base_yes = random.uniform(0.35, 0.65)
-            elif any(kw in question_lower for kw in ["bitcoin", "crypto", "eth"]):
-                base_yes = random.uniform(0.25, 0.75)
-
-            noise = lambda: random.uniform(-0.05, 0.05)
-
-            kalshi_yes = max(0.01, min(0.99, base_yes + noise()))
-            platforms["kalshi"] = {
-                "yes": round(kalshi_yes, 4),
-                "no": round(1 - kalshi_yes, 4),
-                "volume": round(random.uniform(10000, 500000), 2),
-            }
-
-            if random.random() > 0.3:
-                pi_yes = max(0.01, min(0.99, base_yes + noise()))
-                platforms["predictit"] = {
-                    "yes": round(pi_yes, 4),
-                    "no": round(1 - pi_yes, 4),
-                }
-
-            if random.random() > 0.4:
-                platforms["metaculus"] = {
-                    "prediction": round(max(0.01, min(0.99, base_yes + noise())), 4),
-                }
-
-        except Exception as e:
-            logger.error("Failed to fetch cross-platform odds", error=str(e))
+        metaculus_data = await self._fetch_metaculus_odds(question)
+        if metaculus_data:
+            platforms["metaculus"] = metaculus_data
 
         return platforms
+
+    async def _fetch_kalshi_odds(self, question: str) -> Optional[Dict]:
+        """Fetch matching market from Kalshi's public API."""
+        import aiohttp
+        try:
+            keywords = [w for w in question.lower().split() if len(w) > 4][:3]
+            search_term = " ".join(keywords)
+
+            async with aiohttp.ClientSession() as session:
+                url = "https://api.elections.kalshi.com/trade-api/v2/markets"
+                params = {"limit": 10, "status": "open"}
+                async with session.get(url, params=params, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        markets = data.get("markets", [])
+                        for market in markets:
+                            title = (market.get("title") or "").lower()
+                            if any(kw in title for kw in keywords):
+                                yes_price = market.get("yes_ask", market.get("last_price"))
+                                if yes_price:
+                                    yes_price = float(yes_price) / 100 if float(yes_price) > 1 else float(yes_price)
+                                    return {
+                                        "yes": round(yes_price, 4),
+                                        "no": round(1 - yes_price, 4),
+                                        "volume": float(market.get("volume", 0)),
+                                        "ticker": market.get("ticker"),
+                                    }
+        except Exception as e:
+            logger.debug("Kalshi API fetch failed (may be rate limited)", error=str(e)[:100])
+        return None
+
+    async def _fetch_metaculus_odds(self, question: str) -> Optional[Dict]:
+        """Fetch matching prediction from Metaculus public API."""
+        import aiohttp
+        try:
+            keywords = [w for w in question.lower().split() if len(w) > 4][:3]
+            search_term = " ".join(keywords)
+
+            async with aiohttp.ClientSession() as session:
+                url = "https://www.metaculus.com/api2/questions/"
+                params = {"search": search_term, "limit": 5, "status": "open"}
+                async with session.get(url, params=params, timeout=aiohttp.ClientTimeout(total=10)) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        results = data.get("results", [])
+                        for q in results:
+                            community = q.get("community_prediction", {})
+                            if community and community.get("full", {}).get("q2"):
+                                prediction = float(community["full"]["q2"])
+                                return {"prediction": round(prediction, 4), "metaculus_id": q.get("id")}
+        except Exception as e:
+            logger.debug("Metaculus API fetch failed", error=str(e)[:100])
+        return None
 
     def _record_to_dict(self, record: CrossPlatformOdds) -> Dict:
         platforms = {"polymarket": {"yes": float(record.polymarket_yes) if record.polymarket_yes else None, "no": float(record.polymarket_no) if record.polymarket_no else None, "volume": float(record.polymarket_volume) if record.polymarket_volume else None}}

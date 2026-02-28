@@ -229,6 +229,12 @@ try:
 except ImportError:
     logger.warning("Backtesting endpoints not available")
 
+try:
+    from .endpoints import data_collection as data_collection_endpoints
+    app.include_router(data_collection_endpoints.router)
+except ImportError:
+    logger.warning("Data collection endpoints not available")
+
 # Differentiator feature routers
 try:
     from .endpoints import smart_money as smart_money_endpoints

@@ -45,10 +45,15 @@ class LeaderboardService:
                     "updated_at": entries[0].calculated_at.isoformat() if entries else None,
                 }
 
-            return await self._generate_leaderboard(period, limit)
+            # Auto-calculate from whale data if no entries exist
+            calculated = await self.calculate_rankings(period)
+            if calculated:
+                return {"period": period, "entries": calculated, "total_traders": len(calculated)}
+
+            return await self._generate_leaderboard_from_whales(period, limit)
         except Exception as e:
             logger.error("Failed to get leaderboard", error=str(e))
-            return await self._generate_leaderboard(period, limit)
+            return await self._generate_leaderboard_from_whales(period, limit)
 
     async def calculate_rankings(self, period: str = "ALL_TIME") -> List[Dict]:
         """Calculate and store fresh rankings from whale data."""
@@ -153,8 +158,8 @@ class LeaderboardService:
             logger.error("Failed to search traders", error=str(e))
             return []
 
-    async def _generate_leaderboard(self, period: str, limit: int) -> Dict:
-        """Generate leaderboard data (from whale data or sample)."""
+    async def _generate_leaderboard_from_whales(self, period: str, limit: int) -> Dict:
+        """Generate leaderboard from existing whale wallet data."""
         try:
             wallets_result = await self.db.execute(
                 select(WhaleWallet)
@@ -182,25 +187,7 @@ class LeaderboardService:
         except Exception:
             pass
 
-        entries = []
-        for i in range(min(limit, 25)):
-            addr = f"0x{''.join(random.choices('0123456789abcdef', k=40))}"
-            profit = round(random.uniform(1000, 500000) * (1 - i * 0.03), 2)
-            volume = round(profit * random.uniform(3, 15), 2)
-            win_rate = round(random.uniform(0.52, 0.82), 4)
-            entries.append({
-                "rank": i + 1,
-                "wallet_address": addr,
-                "nickname": f"TopTrader_{i+1}",
-                "total_profit": profit,
-                "total_volume": volume,
-                "win_rate": win_rate,
-                "total_trades": random.randint(50, 3000),
-                "roi_pct": round(profit / max(volume, 1) * 100, 2),
-                "score": round(profit * win_rate, 2),
-            })
-
-        return {"period": period, "entries": entries, "total_traders": len(entries), "source": "estimated"}
+        return {"period": period, "entries": [], "total_traders": 0, "message": "No trader data available. Run whale discovery to populate."}
 
     def _calculate_score(self, wallet: WhaleWallet) -> float:
         """Calculate composite ranking score."""
