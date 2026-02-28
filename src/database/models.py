@@ -891,3 +891,214 @@ class BacktestTrade(Base):
 
     backtest_run = relationship("BacktestRun", back_populates="backtest_trades")
 
+
+# ============================================================================
+# Smart Money Conviction Scoring
+# ============================================================================
+
+class SmartMoneyScore(Base):
+    """Multi-layer conviction score for wallets."""
+
+    __tablename__ = "smart_money_scores"
+
+    id = Column(Integer, primary_key=True, index=True)
+    wallet_address = Column(String(42), nullable=False, index=True)
+    overall_grade = Column(String(2), nullable=False, index=True)  # S, A, B, C, D
+    conviction_score = Column(Numeric(5, 2), default=0, nullable=False, index=True)  # 0-100
+    consistency_score = Column(Numeric(5, 2), default=0, nullable=False)
+    timing_score = Column(Numeric(5, 2), default=0, nullable=False)
+    sizing_score = Column(Numeric(5, 2), default=0, nullable=False)
+    edge_score = Column(Numeric(5, 2), default=0, nullable=False)
+    risk_management_score = Column(Numeric(5, 2), default=0, nullable=False)
+    diversification_score = Column(Numeric(5, 2), default=0, nullable=False)
+    profitable_streak = Column(Integer, default=0, nullable=False)
+    avg_hold_hours = Column(Numeric(10, 2), nullable=True)
+    avg_position_pct = Column(Numeric(5, 4), nullable=True)
+    win_rate_30d = Column(Numeric(5, 4), nullable=True)
+    roi_30d = Column(Numeric(10, 4), nullable=True)
+    total_analyzed_trades = Column(Integer, default=0, nullable=False)
+    classification = Column(String(30), nullable=True)  # WHALE, SMART_MONEY, RETAIL, BOT, INSIDER
+    strategy_profile = Column(JSON, nullable=True)
+    calculated_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+    __table_args__ = (UniqueConstraint("wallet_address", "calculated_at", name="uq_smart_money_score"),)
+
+
+# ============================================================================
+# Natural Language Strategy Builder
+# ============================================================================
+
+class NLStrategy(Base):
+    """Strategy created from natural language description."""
+
+    __tablename__ = "nl_strategies"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String(100), default="default", nullable=False, index=True)
+    name = Column(String(100), nullable=False)
+    natural_language_input = Column(Text, nullable=False)
+    parsed_rules = Column(JSON, nullable=False)
+    strategy_type = Column(String(50), nullable=True)
+    parameters = Column(JSON, nullable=True)
+    is_active = Column(Boolean, default=False, nullable=False, index=True)
+    backtest_results = Column(JSON, nullable=True)
+    total_trades = Column(Integer, default=0, nullable=False)
+    total_pnl = Column(Numeric(20, 8), default=0, nullable=False)
+    win_rate = Column(Numeric(5, 4), default=0, nullable=False)
+    last_signal_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+# ============================================================================
+# Semantic Market Clustering
+# ============================================================================
+
+class MarketCluster(Base):
+    """AI-discovered cluster of semantically related markets."""
+
+    __tablename__ = "market_clusters"
+
+    id = Column(Integer, primary_key=True, index=True)
+    cluster_name = Column(String(100), nullable=False)
+    theme = Column(Text, nullable=True)
+    keywords = Column(JSON, nullable=True)
+    market_ids = Column(JSON, nullable=False)
+    market_count = Column(Integer, default=0, nullable=False)
+    avg_correlation = Column(Numeric(6, 4), nullable=True)
+    cluster_sentiment = Column(Numeric(5, 4), nullable=True)
+    leading_market_id = Column(String(100), nullable=True)
+    total_volume = Column(Numeric(20, 2), nullable=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+
+# ============================================================================
+# Portfolio Hedging Engine
+# ============================================================================
+
+class HedgeSuggestion(Base):
+    """Suggested hedge for an open position."""
+
+    __tablename__ = "hedge_suggestions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    source_market_id = Column(String(100), nullable=False, index=True)
+    source_side = Column(String(3), nullable=False)
+    source_size = Column(Numeric(20, 8), nullable=True)
+    hedge_market_id = Column(String(100), nullable=False, index=True)
+    hedge_side = Column(String(3), nullable=False)
+    hedge_size = Column(Numeric(20, 8), nullable=False)
+    correlation = Column(Numeric(6, 4), nullable=False)
+    hedge_effectiveness = Column(Numeric(5, 4), nullable=False)
+    risk_reduction_pct = Column(Numeric(5, 2), nullable=False)
+    hedge_type = Column(String(30), nullable=False)  # DIRECT, PROXY, CROSS_MARKET, PORTFOLIO
+    reasoning = Column(Text, nullable=True)
+    is_executed = Column(Boolean, default=False, nullable=False)
+    expires_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+
+
+# ============================================================================
+# Multi-Model AI Consensus
+# ============================================================================
+
+class AIConsensus(Base):
+    """Consensus prediction from multiple AI models."""
+
+    __tablename__ = "ai_consensus"
+
+    id = Column(Integer, primary_key=True, index=True)
+    market_id = Column(String(100), nullable=False, index=True)
+    market_question = Column(Text, nullable=True)
+    model_predictions = Column(JSON, nullable=False)
+    consensus_probability = Column(Numeric(5, 4), nullable=False)
+    consensus_confidence = Column(Numeric(5, 4), nullable=False)
+    disagreement_score = Column(Numeric(5, 4), nullable=False)
+    strongest_signal = Column(String(20), nullable=True)
+    num_models = Column(Integer, nullable=False)
+    num_bullish = Column(Integer, default=0, nullable=False)
+    num_bearish = Column(Integer, default=0, nullable=False)
+    market_price = Column(Numeric(10, 6), nullable=True)
+    edge_vs_market = Column(Numeric(10, 6), nullable=True)
+    calculated_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+
+# ============================================================================
+# Market Regime Detection
+# ============================================================================
+
+class MarketRegime(Base):
+    """Detected market regime for adaptive strategy selection."""
+
+    __tablename__ = "market_regimes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    market_id = Column(String(100), nullable=False, index=True)
+    regime_type = Column(String(30), nullable=False, index=True)  # TRENDING_UP, TRENDING_DOWN, MEAN_REVERTING, HIGH_VOLATILITY, LOW_VOLATILITY, CHOPPY
+    confidence = Column(Numeric(5, 4), nullable=False)
+    volatility = Column(Numeric(10, 6), nullable=True)
+    trend_strength = Column(Numeric(10, 6), nullable=True)
+    mean_reversion_speed = Column(Numeric(10, 6), nullable=True)
+    recommended_strategy = Column(String(50), nullable=True)
+    lookback_hours = Column(Integer, default=48, nullable=False)
+    regime_duration_hours = Column(Numeric(10, 2), nullable=True)
+    features = Column(JSON, nullable=True)
+    detected_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+
+# ============================================================================
+# Resolution Probability Decay Curves
+# ============================================================================
+
+class ProbabilityDecayCurve(Base):
+    """Models how probability changes as market approaches resolution."""
+
+    __tablename__ = "probability_decay_curves"
+
+    id = Column(Integer, primary_key=True, index=True)
+    market_id = Column(String(100), nullable=False, index=True)
+    market_question = Column(Text, nullable=True)
+    resolution_date = Column(DateTime, nullable=True)
+    hours_to_resolution = Column(Numeric(10, 2), nullable=True)
+    current_price = Column(Numeric(10, 6), nullable=False)
+    predicted_path = Column(JSON, nullable=True)
+    confidence_band_upper = Column(JSON, nullable=True)
+    confidence_band_lower = Column(JSON, nullable=True)
+    decay_rate = Column(Numeric(10, 6), nullable=True)
+    expected_final_price = Column(Numeric(10, 6), nullable=True)
+    model_type = Column(String(30), default="gbm", nullable=False)  # gbm, logistic, empirical
+    rmse = Column(Numeric(10, 6), nullable=True)
+    calculated_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+
+
+# ============================================================================
+# Social Sentiment Momentum
+# ============================================================================
+
+class SentimentMomentum(Base):
+    """Tracks real-time sentiment shifts versus price movement."""
+
+    __tablename__ = "sentiment_momentum"
+
+    id = Column(Integer, primary_key=True, index=True)
+    market_id = Column(String(100), nullable=False, index=True)
+    sentiment_score = Column(Numeric(5, 4), nullable=False)
+    sentiment_change_1h = Column(Numeric(5, 4), nullable=True)
+    sentiment_change_24h = Column(Numeric(5, 4), nullable=True)
+    price_at_measurement = Column(Numeric(10, 6), nullable=True)
+    price_change_1h = Column(Numeric(10, 6), nullable=True)
+    price_change_24h = Column(Numeric(10, 6), nullable=True)
+    sentiment_price_divergence = Column(Numeric(10, 6), nullable=True)
+    twitter_mentions = Column(Integer, default=0, nullable=False)
+    reddit_mentions = Column(Integer, default=0, nullable=False)
+    news_mentions = Column(Integer, default=0, nullable=False)
+    social_volume_change = Column(Numeric(10, 4), nullable=True)
+    divergence_signal = Column(String(30), nullable=True)  # BULLISH_DIVERGENCE, BEARISH_DIVERGENCE, CONFIRMING, NEUTRAL
+    measured_at = Column(DateTime, server_default=func.now(), nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now(), nullable=False)
+

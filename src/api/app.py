@@ -229,6 +229,55 @@ try:
 except ImportError:
     logger.warning("Backtesting endpoints not available")
 
+# Differentiator feature routers
+try:
+    from .endpoints import smart_money as smart_money_endpoints
+    app.include_router(smart_money_endpoints.router)
+except ImportError:
+    logger.warning("Smart money endpoints not available")
+
+try:
+    from .endpoints import nl_strategies as nl_strategies_endpoints
+    app.include_router(nl_strategies_endpoints.router)
+except ImportError:
+    logger.warning("NL strategies endpoints not available")
+
+try:
+    from .endpoints import market_clusters as market_clusters_endpoints
+    app.include_router(market_clusters_endpoints.router)
+except ImportError:
+    logger.warning("Market clusters endpoints not available")
+
+try:
+    from .endpoints import hedging as hedging_endpoints
+    app.include_router(hedging_endpoints.router)
+except ImportError:
+    logger.warning("Hedging endpoints not available")
+
+try:
+    from .endpoints import ai_consensus as ai_consensus_endpoints
+    app.include_router(ai_consensus_endpoints.router)
+except ImportError:
+    logger.warning("AI consensus endpoints not available")
+
+try:
+    from .endpoints import regimes as regimes_endpoints
+    app.include_router(regimes_endpoints.router)
+except ImportError:
+    logger.warning("Regime detection endpoints not available")
+
+try:
+    from .endpoints import decay_curves as decay_curves_endpoints
+    app.include_router(decay_curves_endpoints.router)
+except ImportError:
+    logger.warning("Decay curves endpoints not available")
+
+try:
+    from .endpoints import sentiment_momentum as sentiment_momentum_endpoints
+    app.include_router(sentiment_momentum_endpoints.router)
+except ImportError:
+    logger.warning("Sentiment momentum endpoints not available")
+
 
 # Pydantic models for API responses
 class MarketResponse(BaseModel):
